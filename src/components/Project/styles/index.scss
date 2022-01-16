@@ -1,0 +1,57 @@
+.app-project {
+	.ant-card-body {
+		padding: 5px 10px !important;
+		margin-bottom: 10px !important;
+		max-width: 100%;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		border: 1px solid #f1f1f1;
+		background: #fdfdfd;
+		border-radius: 5px;
+	}
+
+	svg {
+		vertical-align: middle;
+	}
+
+	img {
+		vertical-align: middle;
+		height: 20px;
+		width: 20px;
+	}
+
+	.ant-card {
+		&:hover {
+			opacity: .7;
+		}
+
+		border-radius: 3px;
+		
+	}
+
+	.is-placeholder {
+
+		.ant-card-body {
+			color: rgb(249, 250, 232);
+			background-color:rgb(249, 250, 232);
+			border: 3px dashed rgb(216, 219, 159);
+		}
+	}
+}
+
+
+/* Delete button */
+.app-deletebtn-project {
+    position: absolute;
+    right: 5px;
+	top: 4px;
+    transform: scale(0.8);
+	display: none;
+}
+
+.ant-card:hover {
+    .app-deletebtn-project {
+		display: block;
+	}
+}
