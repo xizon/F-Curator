@@ -21,6 +21,7 @@ F-Curator is an offline application that comes at you all day long, and curate y
 [Package (macOS)](package/macOS/F-Curator.dmg)
 
 
+
 ## Getting Started
 
 [https://youtu.be/WEgNe33UNTs](https://youtu.be/WEgNe33UNTs)
@@ -158,7 +159,12 @@ $ sudo npm rebuild node-sass
 ## Changelog
 
 
-#### = 0.0.1 (January 3, 2022) =
+
+#### = 1.0.1 (January 17, 2022) =
+
+* Added command to compile package.
+
+#### = 1.0.0 (January 3, 2022) =
 
 * First release.
 
