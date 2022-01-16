@@ -16,6 +16,9 @@
 
 F-Curator is an offline application that comes at you all day long, and curate your own web favorites. Based on Electron and React technology.
 
+## Packages
+
+![Package (macOS)](package/macOS/F-Curator.dmg)
 
 
 ## Getting Started
@@ -50,6 +53,7 @@ F-Curator is an offline application that comes at you all day long, and curate y
 ├── babel.config.js
 ├── package-lock.json
 ├── package.json
+├── package/      ·············· Available packages
 ├── db/           ·············· Local database
 ├── main/         ·············· Main Process Modules
 ├── renderer/     ·············· Renderer Process Modules
