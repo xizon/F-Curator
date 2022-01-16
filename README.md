@@ -18,7 +18,7 @@ F-Curator is an offline application that comes at you all day long, and curate y
 
 ## Packages
 
-![Package (macOS)](package/macOS/F-Curator.dmg)
+[Package (macOS)](package/macOS/F-Curator.dmg)
 
 
 ## Getting Started
