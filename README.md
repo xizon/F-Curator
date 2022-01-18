@@ -14,7 +14,7 @@
 
 
 
-F-Curator is an offline application that comes at you all day long, and curate your own web favorites. Based on Electron and React technology.
+F-Curator is an offline application that comes at you all day long and curates your own web favorites. Based on Electron and React technology.
 
 ## Packages
 
@@ -24,7 +24,7 @@ F-Curator is an offline application that comes at you all day long, and curate y
 
 ## Getting Started
 
-[https://youtu.be/WEgNe33UNTs](https://youtu.be/WEgNe33UNTs)
+[https://youtu.be/Syrx3jYxgDw](https://youtu.be/Syrx3jYxgDw)
 
 
 ![quick overview](public/assets/images/main/preview.jpg)
@@ -35,12 +35,12 @@ F-Curator is an offline application that comes at you all day long, and curate y
 
 - **Offline** support and fast speeds
 - Easily achieve **data persistence**
-- Fetch **remote resources** to local database
+- Fetch **remote resources** to the local database
 - **Category management** and clear list blocks
 - Drag and drop **sorting**
+- **Exporting HTML** that separates APP to use favorites
 - Judgment of URL validity and repetitiveness
-- Automatically extract resources to local, such as icons
-- Data export in different formats in the future
+- Automatically extract resources local, such as icons
 
 
 ## File Structures
@@ -158,6 +158,11 @@ $ sudo npm rebuild node-sass
 
 ## Changelog
 
+#### = 1.1.0 (January 18, 2022) =
+
+* feat: Added the function of exporting HTML, separate APP to use favorites.
+* fix: Optimized some styles.
+* optimize: Modified dependencies and optimized app size.
 
 
 #### = 1.0.1 (January 17, 2022) =

@@ -3,7 +3,7 @@
  * 	Boot Helpers
  *
  * 	@source: https://github.com/xizon/f-curator
- * 	@version: 1.0.0 (January 16, 2022)
+ * 	@version: 1.1.0 (January 18, 2022)
  * 	@author: UIUX Lab <uiuxlab@gmail.com>
  * 	@license: MIT
  *
@@ -103,7 +103,7 @@
 
 @media all and (max-width: 768px) {
   .app-content__wrapper .content__sidebar {
-    width: 100;
+    width: 100px;
   }
   .app-content__wrapper .content-area {
     width: calc(100% - 98px);
@@ -31466,7 +31466,7 @@ div.ant-typography-edit-content.ant-typography-rtl {
   border-radius: 7px;
   background-color: white;
   box-shadow: 0px 2px 13px 0px rgba(27, 44, 12, 0.08);
-  margin-bottom: 30px;
+  margin-bottom: 17px;
 }
 
 .app-group .app-group__title {

@@ -3,7 +3,7 @@
  * 	Boot Helpers
  *
  * 	@source: https://github.com/xizon/f-curator
- * 	@version: 1.0.0 (January 16, 2022)
+ * 	@version: 1.1.0 (January 18, 2022)
  * 	@author: UIUX Lab <uiuxlab@gmail.com>
  * 	@license: MIT
  *
@@ -53641,37 +53641,32 @@ function Home() {
       dataCategories = _useState4[0],
       setDataCategories = _useState4[1];
 
-  var _useState5 = (0,react.useState)(null),
+  var _useState5 = (0,react.useState)(),
       _useState6 = _slicedToArray(_useState5, 2),
-      appInfo = _useState6[0],
-      setAppInfo = _useState6[1];
+      category = _useState6[0],
+      setCategory = _useState6[1];
 
-  var _useState7 = (0,react.useState)(),
+  var _useState7 = (0,react.useState)(''),
       _useState8 = _slicedToArray(_useState7, 2),
-      category = _useState8[0],
-      setCategory = _useState8[1];
+      inputTitle = _useState8[0],
+      setInputTitle = _useState8[1];
 
   var _useState9 = (0,react.useState)(''),
       _useState10 = _slicedToArray(_useState9, 2),
-      inputTitle = _useState10[0],
-      setInputTitle = _useState10[1];
-
-  var _useState11 = (0,react.useState)(''),
-      _useState12 = _slicedToArray(_useState11, 2),
-      inputUrl = _useState12[0],
-      setInputUrl = _useState12[1]; // Modal 1
+      inputUrl = _useState10[0],
+      setInputUrl = _useState10[1]; // Modal 1
   //------------------------------------------
 
 
+  var _useState11 = (0,react.useState)(false),
+      _useState12 = _slicedToArray(_useState11, 2),
+      visible = _useState12[0],
+      setVisible = _useState12[1];
+
   var _useState13 = (0,react.useState)(false),
       _useState14 = _slicedToArray(_useState13, 2),
-      visible = _useState14[0],
-      setVisible = _useState14[1];
-
-  var _useState15 = (0,react.useState)(false),
-      _useState16 = _slicedToArray(_useState15, 2),
-      confirmLoading = _useState16[0],
-      setConfirmLoading = _useState16[1];
+      confirmLoading = _useState14[0],
+      setConfirmLoading = _useState14[1];
 
   function showModal() {
     setVisible(true); //clear input and select
@@ -53681,6 +53676,10 @@ function Home() {
 
   function handleOk() {
     sendData();
+  }
+
+  function handleCancel() {
+    setVisible(false);
   }
 
   function handleSelect(value) {
@@ -53700,14 +53699,11 @@ function Home() {
     setInputUrl('');
   }
 
-  function handleCancel() {
-    setVisible(false);
-  }
-
   function updateData() {
     // Unregister from ipcRenderer.on event listener
     Home_ipcRenderer.removeAllListeners('INITIALIZE_DATA');
-    Home_ipcRenderer.removeAllListeners('APP_INFO'); // Receiving on main process
+    Home_ipcRenderer.removeAllListeners('APP_INFO');
+    Home_ipcRenderer.removeAllListeners('EXPORT_INFO'); // Receiving on main process
 
     Home_ipcRenderer.on('INITIALIZE_DATA', function (event, curData) {
       // Modal action
@@ -53752,6 +53748,10 @@ function Home() {
         "name": curData.name
       });
     });
+    Home_ipcRenderer.on('EXPORT_INFO', function (event, curData) {
+      setExportHTMLInfo(curData);
+      setLoadingExportHTMLFile(false);
+    });
   }
 
   function sendData() {
@@ -53783,6 +53783,11 @@ function Home() {
   //------------------------------------------
 
 
+  var _useState15 = (0,react.useState)(null),
+      _useState16 = _slicedToArray(_useState15, 2),
+      appInfo = _useState16[0],
+      setAppInfo = _useState16[1];
+
   var _useState17 = (0,react.useState)(false),
       _useState18 = _slicedToArray(_useState17, 2),
       visibleAbout = _useState18[0],
@@ -53791,6 +53796,41 @@ function Home() {
   function showModalAbout(e) {
     e.preventDefault();
     setVisibleAbout(true);
+  } // Modal 3
+  //------------------------------------------
+
+
+  var _useState19 = (0,react.useState)(''),
+      _useState20 = _slicedToArray(_useState19, 2),
+      exportHTMLInfo = _useState20[0],
+      setExportHTMLInfo = _useState20[1];
+
+  var _useState21 = (0,react.useState)(false),
+      _useState22 = _slicedToArray(_useState21, 2),
+      visibleExportHTMLFile = _useState22[0],
+      setVisibleExportHTMLFile = _useState22[1];
+
+  var _useState23 = (0,react.useState)(false),
+      _useState24 = _slicedToArray(_useState23, 2),
+      loadingExportHTMLFile = _useState24[0],
+      setLoadingExportHTMLFile = _useState24[1];
+
+  function handleOkExportHTMLFile() {
+    setLoadingExportHTMLFile(true); // Communicate asynchronously from a renderer process to the main process.
+
+    Home_ipcRenderer.send('EXPORT_DATA_HTML', false);
+  }
+
+  function handleCancelExportHTMLFile() {
+    hideModalExportHTMLFile();
+  }
+
+  function showModalExportHTMLFile() {
+    setVisibleExportHTMLFile(true);
+  }
+
+  function hideModalExportHTMLFile() {
+    setVisibleExportHTMLFile(false);
   } //------------------------------------------
 
 
@@ -53839,6 +53879,18 @@ function Home() {
       fill: "#d5d5d5",
       d: "M12.83 352h262.34A12.82 12.82 0 0 0 288 339.17v-38.34A12.82 12.82 0 0 0 275.17 288H12.83A12.82 12.82 0 0 0 0 300.83v38.34A12.82 12.82 0 0 0 12.83 352zm0-256h262.34A12.82 12.82 0 0 0 288 83.17V44.83A12.82 12.82 0 0 0 275.17 32H12.83A12.82 12.82 0 0 0 0 44.83v38.34A12.82 12.82 0 0 0 12.83 96zM432 160H16a16 16 0 0 0-16 16v32a16 16 0 0 0 16 16h416a16 16 0 0 0 16-16v-32a16 16 0 0 0-16-16zm0 256H16a16 16 0 0 0-16 16v32a16 16 0 0 0 16 16h416a16 16 0 0 0 16-16v-32a16 16 0 0 0-16-16z"
     })), " Category Edit"), /*#__PURE__*/react.createElement("a", {
+      href: "#",
+      onClick: showModalExportHTMLFile
+    }, /*#__PURE__*/react.createElement("svg", {
+      "aria-hidden": "true",
+      height: "12",
+      role: "img",
+      xmlns: "http://www.w3.org/2000/svg",
+      viewBox: "0 0 512 512"
+    }, /*#__PURE__*/react.createElement("path", {
+      fill: "#d5d5d5",
+      d: "M216 0h80c13.3 0 24 10.7 24 24v168h87.7c17.8 0 26.7 21.5 14.1 34.1L269.7 378.3c-7.5 7.5-19.8 7.5-27.3 0L90.1 226.1c-12.6-12.6-3.7-34.1 14.1-34.1H192V24c0-13.3 10.7-24 24-24zm296 376v112c0 13.3-10.7 24-24 24H24c-13.3 0-24-10.7-24-24V376c0-13.3 10.7-24 24-24h146.7l49 49c20.1 20.1 52.5 20.1 72.6 0l49-49H488c13.3 0 24 10.7 24 24zm-124 88c0-11-9-20-20-20s-20 9-20 20 9 20 20 20 20-9 20-20zm64 0c0-11-9-20-20-20s-20 9-20 20 9 20 20 20 20-9 20-20z"
+    })), " Export HTML"), /*#__PURE__*/react.createElement("a", {
       href: "#",
       onClick: showModalAbout
     }, "About ", appInfo ? appInfo.name : null)),
@@ -53938,7 +53990,33 @@ function Home() {
       okButtonProps: {
         shape: "round"
       }
-    }, /*#__PURE__*/react.createElement("p", null, appInfo ? appInfo.description : null), /*#__PURE__*/react.createElement("p", null, "Current Version: ", "".concat(appInfo ? appInfo.version : null))))
+    }, /*#__PURE__*/react.createElement("p", null, appInfo ? appInfo.description : null), /*#__PURE__*/react.createElement("p", null, "Current Version: ", "".concat(appInfo ? appInfo.version : null))), /*#__PURE__*/react.createElement(modal, {
+      title: "Export HTML",
+      visible: visibleExportHTMLFile,
+      onOk: showModalExportHTMLFile,
+      onCancel: handleCancelExportHTMLFile,
+      cancelButtonProps: {
+        shape: "round"
+      },
+      okButtonProps: {
+        shape: "round"
+      },
+      footer: [/*#__PURE__*/react.createElement(es_button, {
+        key: "back",
+        shape: "round",
+        onClick: handleCancelExportHTMLFile
+      }, "Cancel"), /*#__PURE__*/react.createElement(es_button, {
+        key: "submit",
+        type: "primary",
+        shape: "round",
+        loading: loadingExportHTMLFile,
+        onClick: handleOkExportHTMLFile
+      }, "Export")]
+    }, /*#__PURE__*/react.createElement("p", null, exportHTMLInfo && exportHTMLInfo !== '' ? /*#__PURE__*/react.createElement(react.Fragment, null, "Package ", /*#__PURE__*/react.createElement("strong", {
+      style: {
+        color: "green"
+      }
+    }, exportHTMLInfo), " exported successfully, please check your computer desktop.") : 'Export an HTML file package that you can use directly in any operating system\'s browser.')))
   }));
 }
 ;// CONCATENATED MODULE: ../node_modules/antd/es/form/context.js

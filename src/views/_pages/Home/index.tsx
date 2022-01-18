@@ -29,7 +29,6 @@ export default function Home() {
 
     const [dataURLs, setDataURLs] = useState<any[]>([]);
     const [dataCategories, setDataCategories] = useState<any[]>([]);
-    const [appInfo, setAppInfo] = useState<any | null>(null);
     const [category, setCategory] = useState<string>();
     const [inputTitle, setInputTitle] = useState<string>('');
     const [inputUrl, setInputUrl] = useState<string>('');
@@ -38,7 +37,7 @@ export default function Home() {
 
     // Modal 1
     //------------------------------------------
-    const [visible, setVisible] = useState(false);
+    const [visible, setVisible] = useState<boolean>(false);
     const [confirmLoading, setConfirmLoading] = useState<boolean>(false);
 
     function showModal() {
@@ -52,6 +51,11 @@ export default function Home() {
     function handleOk() {
         sendData();
     }
+
+    function handleCancel() {
+        setVisible(false);
+    }
+
 
     function handleSelect(value) {
         setCategory(value);
@@ -70,15 +74,12 @@ export default function Home() {
         setInputUrl('');
     }
 
-    function handleCancel() {
-        setVisible(false);
-    }
-
     function updateData() {
 
         // Unregister from ipcRenderer.on event listener
         ipcRenderer.removeAllListeners('INITIALIZE_DATA');
         ipcRenderer.removeAllListeners('APP_INFO');
+        ipcRenderer.removeAllListeners('EXPORT_INFO');
 
         // Receiving on main process
         ipcRenderer.on('INITIALIZE_DATA', (event, curData) => {
@@ -126,6 +127,13 @@ export default function Home() {
             setAppInfo({"version":curData.version, "description":curData.description, "name":curData.name});
         });
 
+        ipcRenderer.on('EXPORT_INFO', (event, curData) => {
+            setExportHTMLInfo(curData);
+            setLoadingExportHTMLFile(false);
+        });
+
+        
+
     }
 
     function sendData() {
@@ -154,8 +162,8 @@ export default function Home() {
 
     // Modal 2
     //------------------------------------------
-    const [visibleAbout, setVisibleAbout] = useState(false);
-
+    const [appInfo, setAppInfo] = useState<any | null>(null);
+    const [visibleAbout, setVisibleAbout] = useState<boolean>(false);
     function showModalAbout(e) {
         e.preventDefault();
         setVisibleAbout(true);
@@ -163,6 +171,31 @@ export default function Home() {
 
 
 
+    // Modal 3
+    //------------------------------------------
+    const [exportHTMLInfo, setExportHTMLInfo] = useState<string>('');
+    const [visibleExportHTMLFile, setVisibleExportHTMLFile] = useState<boolean>(false);
+    const [loadingExportHTMLFile, setLoadingExportHTMLFile] = useState<boolean>(false);
+
+
+    function handleOkExportHTMLFile() {
+        setLoadingExportHTMLFile(true);
+
+        // Communicate asynchronously from a renderer process to the main process.
+        ipcRenderer.send('EXPORT_DATA_HTML', false);
+    }
+
+    function handleCancelExportHTMLFile() {
+        hideModalExportHTMLFile();
+    }
+
+    function showModalExportHTMLFile() {
+        setVisibleExportHTMLFile(true);
+    }
+    
+    function hideModalExportHTMLFile() {
+        setVisibleExportHTMLFile(false);
+    }    
 
 
     //------------------------------------------
@@ -203,7 +236,11 @@ export default function Home() {
                 secondaryBtnArea={<>
                     <Link to="/category"><svg aria-hidden="true" height="12" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path fill="#d5d5d5" d="M12.83 352h262.34A12.82 12.82 0 0 0 288 339.17v-38.34A12.82 12.82 0 0 0 275.17 288H12.83A12.82 12.82 0 0 0 0 300.83v38.34A12.82 12.82 0 0 0 12.83 352zm0-256h262.34A12.82 12.82 0 0 0 288 83.17V44.83A12.82 12.82 0 0 0 275.17 32H12.83A12.82 12.82 0 0 0 0 44.83v38.34A12.82 12.82 0 0 0 12.83 96zM432 160H16a16 16 0 0 0-16 16v32a16 16 0 0 0 16 16h416a16 16 0 0 0 16-16v-32a16 16 0 0 0-16-16zm0 256H16a16 16 0 0 0-16 16v32a16 16 0 0 0 16 16h416a16 16 0 0 0 16-16v-32a16 16 0 0 0-16-16z"></path></svg> Category Edit</Link>
 
+                    <a href="#" onClick={showModalExportHTMLFile}>
+<svg aria-hidden="true" height="12" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="#d5d5d5" d="M216 0h80c13.3 0 24 10.7 24 24v168h87.7c17.8 0 26.7 21.5 14.1 34.1L269.7 378.3c-7.5 7.5-19.8 7.5-27.3 0L90.1 226.1c-12.6-12.6-3.7-34.1 14.1-34.1H192V24c0-13.3 10.7-24 24-24zm296 376v112c0 13.3-10.7 24-24 24H24c-13.3 0-24-10.7-24-24V376c0-13.3 10.7-24 24-24h146.7l49 49c20.1 20.1 52.5 20.1 72.6 0l49-49H488c13.3 0 24 10.7 24 24zm-124 88c0-11-9-20-20-20s-20 9-20 20 9 20 20 20 20-9 20-20zm64 0c0-11-9-20-20-20s-20 9-20 20 9 20 20 20 20-9 20-20z"></path></svg> Export HTML</a>
+
                     <a href="#" onClick={showModalAbout}>About {appInfo ? appInfo.name : null}</a>
+                    
 
                 </>}
                 contentArea={<>
@@ -280,6 +317,26 @@ export default function Home() {
                         <p>Current Version: {`${appInfo ? appInfo.version : null}`}</p>
                     </Modal>
 
+
+                    <Modal
+                        title="Export HTML"
+                        visible={visibleExportHTMLFile}
+                        onOk={showModalExportHTMLFile}
+                        onCancel={handleCancelExportHTMLFile}
+                        cancelButtonProps={{ shape: "round" }}
+                        okButtonProps={{ shape: "round" }}
+                        footer={[
+                            <Button key="back" shape="round" onClick={handleCancelExportHTMLFile}>
+                              Cancel
+                            </Button>,
+                            <Button key="submit" type="primary" shape="round" loading={loadingExportHTMLFile} onClick={handleOkExportHTMLFile}>
+                              Export
+                            </Button>,
+                          ]}  
+                    >
+                        <p>{exportHTMLInfo && exportHTMLInfo !== '' ? <>Package <strong style={{color:"green"}}>{exportHTMLInfo}</strong> exported successfully, please check your computer desktop.</> : 'Export an HTML file package that you can use directly in any operating system\'s browser.'}</p>
+                    </Modal>
+                    
 
 
                 </>}
