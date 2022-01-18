@@ -53,6 +53,9 @@ function createWindow() {
     // win.loadFile("index.html");
     win.loadFile(path.join(__dirname, '../public/index.html'));
 
+    // auto fullscreen
+    win.maximize();
+    win.show();
 
 }
 

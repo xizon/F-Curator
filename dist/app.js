@@ -3,7 +3,7 @@
  * 	Boot Helpers
  *
  * 	@source: https://github.com/xizon/f-curator
- * 	@version: 1.1.0 (January 18, 2022)
+ * 	@version: 1.2.0 (January 19, 2022)
  * 	@author: UIUX Lab <uiuxlab@gmail.com>
  * 	@license: MIT
  *
@@ -38187,6 +38187,652 @@ select_Select.SECRET_COMBOBOX_MODE_DO_NOT_USE = SECRET_COMBOBOX_MODE_DO_NOT_USE;
 select_Select.Option = es_Option;
 select_Select.OptGroup = es_OptGroup;
 /* harmony default export */ const es_select = (select_Select);
+;// CONCATENATED MODULE: ../node_modules/antd/es/_util/type.js
+// https://stackoverflow.com/questions/46176165/ways-to-get-string-literal-type-of-array-values-without-enum-overhead
+var tuple = function tuple() {
+  for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+    args[_key] = arguments[_key];
+  }
+
+  return args;
+};
+var tupleNum = function tupleNum() {
+  for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+    args[_key2] = arguments[_key2];
+  }
+
+  return args;
+};
+;// CONCATENATED MODULE: ../node_modules/antd/es/_util/reactNode.js
+
+var isValidElement = react.isValidElement;
+
+function replaceElement(element, replacement, props) {
+  if (!isValidElement(element)) return replacement;
+  return /*#__PURE__*/react.cloneElement(element, typeof props === 'function' ? props(element.props || {}) : props);
+}
+function cloneElement(element, props) {
+  return replaceElement(element, element, props);
+}
+;// CONCATENATED MODULE: ../node_modules/antd/es/input/utils.js
+
+
+function getInputClassName(prefixCls, bordered, size, disabled, direction) {
+  var _classNames;
+
+  return classnames_default()(prefixCls, (_classNames = {}, _defineProperty(_classNames, "".concat(prefixCls, "-sm"), size === 'small'), _defineProperty(_classNames, "".concat(prefixCls, "-lg"), size === 'large'), _defineProperty(_classNames, "".concat(prefixCls, "-disabled"), disabled), _defineProperty(_classNames, "".concat(prefixCls, "-rtl"), direction === 'rtl'), _defineProperty(_classNames, "".concat(prefixCls, "-borderless"), !bordered), _classNames));
+}
+function hasPrefixSuffix(props) {
+  return !!(props.prefix || props.suffix || props.allowClear);
+}
+;// CONCATENATED MODULE: ../node_modules/antd/es/input/ClearableLabeledInput.js
+
+
+
+
+
+
+
+
+
+
+
+var ClearableInputType = tuple('text', 'input');
+
+function hasAddon(props) {
+  return !!(props.addonBefore || props.addonAfter);
+}
+
+var ClearableLabeledInput = /*#__PURE__*/function (_React$Component) {
+  _inherits(ClearableLabeledInput, _React$Component);
+
+  var _super = _createSuper(ClearableLabeledInput);
+
+  function ClearableLabeledInput() {
+    var _this;
+
+    _classCallCheck(this, ClearableLabeledInput);
+
+    _this = _super.apply(this, arguments);
+    /** @private Do Not use out of this class. We do not promise this is always keep. */
+
+    _this.containerRef = /*#__PURE__*/react.createRef();
+
+    _this.onInputMouseUp = function (e) {
+      var _a;
+
+      if ((_a = _this.containerRef.current) === null || _a === void 0 ? void 0 : _a.contains(e.target)) {
+        var triggerFocus = _this.props.triggerFocus;
+        triggerFocus === null || triggerFocus === void 0 ? void 0 : triggerFocus();
+      }
+    };
+
+    return _this;
+  }
+
+  _createClass(ClearableLabeledInput, [{
+    key: "renderClearIcon",
+    value: function renderClearIcon(prefixCls) {
+      var _classNames;
+
+      var _this$props = this.props,
+          allowClear = _this$props.allowClear,
+          value = _this$props.value,
+          disabled = _this$props.disabled,
+          readOnly = _this$props.readOnly,
+          handleReset = _this$props.handleReset,
+          suffix = _this$props.suffix;
+
+      if (!allowClear) {
+        return null;
+      }
+
+      var needClear = !disabled && !readOnly && value;
+      var className = "".concat(prefixCls, "-clear-icon");
+      return /*#__PURE__*/react.createElement(icons_CloseCircleFilled, {
+        onClick: handleReset // Do not trigger onBlur when clear input
+        // https://github.com/ant-design/ant-design/issues/31200
+        ,
+        onMouseDown: function onMouseDown(e) {
+          return e.preventDefault();
+        },
+        className: classnames_default()((_classNames = {}, _defineProperty(_classNames, "".concat(className, "-hidden"), !needClear), _defineProperty(_classNames, "".concat(className, "-has-suffix"), !!suffix), _classNames), className),
+        role: "button"
+      });
+    }
+  }, {
+    key: "renderSuffix",
+    value: function renderSuffix(prefixCls) {
+      var _this$props2 = this.props,
+          suffix = _this$props2.suffix,
+          allowClear = _this$props2.allowClear;
+
+      if (suffix || allowClear) {
+        return /*#__PURE__*/react.createElement("span", {
+          className: "".concat(prefixCls, "-suffix")
+        }, this.renderClearIcon(prefixCls), suffix);
+      }
+
+      return null;
+    }
+  }, {
+    key: "renderLabeledIcon",
+    value: function renderLabeledIcon(prefixCls, element) {
+      var _classNames2;
+
+      var _this$props3 = this.props,
+          focused = _this$props3.focused,
+          value = _this$props3.value,
+          prefix = _this$props3.prefix,
+          className = _this$props3.className,
+          size = _this$props3.size,
+          suffix = _this$props3.suffix,
+          disabled = _this$props3.disabled,
+          allowClear = _this$props3.allowClear,
+          direction = _this$props3.direction,
+          style = _this$props3.style,
+          readOnly = _this$props3.readOnly,
+          bordered = _this$props3.bordered;
+
+      if (!hasPrefixSuffix(this.props)) {
+        return cloneElement(element, {
+          value: value
+        });
+      }
+
+      var suffixNode = this.renderSuffix(prefixCls);
+      var prefixNode = prefix ? /*#__PURE__*/react.createElement("span", {
+        className: "".concat(prefixCls, "-prefix")
+      }, prefix) : null;
+      var affixWrapperCls = classnames_default()("".concat(prefixCls, "-affix-wrapper"), (_classNames2 = {}, _defineProperty(_classNames2, "".concat(prefixCls, "-affix-wrapper-focused"), focused), _defineProperty(_classNames2, "".concat(prefixCls, "-affix-wrapper-disabled"), disabled), _defineProperty(_classNames2, "".concat(prefixCls, "-affix-wrapper-sm"), size === 'small'), _defineProperty(_classNames2, "".concat(prefixCls, "-affix-wrapper-lg"), size === 'large'), _defineProperty(_classNames2, "".concat(prefixCls, "-affix-wrapper-input-with-clear-btn"), suffix && allowClear && value), _defineProperty(_classNames2, "".concat(prefixCls, "-affix-wrapper-rtl"), direction === 'rtl'), _defineProperty(_classNames2, "".concat(prefixCls, "-affix-wrapper-readonly"), readOnly), _defineProperty(_classNames2, "".concat(prefixCls, "-affix-wrapper-borderless"), !bordered), _defineProperty(_classNames2, "".concat(className), !hasAddon(this.props) && className), _classNames2));
+      return /*#__PURE__*/react.createElement("span", {
+        ref: this.containerRef,
+        className: affixWrapperCls,
+        style: style,
+        onMouseUp: this.onInputMouseUp
+      }, prefixNode, cloneElement(element, {
+        style: null,
+        value: value,
+        className: getInputClassName(prefixCls, bordered, size, disabled)
+      }), suffixNode);
+    }
+  }, {
+    key: "renderInputWithLabel",
+    value: function renderInputWithLabel(prefixCls, labeledElement) {
+      var _classNames4;
+
+      var _this$props4 = this.props,
+          addonBefore = _this$props4.addonBefore,
+          addonAfter = _this$props4.addonAfter,
+          style = _this$props4.style,
+          size = _this$props4.size,
+          className = _this$props4.className,
+          direction = _this$props4.direction; // Not wrap when there is not addons
+
+      if (!hasAddon(this.props)) {
+        return labeledElement;
+      }
+
+      var wrapperClassName = "".concat(prefixCls, "-group");
+      var addonClassName = "".concat(wrapperClassName, "-addon");
+      var addonBeforeNode = addonBefore ? /*#__PURE__*/react.createElement("span", {
+        className: addonClassName
+      }, addonBefore) : null;
+      var addonAfterNode = addonAfter ? /*#__PURE__*/react.createElement("span", {
+        className: addonClassName
+      }, addonAfter) : null;
+      var mergedWrapperClassName = classnames_default()("".concat(prefixCls, "-wrapper"), wrapperClassName, _defineProperty({}, "".concat(wrapperClassName, "-rtl"), direction === 'rtl'));
+      var mergedGroupClassName = classnames_default()("".concat(prefixCls, "-group-wrapper"), (_classNames4 = {}, _defineProperty(_classNames4, "".concat(prefixCls, "-group-wrapper-sm"), size === 'small'), _defineProperty(_classNames4, "".concat(prefixCls, "-group-wrapper-lg"), size === 'large'), _defineProperty(_classNames4, "".concat(prefixCls, "-group-wrapper-rtl"), direction === 'rtl'), _classNames4), className); // Need another wrapper for changing display:table to display:inline-block
+      // and put style prop in wrapper
+
+      return /*#__PURE__*/react.createElement("span", {
+        className: mergedGroupClassName,
+        style: style
+      }, /*#__PURE__*/react.createElement("span", {
+        className: mergedWrapperClassName
+      }, addonBeforeNode, cloneElement(labeledElement, {
+        style: null
+      }), addonAfterNode));
+    }
+  }, {
+    key: "renderTextAreaWithClearIcon",
+    value: function renderTextAreaWithClearIcon(prefixCls, element) {
+      var _classNames5;
+
+      var _this$props5 = this.props,
+          value = _this$props5.value,
+          allowClear = _this$props5.allowClear,
+          className = _this$props5.className,
+          style = _this$props5.style,
+          direction = _this$props5.direction,
+          bordered = _this$props5.bordered;
+
+      if (!allowClear) {
+        return cloneElement(element, {
+          value: value
+        });
+      }
+
+      var affixWrapperCls = classnames_default()("".concat(prefixCls, "-affix-wrapper"), "".concat(prefixCls, "-affix-wrapper-textarea-with-clear-btn"), (_classNames5 = {}, _defineProperty(_classNames5, "".concat(prefixCls, "-affix-wrapper-rtl"), direction === 'rtl'), _defineProperty(_classNames5, "".concat(prefixCls, "-affix-wrapper-borderless"), !bordered), _defineProperty(_classNames5, "".concat(className), !hasAddon(this.props) && className), _classNames5));
+      return /*#__PURE__*/react.createElement("span", {
+        className: affixWrapperCls,
+        style: style
+      }, cloneElement(element, {
+        style: null,
+        value: value
+      }), this.renderClearIcon(prefixCls));
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      var _this$props6 = this.props,
+          prefixCls = _this$props6.prefixCls,
+          inputType = _this$props6.inputType,
+          element = _this$props6.element;
+
+      if (inputType === ClearableInputType[0]) {
+        return this.renderTextAreaWithClearIcon(prefixCls, element);
+      }
+
+      return this.renderInputWithLabel(prefixCls, this.renderLabeledIcon(prefixCls, element));
+    }
+  }]);
+
+  return ClearableLabeledInput;
+}(react.Component);
+
+/* harmony default export */ const input_ClearableLabeledInput = (ClearableLabeledInput);
+;// CONCATENATED MODULE: ../node_modules/antd/es/_util/devWarning.js
+
+
+/* harmony default export */ const devWarning = (function (valid, component, message) {
+  es_warning(valid, "[antd: ".concat(component, "] ").concat(message));
+});
+;// CONCATENATED MODULE: ../node_modules/antd/es/input/Input.js
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function fixControlledValue(value) {
+  if (typeof value === 'undefined' || value === null) {
+    return '';
+  }
+
+  return String(value);
+}
+function resolveOnChange(target, e, onChange, targetValue) {
+  if (!onChange) {
+    return;
+  }
+
+  var event = e;
+
+  if (e.type === 'click') {
+    // click clear icon
+    event = Object.create(e); // Clone a new target for event.
+    // Avoid the following usage, the setQuery method gets the original value.
+    //
+    // const [query, setQuery] = React.useState('');
+    // <Input
+    //   allowClear
+    //   value={query}
+    //   onChange={(e)=> {
+    //     setQuery((prevStatus) => e.target.value);
+    //   }}
+    // />
+
+    var currentTarget = target.cloneNode(true);
+    event.target = currentTarget;
+    event.currentTarget = currentTarget;
+    currentTarget.value = '';
+    onChange(event);
+    return;
+  } // Trigger by composition event, this means we need force change the input value
+
+
+  if (targetValue !== undefined) {
+    event = Object.create(e);
+    event.target = target;
+    event.currentTarget = target;
+    target.value = targetValue;
+    onChange(event);
+    return;
+  }
+
+  onChange(event);
+}
+function triggerFocus(element, option) {
+  if (!element) return;
+  element.focus(option); // Selection content
+
+  var _ref = option || {},
+      cursor = _ref.cursor;
+
+  if (cursor) {
+    var len = element.value.length;
+
+    switch (cursor) {
+      case 'start':
+        element.setSelectionRange(0, 0);
+        break;
+
+      case 'end':
+        element.setSelectionRange(len, len);
+        break;
+
+      default:
+        element.setSelectionRange(0, len);
+    }
+  }
+}
+
+var Input_Input = /*#__PURE__*/function (_React$Component) {
+  _inherits(Input, _React$Component);
+
+  var _super = _createSuper(Input);
+
+  function Input(props) {
+    var _this;
+
+    _classCallCheck(this, Input);
+
+    _this = _super.call(this, props);
+    _this.direction = 'ltr';
+
+    _this.focus = function (option) {
+      triggerFocus(_this.input, option);
+    };
+
+    _this.saveClearableInput = function (input) {
+      _this.clearableInput = input;
+    };
+
+    _this.saveInput = function (input) {
+      _this.input = input;
+    };
+
+    _this.onFocus = function (e) {
+      var onFocus = _this.props.onFocus;
+
+      _this.setState({
+        focused: true
+      }, _this.clearPasswordValueAttribute);
+
+      onFocus === null || onFocus === void 0 ? void 0 : onFocus(e);
+    };
+
+    _this.onBlur = function (e) {
+      var onBlur = _this.props.onBlur;
+
+      _this.setState({
+        focused: false
+      }, _this.clearPasswordValueAttribute);
+
+      onBlur === null || onBlur === void 0 ? void 0 : onBlur(e);
+    };
+
+    _this.handleReset = function (e) {
+      _this.setValue('', function () {
+        _this.focus();
+      });
+
+      resolveOnChange(_this.input, e, _this.props.onChange);
+    };
+
+    _this.renderInput = function (prefixCls, size, bordered) {
+      var input = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
+      var _this$props = _this.props,
+          className = _this$props.className,
+          addonBefore = _this$props.addonBefore,
+          addonAfter = _this$props.addonAfter,
+          customizeSize = _this$props.size,
+          disabled = _this$props.disabled,
+          htmlSize = _this$props.htmlSize; // Fix https://fb.me/react-unknown-prop
+
+      var otherProps = omit(_this.props, ['prefixCls', 'onPressEnter', 'addonBefore', 'addonAfter', 'prefix', 'suffix', 'allowClear', // Input elements must be either controlled or uncontrolled,
+      // specify either the value prop, or the defaultValue prop, but not both.
+      'defaultValue', 'size', 'inputType', 'bordered', 'htmlSize']);
+      return /*#__PURE__*/react.createElement("input", extends_extends({
+        autoComplete: input.autoComplete
+      }, otherProps, {
+        onChange: _this.handleChange,
+        onFocus: _this.onFocus,
+        onBlur: _this.onBlur,
+        onKeyDown: _this.handleKeyDown,
+        className: classnames_default()(getInputClassName(prefixCls, bordered, customizeSize || size, disabled, _this.direction), _defineProperty({}, className, className && !addonBefore && !addonAfter)),
+        ref: _this.saveInput,
+        size: htmlSize
+      }));
+    };
+
+    _this.clearPasswordValueAttribute = function () {
+      // https://github.com/ant-design/ant-design/issues/20541
+      _this.removePasswordTimeout = setTimeout(function () {
+        if (_this.input && _this.input.getAttribute('type') === 'password' && _this.input.hasAttribute('value')) {
+          _this.input.removeAttribute('value');
+        }
+      });
+    };
+
+    _this.handleChange = function (e) {
+      _this.setValue(e.target.value, _this.clearPasswordValueAttribute);
+
+      resolveOnChange(_this.input, e, _this.props.onChange);
+    };
+
+    _this.handleKeyDown = function (e) {
+      var _this$props2 = _this.props,
+          onPressEnter = _this$props2.onPressEnter,
+          onKeyDown = _this$props2.onKeyDown;
+
+      if (onPressEnter && e.keyCode === 13) {
+        onPressEnter(e);
+      }
+
+      onKeyDown === null || onKeyDown === void 0 ? void 0 : onKeyDown(e);
+    };
+
+    _this.renderShowCountSuffix = function (prefixCls) {
+      var value = _this.state.value;
+      var _this$props3 = _this.props,
+          maxLength = _this$props3.maxLength,
+          suffix = _this$props3.suffix,
+          showCount = _this$props3.showCount; // Max length value
+
+      var hasMaxLength = Number(maxLength) > 0;
+
+      if (suffix || showCount) {
+        var valueLength = _toConsumableArray(fixControlledValue(value)).length;
+
+        var dataCount = null;
+
+        if (typeof_typeof(showCount) === 'object') {
+          dataCount = showCount.formatter({
+            count: valueLength,
+            maxLength: maxLength
+          });
+        } else {
+          dataCount = "".concat(valueLength).concat(hasMaxLength ? " / ".concat(maxLength) : '');
+        }
+
+        return /*#__PURE__*/react.createElement(react.Fragment, null, !!showCount && /*#__PURE__*/react.createElement("span", {
+          className: classnames_default()("".concat(prefixCls, "-show-count-suffix"), _defineProperty({}, "".concat(prefixCls, "-show-count-has-suffix"), !!suffix))
+        }, dataCount), suffix);
+      }
+
+      return null;
+    };
+
+    _this.renderComponent = function (_ref2) {
+      var getPrefixCls = _ref2.getPrefixCls,
+          direction = _ref2.direction,
+          input = _ref2.input;
+      var _this$state = _this.state,
+          value = _this$state.value,
+          focused = _this$state.focused;
+      var _this$props4 = _this.props,
+          customizePrefixCls = _this$props4.prefixCls,
+          _this$props4$bordered = _this$props4.bordered,
+          bordered = _this$props4$bordered === void 0 ? true : _this$props4$bordered;
+      var prefixCls = getPrefixCls('input', customizePrefixCls);
+      _this.direction = direction;
+
+      var showCountSuffix = _this.renderShowCountSuffix(prefixCls);
+
+      return /*#__PURE__*/react.createElement(config_provider_SizeContext.Consumer, null, function (size) {
+        return /*#__PURE__*/react.createElement(input_ClearableLabeledInput, extends_extends({
+          size: size
+        }, _this.props, {
+          prefixCls: prefixCls,
+          inputType: "input",
+          value: fixControlledValue(value),
+          element: _this.renderInput(prefixCls, size, bordered, input),
+          handleReset: _this.handleReset,
+          ref: _this.saveClearableInput,
+          direction: direction,
+          focused: focused,
+          triggerFocus: _this.focus,
+          bordered: bordered,
+          suffix: showCountSuffix
+        }));
+      });
+    };
+
+    var value = typeof props.value === 'undefined' ? props.defaultValue : props.value;
+    _this.state = {
+      value: value,
+      focused: false,
+      // eslint-disable-next-line react/no-unused-state
+      prevValue: props.value
+    };
+    return _this;
+  }
+
+  _createClass(Input, [{
+    key: "componentDidMount",
+    value: function componentDidMount() {
+      this.clearPasswordValueAttribute();
+    } // Since polyfill `getSnapshotBeforeUpdate` need work with `componentDidUpdate`.
+    // We keep an empty function here.
+
+  }, {
+    key: "componentDidUpdate",
+    value: function componentDidUpdate() {}
+  }, {
+    key: "getSnapshotBeforeUpdate",
+    value: function getSnapshotBeforeUpdate(prevProps) {
+      if (hasPrefixSuffix(prevProps) !== hasPrefixSuffix(this.props)) {
+        devWarning(this.input !== document.activeElement, 'Input', "When Input is focused, dynamic add or remove prefix / suffix will make it lose focus caused by dom structure change. Read more: https://ant.design/components/input/#FAQ");
+      }
+
+      return null;
+    }
+  }, {
+    key: "componentWillUnmount",
+    value: function componentWillUnmount() {
+      if (this.removePasswordTimeout) {
+        clearTimeout(this.removePasswordTimeout);
+      }
+    }
+  }, {
+    key: "blur",
+    value: function blur() {
+      this.input.blur();
+    }
+  }, {
+    key: "setSelectionRange",
+    value: function setSelectionRange(start, end, direction) {
+      this.input.setSelectionRange(start, end, direction);
+    }
+  }, {
+    key: "select",
+    value: function select() {
+      this.input.select();
+    }
+  }, {
+    key: "setValue",
+    value: function setValue(value, callback) {
+      if (this.props.value === undefined) {
+        this.setState({
+          value: value
+        }, callback);
+      } else {
+        callback === null || callback === void 0 ? void 0 : callback();
+      }
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      return /*#__PURE__*/react.createElement(ConfigConsumer, null, this.renderComponent);
+    }
+  }], [{
+    key: "getDerivedStateFromProps",
+    value: function getDerivedStateFromProps(nextProps, _ref3) {
+      var prevValue = _ref3.prevValue;
+      var newState = {
+        prevValue: nextProps.value
+      };
+
+      if (nextProps.value !== undefined || prevValue !== nextProps.value) {
+        newState.value = nextProps.value;
+      }
+
+      if (nextProps.disabled) {
+        newState.focused = false;
+      }
+
+      return newState;
+    }
+  }]);
+
+  return Input;
+}(react.Component);
+
+Input_Input.defaultProps = {
+  type: 'text'
+};
+/* harmony default export */ const input_Input = (Input_Input);
+;// CONCATENATED MODULE: ../node_modules/antd/es/input/Group.js
+
+
+
+
+
+var Group = function Group(props) {
+  return /*#__PURE__*/react.createElement(ConfigConsumer, null, function (_ref) {
+    var _classNames;
+
+    var getPrefixCls = _ref.getPrefixCls,
+        direction = _ref.direction;
+    var customizePrefixCls = props.prefixCls,
+        _props$className = props.className,
+        className = _props$className === void 0 ? '' : _props$className;
+    var prefixCls = getPrefixCls('input-group', customizePrefixCls);
+    var cls = classnames_default()(prefixCls, (_classNames = {}, _defineProperty(_classNames, "".concat(prefixCls, "-lg"), props.size === 'large'), _defineProperty(_classNames, "".concat(prefixCls, "-sm"), props.size === 'small'), _defineProperty(_classNames, "".concat(prefixCls, "-compact"), props.compact), _defineProperty(_classNames, "".concat(prefixCls, "-rtl"), direction === 'rtl'), _classNames), className);
+    return /*#__PURE__*/react.createElement("span", {
+      className: cls,
+      style: props.style,
+      onMouseEnter: props.onMouseEnter,
+      onMouseLeave: props.onMouseLeave,
+      onFocus: props.onFocus,
+      onBlur: props.onBlur
+    }, props.children);
+  });
+};
+
+/* harmony default export */ const input_Group = (Group);
 ;// CONCATENATED MODULE: ../node_modules/antd/es/_util/unreachableException.js
 
 
@@ -38295,17 +38941,6 @@ raf_wrapperRaf.cancel = function cancel(pid) {
 };
 
 raf_wrapperRaf.ids = ids; // export this for test usage
-;// CONCATENATED MODULE: ../node_modules/antd/es/_util/reactNode.js
-
-var isValidElement = react.isValidElement;
-
-function replaceElement(element, replacement, props) {
-  if (!isValidElement(element)) return replacement;
-  return /*#__PURE__*/react.cloneElement(element, typeof props === 'function' ? props(element.props || {}) : props);
-}
-function cloneElement(element, props) {
-  return replaceElement(element, element, props);
-}
 ;// CONCATENATED MODULE: ../node_modules/antd/es/_util/wave.js
 
 
@@ -38541,28 +39176,6 @@ var Wave = /*#__PURE__*/function (_React$Component) {
 
 
 Wave.contextType = ConfigContext;
-;// CONCATENATED MODULE: ../node_modules/antd/es/_util/type.js
-// https://stackoverflow.com/questions/46176165/ways-to-get-string-literal-type-of-array-values-without-enum-overhead
-var tuple = function tuple() {
-  for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-    args[_key] = arguments[_key];
-  }
-
-  return args;
-};
-var tupleNum = function tupleNum() {
-  for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-    args[_key2] = arguments[_key2];
-  }
-
-  return args;
-};
-;// CONCATENATED MODULE: ../node_modules/antd/es/_util/devWarning.js
-
-
-/* harmony default export */ const devWarning = (function (valid, component, message) {
-  es_warning(valid, "[antd: ".concat(component, "] ").concat(message));
-});
 ;// CONCATENATED MODULE: ../node_modules/antd/es/button/LoadingIcon.js
 
 
@@ -38878,6 +39491,912 @@ Button.__ANT_BUTTON = true;
 ;// CONCATENATED MODULE: ../node_modules/antd/es/button/index.js
 
 /* harmony default export */ const es_button = (button_button);
+;// CONCATENATED MODULE: ../node_modules/antd/es/input/Search.js
+
+
+
+var Search_rest = undefined && undefined.__rest || function (s, e) {
+  var t = {};
+
+  for (var p in s) {
+    if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0) t[p] = s[p];
+  }
+
+  if (s != null && typeof Object.getOwnPropertySymbols === "function") for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+    if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i])) t[p[i]] = s[p[i]];
+  }
+  return t;
+};
+
+
+
+
+
+
+
+
+
+
+var Search = /*#__PURE__*/react.forwardRef(function (props, ref) {
+  var _classNames;
+
+  var customizePrefixCls = props.prefixCls,
+      customizeInputPrefixCls = props.inputPrefixCls,
+      className = props.className,
+      customizeSize = props.size,
+      suffix = props.suffix,
+      _props$enterButton = props.enterButton,
+      enterButton = _props$enterButton === void 0 ? false : _props$enterButton,
+      addonAfter = props.addonAfter,
+      loading = props.loading,
+      disabled = props.disabled,
+      customOnSearch = props.onSearch,
+      customOnChange = props.onChange,
+      restProps = Search_rest(props, ["prefixCls", "inputPrefixCls", "className", "size", "suffix", "enterButton", "addonAfter", "loading", "disabled", "onSearch", "onChange"]);
+
+  var _React$useContext = react.useContext(ConfigContext),
+      getPrefixCls = _React$useContext.getPrefixCls,
+      direction = _React$useContext.direction;
+
+  var contextSize = react.useContext(config_provider_SizeContext);
+  var size = customizeSize || contextSize;
+  var inputRef = react.useRef(null);
+
+  var onChange = function onChange(e) {
+    if (e && e.target && e.type === 'click' && customOnSearch) {
+      customOnSearch(e.target.value, e);
+    }
+
+    if (customOnChange) {
+      customOnChange(e);
+    }
+  };
+
+  var onMouseDown = function onMouseDown(e) {
+    var _a;
+
+    if (document.activeElement === ((_a = inputRef.current) === null || _a === void 0 ? void 0 : _a.input)) {
+      e.preventDefault();
+    }
+  };
+
+  var onSearch = function onSearch(e) {
+    var _a;
+
+    if (customOnSearch) {
+      customOnSearch((_a = inputRef.current) === null || _a === void 0 ? void 0 : _a.input.value, e);
+    }
+  };
+
+  var prefixCls = getPrefixCls('input-search', customizePrefixCls);
+  var inputPrefixCls = getPrefixCls('input', customizeInputPrefixCls);
+  var searchIcon = typeof enterButton === 'boolean' ? /*#__PURE__*/react.createElement(icons_SearchOutlined, null) : null;
+  var btnClassName = "".concat(prefixCls, "-button");
+  var button;
+  var enterButtonAsElement = enterButton || {};
+  var isAntdButton = enterButtonAsElement.type && enterButtonAsElement.type.__ANT_BUTTON === true;
+
+  if (isAntdButton || enterButtonAsElement.type === 'button') {
+    button = cloneElement(enterButtonAsElement, extends_extends({
+      onMouseDown: onMouseDown,
+      onClick: function onClick(e) {
+        var _a, _b;
+
+        (_b = (_a = enterButtonAsElement === null || enterButtonAsElement === void 0 ? void 0 : enterButtonAsElement.props) === null || _a === void 0 ? void 0 : _a.onClick) === null || _b === void 0 ? void 0 : _b.call(_a, e);
+        onSearch(e);
+      },
+      key: 'enterButton'
+    }, isAntdButton ? {
+      className: btnClassName,
+      size: size
+    } : {}));
+  } else {
+    button = /*#__PURE__*/react.createElement(es_button, {
+      className: btnClassName,
+      type: enterButton ? 'primary' : undefined,
+      size: size,
+      disabled: disabled,
+      key: "enterButton",
+      onMouseDown: onMouseDown,
+      onClick: onSearch,
+      loading: loading,
+      icon: searchIcon
+    }, enterButton);
+  }
+
+  if (addonAfter) {
+    button = [button, cloneElement(addonAfter, {
+      key: 'addonAfter'
+    })];
+  }
+
+  var cls = classnames_default()(prefixCls, (_classNames = {}, _defineProperty(_classNames, "".concat(prefixCls, "-rtl"), direction === 'rtl'), _defineProperty(_classNames, "".concat(prefixCls, "-").concat(size), !!size), _defineProperty(_classNames, "".concat(prefixCls, "-with-button"), !!enterButton), _classNames), className);
+  return /*#__PURE__*/react.createElement(input_Input, extends_extends({
+    ref: composeRef(inputRef, ref),
+    onPressEnter: onSearch
+  }, restProps, {
+    size: size,
+    prefixCls: inputPrefixCls,
+    addonAfter: button,
+    suffix: suffix,
+    onChange: onChange,
+    className: cls,
+    disabled: disabled
+  }));
+});
+Search.displayName = 'Search';
+/* harmony default export */ const input_Search = (Search);
+;// CONCATENATED MODULE: ../node_modules/rc-textarea/es/calculateNodeHeight.js
+// Thanks to https://github.com/andreypopp/react-textarea-autosize/
+
+/**
+ * calculateNodeHeight(uiTextNode, useCache = false)
+ */
+var HIDDEN_TEXTAREA_STYLE = "\n  min-height:0 !important;\n  max-height:none !important;\n  height:0 !important;\n  visibility:hidden !important;\n  overflow:hidden !important;\n  position:absolute !important;\n  z-index:-1000 !important;\n  top:0 !important;\n  right:0 !important\n";
+var SIZING_STYLE = ['letter-spacing', 'line-height', 'padding-top', 'padding-bottom', 'font-family', 'font-weight', 'font-size', 'font-variant', 'text-rendering', 'text-transform', 'width', 'text-indent', 'padding-left', 'padding-right', 'border-width', 'box-sizing', 'word-break'];
+var computedStyleCache = {};
+var hiddenTextarea;
+function calculateNodeStyling(node) {
+  var useCache = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+  var nodeRef = node.getAttribute('id') || node.getAttribute('data-reactid') || node.getAttribute('name');
+
+  if (useCache && computedStyleCache[nodeRef]) {
+    return computedStyleCache[nodeRef];
+  }
+
+  var style = window.getComputedStyle(node);
+  var boxSizing = style.getPropertyValue('box-sizing') || style.getPropertyValue('-moz-box-sizing') || style.getPropertyValue('-webkit-box-sizing');
+  var paddingSize = parseFloat(style.getPropertyValue('padding-bottom')) + parseFloat(style.getPropertyValue('padding-top'));
+  var borderSize = parseFloat(style.getPropertyValue('border-bottom-width')) + parseFloat(style.getPropertyValue('border-top-width'));
+  var sizingStyle = SIZING_STYLE.map(function (name) {
+    return "".concat(name, ":").concat(style.getPropertyValue(name));
+  }).join(';');
+  var nodeInfo = {
+    sizingStyle: sizingStyle,
+    paddingSize: paddingSize,
+    borderSize: borderSize,
+    boxSizing: boxSizing
+  };
+
+  if (useCache && nodeRef) {
+    computedStyleCache[nodeRef] = nodeInfo;
+  }
+
+  return nodeInfo;
+}
+function calculateNodeHeight(uiTextNode) {
+  var useCache = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+  var minRows = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+  var maxRows = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
+
+  if (!hiddenTextarea) {
+    hiddenTextarea = document.createElement('textarea');
+    hiddenTextarea.setAttribute('tab-index', '-1');
+    hiddenTextarea.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(hiddenTextarea);
+  } // Fix wrap="off" issue
+  // https://github.com/ant-design/ant-design/issues/6577
+
+
+  if (uiTextNode.getAttribute('wrap')) {
+    hiddenTextarea.setAttribute('wrap', uiTextNode.getAttribute('wrap'));
+  } else {
+    hiddenTextarea.removeAttribute('wrap');
+  } // Copy all CSS properties that have an impact on the height of the content in
+  // the textbox
+
+
+  var _calculateNodeStyling = calculateNodeStyling(uiTextNode, useCache),
+      paddingSize = _calculateNodeStyling.paddingSize,
+      borderSize = _calculateNodeStyling.borderSize,
+      boxSizing = _calculateNodeStyling.boxSizing,
+      sizingStyle = _calculateNodeStyling.sizingStyle; // Need to have the overflow attribute to hide the scrollbar otherwise
+  // text-lines will not calculated properly as the shadow will technically be
+  // narrower for content
+
+
+  hiddenTextarea.setAttribute('style', "".concat(sizingStyle, ";").concat(HIDDEN_TEXTAREA_STYLE));
+  hiddenTextarea.value = uiTextNode.value || uiTextNode.placeholder || '';
+  var minHeight = Number.MIN_SAFE_INTEGER;
+  var maxHeight = Number.MAX_SAFE_INTEGER;
+  var height = hiddenTextarea.scrollHeight;
+  var overflowY;
+
+  if (boxSizing === 'border-box') {
+    // border-box: add border, since height = content + padding + border
+    height += borderSize;
+  } else if (boxSizing === 'content-box') {
+    // remove padding, since height = content
+    height -= paddingSize;
+  }
+
+  if (minRows !== null || maxRows !== null) {
+    // measure height of a textarea with a single row
+    hiddenTextarea.value = ' ';
+    var singleRowHeight = hiddenTextarea.scrollHeight - paddingSize;
+
+    if (minRows !== null) {
+      minHeight = singleRowHeight * minRows;
+
+      if (boxSizing === 'border-box') {
+        minHeight = minHeight + paddingSize + borderSize;
+      }
+
+      height = Math.max(minHeight, height);
+    }
+
+    if (maxRows !== null) {
+      maxHeight = singleRowHeight * maxRows;
+
+      if (boxSizing === 'border-box') {
+        maxHeight = maxHeight + paddingSize + borderSize;
+      }
+
+      overflowY = height > maxHeight ? '' : 'hidden';
+      height = Math.min(maxHeight, height);
+    }
+  }
+
+  return {
+    height: height,
+    minHeight: minHeight,
+    maxHeight: maxHeight,
+    overflowY: overflowY,
+    resize: 'none'
+  };
+}
+// EXTERNAL MODULE: ../node_modules/shallowequal/index.js
+var shallowequal = __webpack_require__(4445);
+var shallowequal_default = /*#__PURE__*/__webpack_require__.n(shallowequal);
+;// CONCATENATED MODULE: ../node_modules/rc-textarea/es/ResizableTextArea.js
+
+
+
+
+
+
+
+
+
+
+
+
+ // eslint-disable-next-line @typescript-eslint/naming-convention
+
+var RESIZE_STATUS;
+
+(function (RESIZE_STATUS) {
+  RESIZE_STATUS[RESIZE_STATUS["NONE"] = 0] = "NONE";
+  RESIZE_STATUS[RESIZE_STATUS["RESIZING"] = 1] = "RESIZING";
+  RESIZE_STATUS[RESIZE_STATUS["RESIZED"] = 2] = "RESIZED";
+})(RESIZE_STATUS || (RESIZE_STATUS = {}));
+
+var ResizableTextArea = /*#__PURE__*/function (_React$Component) {
+  _inherits(ResizableTextArea, _React$Component);
+
+  var _super = _createSuper(ResizableTextArea);
+
+  function ResizableTextArea(props) {
+    var _this;
+
+    _classCallCheck(this, ResizableTextArea);
+
+    _this = _super.call(this, props);
+    _this.nextFrameActionId = void 0;
+    _this.resizeFrameId = void 0;
+    _this.textArea = void 0;
+
+    _this.saveTextArea = function (textArea) {
+      _this.textArea = textArea;
+    };
+
+    _this.handleResize = function (size) {
+      var resizeStatus = _this.state.resizeStatus;
+      var _this$props = _this.props,
+          autoSize = _this$props.autoSize,
+          onResize = _this$props.onResize;
+
+      if (resizeStatus !== RESIZE_STATUS.NONE) {
+        return;
+      }
+
+      if (typeof onResize === 'function') {
+        onResize(size);
+      }
+
+      if (autoSize) {
+        _this.resizeOnNextFrame();
+      }
+    };
+
+    _this.resizeOnNextFrame = function () {
+      cancelAnimationFrame(_this.nextFrameActionId);
+      _this.nextFrameActionId = requestAnimationFrame(_this.resizeTextarea);
+    };
+
+    _this.resizeTextarea = function () {
+      var autoSize = _this.props.autoSize;
+
+      if (!autoSize || !_this.textArea) {
+        return;
+      }
+
+      var minRows = autoSize.minRows,
+          maxRows = autoSize.maxRows;
+      var textareaStyles = calculateNodeHeight(_this.textArea, false, minRows, maxRows);
+
+      _this.setState({
+        textareaStyles: textareaStyles,
+        resizeStatus: RESIZE_STATUS.RESIZING
+      }, function () {
+        cancelAnimationFrame(_this.resizeFrameId);
+        _this.resizeFrameId = requestAnimationFrame(function () {
+          _this.setState({
+            resizeStatus: RESIZE_STATUS.RESIZED
+          }, function () {
+            _this.resizeFrameId = requestAnimationFrame(function () {
+              _this.setState({
+                resizeStatus: RESIZE_STATUS.NONE
+              });
+
+              _this.fixFirefoxAutoScroll();
+            });
+          });
+        });
+      });
+    };
+
+    _this.renderTextArea = function () {
+      var _this$props2 = _this.props,
+          _this$props2$prefixCl = _this$props2.prefixCls,
+          prefixCls = _this$props2$prefixCl === void 0 ? 'rc-textarea' : _this$props2$prefixCl,
+          autoSize = _this$props2.autoSize,
+          onResize = _this$props2.onResize,
+          className = _this$props2.className,
+          disabled = _this$props2.disabled;
+      var _this$state = _this.state,
+          textareaStyles = _this$state.textareaStyles,
+          resizeStatus = _this$state.resizeStatus;
+      var otherProps = omit(_this.props, ['prefixCls', 'onPressEnter', 'autoSize', 'defaultValue', 'onResize']);
+      var cls = classnames_default()(prefixCls, className, _defineProperty({}, "".concat(prefixCls, "-disabled"), disabled)); // Fix https://github.com/ant-design/ant-design/issues/6776
+      // Make sure it could be reset when using form.getFieldDecorator
+
+      if ('value' in otherProps) {
+        otherProps.value = otherProps.value || '';
+      }
+
+      var style = _objectSpread2(_objectSpread2(_objectSpread2({}, _this.props.style), textareaStyles), resizeStatus === RESIZE_STATUS.RESIZING ? // React will warning when mix `overflow` & `overflowY`.
+      // We need to define this separately.
+      {
+        overflowX: 'hidden',
+        overflowY: 'hidden'
+      } : null);
+
+      return /*#__PURE__*/react.createElement(rc_resize_observer_es, {
+        onResize: _this.handleResize,
+        disabled: !(autoSize || onResize)
+      }, /*#__PURE__*/react.createElement("textarea", extends_extends({}, otherProps, {
+        className: cls,
+        style: style,
+        ref: _this.saveTextArea
+      })));
+    };
+
+    _this.state = {
+      textareaStyles: {},
+      resizeStatus: RESIZE_STATUS.NONE
+    };
+    return _this;
+  }
+
+  _createClass(ResizableTextArea, [{
+    key: "componentDidUpdate",
+    value: function componentDidUpdate(prevProps) {
+      // Re-render with the new content or new autoSize property then recalculate the height as required.
+      if (prevProps.value !== this.props.value || !shallowequal_default()(prevProps.autoSize, this.props.autoSize)) {
+        this.resizeTextarea();
+      }
+    }
+  }, {
+    key: "componentWillUnmount",
+    value: function componentWillUnmount() {
+      cancelAnimationFrame(this.nextFrameActionId);
+      cancelAnimationFrame(this.resizeFrameId);
+    } // https://github.com/ant-design/ant-design/issues/21870
+
+  }, {
+    key: "fixFirefoxAutoScroll",
+    value: function fixFirefoxAutoScroll() {
+      try {
+        if (document.activeElement === this.textArea) {
+          var currentStart = this.textArea.selectionStart;
+          var currentEnd = this.textArea.selectionEnd;
+          this.textArea.setSelectionRange(currentStart, currentEnd);
+        }
+      } catch (e) {// Fix error in Chrome:
+        // Failed to read the 'selectionStart' property from 'HTMLInputElement'
+        // http://stackoverflow.com/q/21177489/3040605
+      }
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      return this.renderTextArea();
+    }
+  }]);
+
+  return ResizableTextArea;
+}(react.Component);
+
+/* harmony default export */ const es_ResizableTextArea = (ResizableTextArea);
+;// CONCATENATED MODULE: ../node_modules/rc-textarea/es/index.js
+
+
+
+
+
+
+
+
+var TextArea = /*#__PURE__*/function (_React$Component) {
+  _inherits(TextArea, _React$Component);
+
+  var _super = _createSuper(TextArea);
+
+  function TextArea(props) {
+    var _this;
+
+    _classCallCheck(this, TextArea);
+
+    _this = _super.call(this, props);
+    _this.resizableTextArea = void 0;
+
+    _this.focus = function () {
+      _this.resizableTextArea.textArea.focus();
+    };
+
+    _this.saveTextArea = function (resizableTextArea) {
+      _this.resizableTextArea = resizableTextArea;
+    };
+
+    _this.handleChange = function (e) {
+      var onChange = _this.props.onChange;
+
+      _this.setValue(e.target.value, function () {
+        _this.resizableTextArea.resizeTextarea();
+      });
+
+      if (onChange) {
+        onChange(e);
+      }
+    };
+
+    _this.handleKeyDown = function (e) {
+      var _this$props = _this.props,
+          onPressEnter = _this$props.onPressEnter,
+          onKeyDown = _this$props.onKeyDown;
+
+      if (e.keyCode === 13 && onPressEnter) {
+        onPressEnter(e);
+      }
+
+      if (onKeyDown) {
+        onKeyDown(e);
+      }
+    };
+
+    var value = typeof props.value === 'undefined' || props.value === null ? props.defaultValue : props.value;
+    _this.state = {
+      value: value
+    };
+    return _this;
+  }
+
+  _createClass(TextArea, [{
+    key: "setValue",
+    value: function setValue(value, callback) {
+      if (!('value' in this.props)) {
+        this.setState({
+          value: value
+        }, callback);
+      }
+    }
+  }, {
+    key: "blur",
+    value: function blur() {
+      this.resizableTextArea.textArea.blur();
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      return /*#__PURE__*/react.createElement(es_ResizableTextArea, extends_extends({}, this.props, {
+        value: this.state.value,
+        onKeyDown: this.handleKeyDown,
+        onChange: this.handleChange,
+        ref: this.saveTextArea
+      }));
+    }
+  }], [{
+    key: "getDerivedStateFromProps",
+    value: function getDerivedStateFromProps(nextProps) {
+      if ('value' in nextProps) {
+        return {
+          value: nextProps.value
+        };
+      }
+
+      return null;
+    }
+  }]);
+
+  return TextArea;
+}(react.Component);
+
+
+/* harmony default export */ const rc_textarea_es = (TextArea);
+;// CONCATENATED MODULE: ../node_modules/antd/es/input/TextArea.js
+
+
+
+
+
+
+var TextArea_rest = undefined && undefined.__rest || function (s, e) {
+  var t = {};
+
+  for (var p in s) {
+    if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0) t[p] = s[p];
+  }
+
+  if (s != null && typeof Object.getOwnPropertySymbols === "function") for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+    if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i])) t[p[i]] = s[p[i]];
+  }
+  return t;
+};
+
+
+
+
+
+
+
+
+
+
+
+function fixEmojiLength(value, maxLength) {
+  return _toConsumableArray(value || '').slice(0, maxLength).join('');
+}
+
+var TextArea_TextArea = /*#__PURE__*/react.forwardRef(function (_a, ref) {
+  var _classNames;
+
+  var customizePrefixCls = _a.prefixCls,
+      _a$bordered = _a.bordered,
+      bordered = _a$bordered === void 0 ? true : _a$bordered,
+      _a$showCount = _a.showCount,
+      showCount = _a$showCount === void 0 ? false : _a$showCount,
+      maxLength = _a.maxLength,
+      className = _a.className,
+      style = _a.style,
+      customizeSize = _a.size,
+      onCompositionStart = _a.onCompositionStart,
+      onCompositionEnd = _a.onCompositionEnd,
+      onChange = _a.onChange,
+      props = TextArea_rest(_a, ["prefixCls", "bordered", "showCount", "maxLength", "className", "style", "size", "onCompositionStart", "onCompositionEnd", "onChange"]);
+
+  var _React$useContext = react.useContext(ConfigContext),
+      getPrefixCls = _React$useContext.getPrefixCls,
+      direction = _React$useContext.direction;
+
+  var size = react.useContext(config_provider_SizeContext);
+  var innerRef = react.useRef(null);
+  var clearableInputRef = react.useRef(null);
+
+  var _React$useState = react.useState(false),
+      _React$useState2 = _slicedToArray(_React$useState, 2),
+      compositing = _React$useState2[0],
+      setCompositing = _React$useState2[1];
+
+  var _useMergedState = useControlledState(props.defaultValue, {
+    value: props.value
+  }),
+      _useMergedState2 = _slicedToArray(_useMergedState, 2),
+      value = _useMergedState2[0],
+      setValue = _useMergedState2[1];
+
+  var handleSetValue = function handleSetValue(val, callback) {
+    if (props.value === undefined) {
+      setValue(val);
+      callback === null || callback === void 0 ? void 0 : callback();
+    }
+  }; // =========================== Value Update ===========================
+  // Max length value
+
+
+  var hasMaxLength = Number(maxLength) > 0;
+
+  var onInternalCompositionStart = function onInternalCompositionStart(e) {
+    setCompositing(true);
+    onCompositionStart === null || onCompositionStart === void 0 ? void 0 : onCompositionStart(e);
+  };
+
+  var onInternalCompositionEnd = function onInternalCompositionEnd(e) {
+    setCompositing(false);
+    var triggerValue = e.currentTarget.value;
+
+    if (hasMaxLength) {
+      triggerValue = fixEmojiLength(triggerValue, maxLength);
+    } // Patch composition onChange when value changed
+
+
+    if (triggerValue !== value) {
+      handleSetValue(triggerValue);
+      resolveOnChange(e.currentTarget, e, onChange, triggerValue);
+    }
+
+    onCompositionEnd === null || onCompositionEnd === void 0 ? void 0 : onCompositionEnd(e);
+  };
+
+  var handleChange = function handleChange(e) {
+    var triggerValue = e.target.value;
+
+    if (!compositing && hasMaxLength) {
+      triggerValue = fixEmojiLength(triggerValue, maxLength);
+    }
+
+    handleSetValue(triggerValue);
+    resolveOnChange(e.currentTarget, e, onChange, triggerValue);
+  }; // ============================== Reset ===============================
+
+
+  var handleReset = function handleReset(e) {
+    var _a, _b;
+
+    handleSetValue('', function () {
+      var _a;
+
+      (_a = innerRef.current) === null || _a === void 0 ? void 0 : _a.focus();
+    });
+    resolveOnChange((_b = (_a = innerRef.current) === null || _a === void 0 ? void 0 : _a.resizableTextArea) === null || _b === void 0 ? void 0 : _b.textArea, e, onChange);
+  };
+
+  var prefixCls = getPrefixCls('input', customizePrefixCls);
+  react.useImperativeHandle(ref, function () {
+    var _a;
+
+    return {
+      resizableTextArea: (_a = innerRef.current) === null || _a === void 0 ? void 0 : _a.resizableTextArea,
+      focus: function focus(option) {
+        var _a, _b;
+
+        triggerFocus((_b = (_a = innerRef.current) === null || _a === void 0 ? void 0 : _a.resizableTextArea) === null || _b === void 0 ? void 0 : _b.textArea, option);
+      },
+      blur: function blur() {
+        var _a;
+
+        return (_a = innerRef.current) === null || _a === void 0 ? void 0 : _a.blur();
+      }
+    };
+  });
+  var textArea = /*#__PURE__*/react.createElement(rc_textarea_es, extends_extends({}, omit(props, ['allowClear']), {
+    className: classnames_default()((_classNames = {}, _defineProperty(_classNames, "".concat(prefixCls, "-borderless"), !bordered), _defineProperty(_classNames, className, className && !showCount), _defineProperty(_classNames, "".concat(prefixCls, "-sm"), size === 'small' || customizeSize === 'small'), _defineProperty(_classNames, "".concat(prefixCls, "-lg"), size === 'large' || customizeSize === 'large'), _classNames)),
+    style: showCount ? undefined : style,
+    prefixCls: prefixCls,
+    onCompositionStart: onInternalCompositionStart,
+    onChange: handleChange,
+    onCompositionEnd: onInternalCompositionEnd,
+    ref: innerRef
+  }));
+  var val = fixControlledValue(value);
+
+  if (!compositing && hasMaxLength && (props.value === null || props.value === undefined)) {
+    // fix #27612 将value转为数组进行截取，解决 '😂'.length === 2 等emoji表情导致的截取乱码的问题
+    val = fixEmojiLength(val, maxLength);
+  } // TextArea
+
+
+  var textareaNode = /*#__PURE__*/react.createElement(input_ClearableLabeledInput, extends_extends({}, props, {
+    prefixCls: prefixCls,
+    direction: direction,
+    inputType: "text",
+    value: val,
+    element: textArea,
+    handleReset: handleReset,
+    ref: clearableInputRef,
+    bordered: bordered,
+    style: showCount ? undefined : style
+  })); // Only show text area wrapper when needed
+
+  if (showCount) {
+    var valueLength = _toConsumableArray(val).length;
+
+    var dataCount = '';
+
+    if (typeof_typeof(showCount) === 'object') {
+      dataCount = showCount.formatter({
+        count: valueLength,
+        maxLength: maxLength
+      });
+    } else {
+      dataCount = "".concat(valueLength).concat(hasMaxLength ? " / ".concat(maxLength) : '');
+    }
+
+    return /*#__PURE__*/react.createElement("div", {
+      className: classnames_default()("".concat(prefixCls, "-textarea"), _defineProperty({}, "".concat(prefixCls, "-textarea-rtl"), direction === 'rtl'), "".concat(prefixCls, "-textarea-show-count"), className),
+      style: style,
+      "data-count": dataCount
+    }, textareaNode);
+  }
+
+  return textareaNode;
+});
+/* harmony default export */ const input_TextArea = (TextArea_TextArea);
+;// CONCATENATED MODULE: ../node_modules/@ant-design/icons-svg/es/asn/EyeOutlined.js
+// This icon file is generated automatically.
+var EyeOutlined = { "icon": { "tag": "svg", "attrs": { "viewBox": "64 64 896 896", "focusable": "false" }, "children": [{ "tag": "path", "attrs": { "d": "M942.2 486.2C847.4 286.5 704.1 186 512 186c-192.2 0-335.4 100.5-430.2 300.3a60.3 60.3 0 000 51.5C176.6 737.5 319.9 838 512 838c192.2 0 335.4-100.5 430.2-300.3 7.7-16.2 7.7-35 0-51.5zM512 766c-161.3 0-279.4-81.8-362.7-254C232.6 339.8 350.7 258 512 258c161.3 0 279.4 81.8 362.7 254C791.5 684.2 673.4 766 512 766zm-4-430c-97.2 0-176 78.8-176 176s78.8 176 176 176 176-78.8 176-176-78.8-176-176-176zm0 288c-61.9 0-112-50.1-112-112s50.1-112 112-112 112 50.1 112 112-50.1 112-112 112z" } }] }, "name": "eye", "theme": "outlined" };
+/* harmony default export */ const asn_EyeOutlined = (EyeOutlined);
+
+;// CONCATENATED MODULE: ../node_modules/@ant-design/icons/es/icons/EyeOutlined.js
+
+// GENERATE BY ./scripts/generate.ts
+// DON NOT EDIT IT MANUALLY
+
+
+
+
+var EyeOutlined_EyeOutlined = function EyeOutlined(props, ref) {
+  return /*#__PURE__*/react.createElement(AntdIcon, _objectSpread2(_objectSpread2({}, props), {}, {
+    ref: ref,
+    icon: asn_EyeOutlined
+  }));
+};
+
+EyeOutlined_EyeOutlined.displayName = 'EyeOutlined';
+/* harmony default export */ const icons_EyeOutlined = (/*#__PURE__*/react.forwardRef(EyeOutlined_EyeOutlined));
+;// CONCATENATED MODULE: ../node_modules/@ant-design/icons-svg/es/asn/EyeInvisibleOutlined.js
+// This icon file is generated automatically.
+var EyeInvisibleOutlined = { "icon": { "tag": "svg", "attrs": { "viewBox": "64 64 896 896", "focusable": "false" }, "children": [{ "tag": "path", "attrs": { "d": "M942.2 486.2Q889.47 375.11 816.7 305l-50.88 50.88C807.31 395.53 843.45 447.4 874.7 512 791.5 684.2 673.4 766 512 766q-72.67 0-133.87-22.38L323 798.75Q408 838 512 838q288.3 0 430.2-300.3a60.29 60.29 0 000-51.5zm-63.57-320.64L836 122.88a8 8 0 00-11.32 0L715.31 232.2Q624.86 186 512 186q-288.3 0-430.2 300.3a60.3 60.3 0 000 51.5q56.69 119.4 136.5 191.41L112.48 835a8 8 0 000 11.31L155.17 889a8 8 0 0011.31 0l712.15-712.12a8 8 0 000-11.32zM149.3 512C232.6 339.8 350.7 258 512 258c54.54 0 104.13 9.36 149.12 28.39l-70.3 70.3a176 176 0 00-238.13 238.13l-83.42 83.42C223.1 637.49 183.3 582.28 149.3 512zm246.7 0a112.11 112.11 0 01146.2-106.69L401.31 546.2A112 112 0 01396 512z" } }, { "tag": "path", "attrs": { "d": "M508 624c-3.46 0-6.87-.16-10.25-.47l-52.82 52.82a176.09 176.09 0 00227.42-227.42l-52.82 52.82c.31 3.38.47 6.79.47 10.25a111.94 111.94 0 01-112 112z" } }] }, "name": "eye-invisible", "theme": "outlined" };
+/* harmony default export */ const asn_EyeInvisibleOutlined = (EyeInvisibleOutlined);
+
+;// CONCATENATED MODULE: ../node_modules/@ant-design/icons/es/icons/EyeInvisibleOutlined.js
+
+// GENERATE BY ./scripts/generate.ts
+// DON NOT EDIT IT MANUALLY
+
+
+
+
+var EyeInvisibleOutlined_EyeInvisibleOutlined = function EyeInvisibleOutlined(props, ref) {
+  return /*#__PURE__*/react.createElement(AntdIcon, _objectSpread2(_objectSpread2({}, props), {}, {
+    ref: ref,
+    icon: asn_EyeInvisibleOutlined
+  }));
+};
+
+EyeInvisibleOutlined_EyeInvisibleOutlined.displayName = 'EyeInvisibleOutlined';
+/* harmony default export */ const icons_EyeInvisibleOutlined = (/*#__PURE__*/react.forwardRef(EyeInvisibleOutlined_EyeInvisibleOutlined));
+;// CONCATENATED MODULE: ../node_modules/antd/es/input/Password.js
+
+
+
+
+var Password_rest = undefined && undefined.__rest || function (s, e) {
+  var t = {};
+
+  for (var p in s) {
+    if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0) t[p] = s[p];
+  }
+
+  if (s != null && typeof Object.getOwnPropertySymbols === "function") for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+    if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i])) t[p[i]] = s[p[i]];
+  }
+  return t;
+};
+
+
+
+
+
+
+
+
+
+var ActionMap = {
+  click: 'onClick',
+  hover: 'onMouseOver'
+};
+var Password = /*#__PURE__*/react.forwardRef(function (props, ref) {
+  var _useState = (0,react.useState)(false),
+      _useState2 = _slicedToArray(_useState, 2),
+      visible = _useState2[0],
+      setVisible = _useState2[1];
+
+  var onVisibleChange = function onVisibleChange() {
+    var disabled = props.disabled;
+
+    if (disabled) {
+      return;
+    }
+
+    setVisible(!visible);
+  };
+
+  var getIcon = function getIcon(prefixCls) {
+    var _iconProps;
+
+    var action = props.action,
+        _props$iconRender = props.iconRender,
+        iconRender = _props$iconRender === void 0 ? function () {
+      return null;
+    } : _props$iconRender;
+    var iconTrigger = ActionMap[action] || '';
+    var icon = iconRender(visible);
+    var iconProps = (_iconProps = {}, _defineProperty(_iconProps, iconTrigger, onVisibleChange), _defineProperty(_iconProps, "className", "".concat(prefixCls, "-icon")), _defineProperty(_iconProps, "key", 'passwordIcon'), _defineProperty(_iconProps, "onMouseDown", function onMouseDown(e) {
+      // Prevent focused state lost
+      // https://github.com/ant-design/ant-design/issues/15173
+      e.preventDefault();
+    }), _defineProperty(_iconProps, "onMouseUp", function onMouseUp(e) {
+      // Prevent caret position change
+      // https://github.com/ant-design/ant-design/issues/23524
+      e.preventDefault();
+    }), _iconProps);
+    return /*#__PURE__*/react.cloneElement( /*#__PURE__*/react.isValidElement(icon) ? icon : /*#__PURE__*/react.createElement("span", null, icon), iconProps);
+  };
+
+  var renderPassword = function renderPassword(_ref) {
+    var getPrefixCls = _ref.getPrefixCls;
+
+    var className = props.className,
+        customizePrefixCls = props.prefixCls,
+        customizeInputPrefixCls = props.inputPrefixCls,
+        size = props.size,
+        visibilityToggle = props.visibilityToggle,
+        restProps = Password_rest(props, ["className", "prefixCls", "inputPrefixCls", "size", "visibilityToggle"]);
+
+    var inputPrefixCls = getPrefixCls('input', customizeInputPrefixCls);
+    var prefixCls = getPrefixCls('input-password', customizePrefixCls);
+    var suffixIcon = visibilityToggle && getIcon(prefixCls);
+    var inputClassName = classnames_default()(prefixCls, className, _defineProperty({}, "".concat(prefixCls, "-").concat(size), !!size));
+
+    var omittedProps = extends_extends(extends_extends({}, omit(restProps, ['suffix', 'iconRender'])), {
+      type: visible ? 'text' : 'password',
+      className: inputClassName,
+      prefixCls: inputPrefixCls,
+      suffix: suffixIcon
+    });
+
+    if (size) {
+      omittedProps.size = size;
+    }
+
+    return /*#__PURE__*/react.createElement(input_Input, extends_extends({
+      ref: ref
+    }, omittedProps));
+  };
+
+  return /*#__PURE__*/react.createElement(ConfigConsumer, null, renderPassword);
+});
+Password.defaultProps = {
+  action: 'click',
+  visibilityToggle: true,
+  iconRender: function iconRender(visible) {
+    return visible ? /*#__PURE__*/react.createElement(icons_EyeOutlined, null) : /*#__PURE__*/react.createElement(icons_EyeInvisibleOutlined, null);
+  }
+};
+Password.displayName = 'Password';
+/* harmony default export */ const input_Password = (Password);
+;// CONCATENATED MODULE: ../node_modules/antd/es/input/index.js
+
+
+
+
+
+input_Input.Group = input_Group;
+input_Input.Search = input_Search;
+input_Input.TextArea = input_TextArea;
+input_Input.Password = input_Password;
+/* harmony default export */ const input = (input_Input);
 ;// CONCATENATED MODULE: ../node_modules/rc-util/es/getScrollBarSize.js
 /* eslint-disable no-param-reassign */
 var cached;
@@ -46963,1525 +48482,6 @@ es_modal_Modal.destroyAll = function destroyAllFn() {
 
 es_modal_Modal.config = modalGlobalConfig;
 /* harmony default export */ const modal = (es_modal_Modal);
-;// CONCATENATED MODULE: ../node_modules/antd/es/input/utils.js
-
-
-function getInputClassName(prefixCls, bordered, size, disabled, direction) {
-  var _classNames;
-
-  return classnames_default()(prefixCls, (_classNames = {}, _defineProperty(_classNames, "".concat(prefixCls, "-sm"), size === 'small'), _defineProperty(_classNames, "".concat(prefixCls, "-lg"), size === 'large'), _defineProperty(_classNames, "".concat(prefixCls, "-disabled"), disabled), _defineProperty(_classNames, "".concat(prefixCls, "-rtl"), direction === 'rtl'), _defineProperty(_classNames, "".concat(prefixCls, "-borderless"), !bordered), _classNames));
-}
-function hasPrefixSuffix(props) {
-  return !!(props.prefix || props.suffix || props.allowClear);
-}
-;// CONCATENATED MODULE: ../node_modules/antd/es/input/ClearableLabeledInput.js
-
-
-
-
-
-
-
-
-
-
-
-var ClearableInputType = tuple('text', 'input');
-
-function hasAddon(props) {
-  return !!(props.addonBefore || props.addonAfter);
-}
-
-var ClearableLabeledInput = /*#__PURE__*/function (_React$Component) {
-  _inherits(ClearableLabeledInput, _React$Component);
-
-  var _super = _createSuper(ClearableLabeledInput);
-
-  function ClearableLabeledInput() {
-    var _this;
-
-    _classCallCheck(this, ClearableLabeledInput);
-
-    _this = _super.apply(this, arguments);
-    /** @private Do Not use out of this class. We do not promise this is always keep. */
-
-    _this.containerRef = /*#__PURE__*/react.createRef();
-
-    _this.onInputMouseUp = function (e) {
-      var _a;
-
-      if ((_a = _this.containerRef.current) === null || _a === void 0 ? void 0 : _a.contains(e.target)) {
-        var triggerFocus = _this.props.triggerFocus;
-        triggerFocus === null || triggerFocus === void 0 ? void 0 : triggerFocus();
-      }
-    };
-
-    return _this;
-  }
-
-  _createClass(ClearableLabeledInput, [{
-    key: "renderClearIcon",
-    value: function renderClearIcon(prefixCls) {
-      var _classNames;
-
-      var _this$props = this.props,
-          allowClear = _this$props.allowClear,
-          value = _this$props.value,
-          disabled = _this$props.disabled,
-          readOnly = _this$props.readOnly,
-          handleReset = _this$props.handleReset,
-          suffix = _this$props.suffix;
-
-      if (!allowClear) {
-        return null;
-      }
-
-      var needClear = !disabled && !readOnly && value;
-      var className = "".concat(prefixCls, "-clear-icon");
-      return /*#__PURE__*/react.createElement(icons_CloseCircleFilled, {
-        onClick: handleReset // Do not trigger onBlur when clear input
-        // https://github.com/ant-design/ant-design/issues/31200
-        ,
-        onMouseDown: function onMouseDown(e) {
-          return e.preventDefault();
-        },
-        className: classnames_default()((_classNames = {}, _defineProperty(_classNames, "".concat(className, "-hidden"), !needClear), _defineProperty(_classNames, "".concat(className, "-has-suffix"), !!suffix), _classNames), className),
-        role: "button"
-      });
-    }
-  }, {
-    key: "renderSuffix",
-    value: function renderSuffix(prefixCls) {
-      var _this$props2 = this.props,
-          suffix = _this$props2.suffix,
-          allowClear = _this$props2.allowClear;
-
-      if (suffix || allowClear) {
-        return /*#__PURE__*/react.createElement("span", {
-          className: "".concat(prefixCls, "-suffix")
-        }, this.renderClearIcon(prefixCls), suffix);
-      }
-
-      return null;
-    }
-  }, {
-    key: "renderLabeledIcon",
-    value: function renderLabeledIcon(prefixCls, element) {
-      var _classNames2;
-
-      var _this$props3 = this.props,
-          focused = _this$props3.focused,
-          value = _this$props3.value,
-          prefix = _this$props3.prefix,
-          className = _this$props3.className,
-          size = _this$props3.size,
-          suffix = _this$props3.suffix,
-          disabled = _this$props3.disabled,
-          allowClear = _this$props3.allowClear,
-          direction = _this$props3.direction,
-          style = _this$props3.style,
-          readOnly = _this$props3.readOnly,
-          bordered = _this$props3.bordered;
-
-      if (!hasPrefixSuffix(this.props)) {
-        return cloneElement(element, {
-          value: value
-        });
-      }
-
-      var suffixNode = this.renderSuffix(prefixCls);
-      var prefixNode = prefix ? /*#__PURE__*/react.createElement("span", {
-        className: "".concat(prefixCls, "-prefix")
-      }, prefix) : null;
-      var affixWrapperCls = classnames_default()("".concat(prefixCls, "-affix-wrapper"), (_classNames2 = {}, _defineProperty(_classNames2, "".concat(prefixCls, "-affix-wrapper-focused"), focused), _defineProperty(_classNames2, "".concat(prefixCls, "-affix-wrapper-disabled"), disabled), _defineProperty(_classNames2, "".concat(prefixCls, "-affix-wrapper-sm"), size === 'small'), _defineProperty(_classNames2, "".concat(prefixCls, "-affix-wrapper-lg"), size === 'large'), _defineProperty(_classNames2, "".concat(prefixCls, "-affix-wrapper-input-with-clear-btn"), suffix && allowClear && value), _defineProperty(_classNames2, "".concat(prefixCls, "-affix-wrapper-rtl"), direction === 'rtl'), _defineProperty(_classNames2, "".concat(prefixCls, "-affix-wrapper-readonly"), readOnly), _defineProperty(_classNames2, "".concat(prefixCls, "-affix-wrapper-borderless"), !bordered), _defineProperty(_classNames2, "".concat(className), !hasAddon(this.props) && className), _classNames2));
-      return /*#__PURE__*/react.createElement("span", {
-        ref: this.containerRef,
-        className: affixWrapperCls,
-        style: style,
-        onMouseUp: this.onInputMouseUp
-      }, prefixNode, cloneElement(element, {
-        style: null,
-        value: value,
-        className: getInputClassName(prefixCls, bordered, size, disabled)
-      }), suffixNode);
-    }
-  }, {
-    key: "renderInputWithLabel",
-    value: function renderInputWithLabel(prefixCls, labeledElement) {
-      var _classNames4;
-
-      var _this$props4 = this.props,
-          addonBefore = _this$props4.addonBefore,
-          addonAfter = _this$props4.addonAfter,
-          style = _this$props4.style,
-          size = _this$props4.size,
-          className = _this$props4.className,
-          direction = _this$props4.direction; // Not wrap when there is not addons
-
-      if (!hasAddon(this.props)) {
-        return labeledElement;
-      }
-
-      var wrapperClassName = "".concat(prefixCls, "-group");
-      var addonClassName = "".concat(wrapperClassName, "-addon");
-      var addonBeforeNode = addonBefore ? /*#__PURE__*/react.createElement("span", {
-        className: addonClassName
-      }, addonBefore) : null;
-      var addonAfterNode = addonAfter ? /*#__PURE__*/react.createElement("span", {
-        className: addonClassName
-      }, addonAfter) : null;
-      var mergedWrapperClassName = classnames_default()("".concat(prefixCls, "-wrapper"), wrapperClassName, _defineProperty({}, "".concat(wrapperClassName, "-rtl"), direction === 'rtl'));
-      var mergedGroupClassName = classnames_default()("".concat(prefixCls, "-group-wrapper"), (_classNames4 = {}, _defineProperty(_classNames4, "".concat(prefixCls, "-group-wrapper-sm"), size === 'small'), _defineProperty(_classNames4, "".concat(prefixCls, "-group-wrapper-lg"), size === 'large'), _defineProperty(_classNames4, "".concat(prefixCls, "-group-wrapper-rtl"), direction === 'rtl'), _classNames4), className); // Need another wrapper for changing display:table to display:inline-block
-      // and put style prop in wrapper
-
-      return /*#__PURE__*/react.createElement("span", {
-        className: mergedGroupClassName,
-        style: style
-      }, /*#__PURE__*/react.createElement("span", {
-        className: mergedWrapperClassName
-      }, addonBeforeNode, cloneElement(labeledElement, {
-        style: null
-      }), addonAfterNode));
-    }
-  }, {
-    key: "renderTextAreaWithClearIcon",
-    value: function renderTextAreaWithClearIcon(prefixCls, element) {
-      var _classNames5;
-
-      var _this$props5 = this.props,
-          value = _this$props5.value,
-          allowClear = _this$props5.allowClear,
-          className = _this$props5.className,
-          style = _this$props5.style,
-          direction = _this$props5.direction,
-          bordered = _this$props5.bordered;
-
-      if (!allowClear) {
-        return cloneElement(element, {
-          value: value
-        });
-      }
-
-      var affixWrapperCls = classnames_default()("".concat(prefixCls, "-affix-wrapper"), "".concat(prefixCls, "-affix-wrapper-textarea-with-clear-btn"), (_classNames5 = {}, _defineProperty(_classNames5, "".concat(prefixCls, "-affix-wrapper-rtl"), direction === 'rtl'), _defineProperty(_classNames5, "".concat(prefixCls, "-affix-wrapper-borderless"), !bordered), _defineProperty(_classNames5, "".concat(className), !hasAddon(this.props) && className), _classNames5));
-      return /*#__PURE__*/react.createElement("span", {
-        className: affixWrapperCls,
-        style: style
-      }, cloneElement(element, {
-        style: null,
-        value: value
-      }), this.renderClearIcon(prefixCls));
-    }
-  }, {
-    key: "render",
-    value: function render() {
-      var _this$props6 = this.props,
-          prefixCls = _this$props6.prefixCls,
-          inputType = _this$props6.inputType,
-          element = _this$props6.element;
-
-      if (inputType === ClearableInputType[0]) {
-        return this.renderTextAreaWithClearIcon(prefixCls, element);
-      }
-
-      return this.renderInputWithLabel(prefixCls, this.renderLabeledIcon(prefixCls, element));
-    }
-  }]);
-
-  return ClearableLabeledInput;
-}(react.Component);
-
-/* harmony default export */ const input_ClearableLabeledInput = (ClearableLabeledInput);
-;// CONCATENATED MODULE: ../node_modules/antd/es/input/Input.js
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-function fixControlledValue(value) {
-  if (typeof value === 'undefined' || value === null) {
-    return '';
-  }
-
-  return String(value);
-}
-function resolveOnChange(target, e, onChange, targetValue) {
-  if (!onChange) {
-    return;
-  }
-
-  var event = e;
-
-  if (e.type === 'click') {
-    // click clear icon
-    event = Object.create(e); // Clone a new target for event.
-    // Avoid the following usage, the setQuery method gets the original value.
-    //
-    // const [query, setQuery] = React.useState('');
-    // <Input
-    //   allowClear
-    //   value={query}
-    //   onChange={(e)=> {
-    //     setQuery((prevStatus) => e.target.value);
-    //   }}
-    // />
-
-    var currentTarget = target.cloneNode(true);
-    event.target = currentTarget;
-    event.currentTarget = currentTarget;
-    currentTarget.value = '';
-    onChange(event);
-    return;
-  } // Trigger by composition event, this means we need force change the input value
-
-
-  if (targetValue !== undefined) {
-    event = Object.create(e);
-    event.target = target;
-    event.currentTarget = target;
-    target.value = targetValue;
-    onChange(event);
-    return;
-  }
-
-  onChange(event);
-}
-function triggerFocus(element, option) {
-  if (!element) return;
-  element.focus(option); // Selection content
-
-  var _ref = option || {},
-      cursor = _ref.cursor;
-
-  if (cursor) {
-    var len = element.value.length;
-
-    switch (cursor) {
-      case 'start':
-        element.setSelectionRange(0, 0);
-        break;
-
-      case 'end':
-        element.setSelectionRange(len, len);
-        break;
-
-      default:
-        element.setSelectionRange(0, len);
-    }
-  }
-}
-
-var Input_Input = /*#__PURE__*/function (_React$Component) {
-  _inherits(Input, _React$Component);
-
-  var _super = _createSuper(Input);
-
-  function Input(props) {
-    var _this;
-
-    _classCallCheck(this, Input);
-
-    _this = _super.call(this, props);
-    _this.direction = 'ltr';
-
-    _this.focus = function (option) {
-      triggerFocus(_this.input, option);
-    };
-
-    _this.saveClearableInput = function (input) {
-      _this.clearableInput = input;
-    };
-
-    _this.saveInput = function (input) {
-      _this.input = input;
-    };
-
-    _this.onFocus = function (e) {
-      var onFocus = _this.props.onFocus;
-
-      _this.setState({
-        focused: true
-      }, _this.clearPasswordValueAttribute);
-
-      onFocus === null || onFocus === void 0 ? void 0 : onFocus(e);
-    };
-
-    _this.onBlur = function (e) {
-      var onBlur = _this.props.onBlur;
-
-      _this.setState({
-        focused: false
-      }, _this.clearPasswordValueAttribute);
-
-      onBlur === null || onBlur === void 0 ? void 0 : onBlur(e);
-    };
-
-    _this.handleReset = function (e) {
-      _this.setValue('', function () {
-        _this.focus();
-      });
-
-      resolveOnChange(_this.input, e, _this.props.onChange);
-    };
-
-    _this.renderInput = function (prefixCls, size, bordered) {
-      var input = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
-      var _this$props = _this.props,
-          className = _this$props.className,
-          addonBefore = _this$props.addonBefore,
-          addonAfter = _this$props.addonAfter,
-          customizeSize = _this$props.size,
-          disabled = _this$props.disabled,
-          htmlSize = _this$props.htmlSize; // Fix https://fb.me/react-unknown-prop
-
-      var otherProps = omit(_this.props, ['prefixCls', 'onPressEnter', 'addonBefore', 'addonAfter', 'prefix', 'suffix', 'allowClear', // Input elements must be either controlled or uncontrolled,
-      // specify either the value prop, or the defaultValue prop, but not both.
-      'defaultValue', 'size', 'inputType', 'bordered', 'htmlSize']);
-      return /*#__PURE__*/react.createElement("input", extends_extends({
-        autoComplete: input.autoComplete
-      }, otherProps, {
-        onChange: _this.handleChange,
-        onFocus: _this.onFocus,
-        onBlur: _this.onBlur,
-        onKeyDown: _this.handleKeyDown,
-        className: classnames_default()(getInputClassName(prefixCls, bordered, customizeSize || size, disabled, _this.direction), _defineProperty({}, className, className && !addonBefore && !addonAfter)),
-        ref: _this.saveInput,
-        size: htmlSize
-      }));
-    };
-
-    _this.clearPasswordValueAttribute = function () {
-      // https://github.com/ant-design/ant-design/issues/20541
-      _this.removePasswordTimeout = setTimeout(function () {
-        if (_this.input && _this.input.getAttribute('type') === 'password' && _this.input.hasAttribute('value')) {
-          _this.input.removeAttribute('value');
-        }
-      });
-    };
-
-    _this.handleChange = function (e) {
-      _this.setValue(e.target.value, _this.clearPasswordValueAttribute);
-
-      resolveOnChange(_this.input, e, _this.props.onChange);
-    };
-
-    _this.handleKeyDown = function (e) {
-      var _this$props2 = _this.props,
-          onPressEnter = _this$props2.onPressEnter,
-          onKeyDown = _this$props2.onKeyDown;
-
-      if (onPressEnter && e.keyCode === 13) {
-        onPressEnter(e);
-      }
-
-      onKeyDown === null || onKeyDown === void 0 ? void 0 : onKeyDown(e);
-    };
-
-    _this.renderShowCountSuffix = function (prefixCls) {
-      var value = _this.state.value;
-      var _this$props3 = _this.props,
-          maxLength = _this$props3.maxLength,
-          suffix = _this$props3.suffix,
-          showCount = _this$props3.showCount; // Max length value
-
-      var hasMaxLength = Number(maxLength) > 0;
-
-      if (suffix || showCount) {
-        var valueLength = _toConsumableArray(fixControlledValue(value)).length;
-
-        var dataCount = null;
-
-        if (typeof_typeof(showCount) === 'object') {
-          dataCount = showCount.formatter({
-            count: valueLength,
-            maxLength: maxLength
-          });
-        } else {
-          dataCount = "".concat(valueLength).concat(hasMaxLength ? " / ".concat(maxLength) : '');
-        }
-
-        return /*#__PURE__*/react.createElement(react.Fragment, null, !!showCount && /*#__PURE__*/react.createElement("span", {
-          className: classnames_default()("".concat(prefixCls, "-show-count-suffix"), _defineProperty({}, "".concat(prefixCls, "-show-count-has-suffix"), !!suffix))
-        }, dataCount), suffix);
-      }
-
-      return null;
-    };
-
-    _this.renderComponent = function (_ref2) {
-      var getPrefixCls = _ref2.getPrefixCls,
-          direction = _ref2.direction,
-          input = _ref2.input;
-      var _this$state = _this.state,
-          value = _this$state.value,
-          focused = _this$state.focused;
-      var _this$props4 = _this.props,
-          customizePrefixCls = _this$props4.prefixCls,
-          _this$props4$bordered = _this$props4.bordered,
-          bordered = _this$props4$bordered === void 0 ? true : _this$props4$bordered;
-      var prefixCls = getPrefixCls('input', customizePrefixCls);
-      _this.direction = direction;
-
-      var showCountSuffix = _this.renderShowCountSuffix(prefixCls);
-
-      return /*#__PURE__*/react.createElement(config_provider_SizeContext.Consumer, null, function (size) {
-        return /*#__PURE__*/react.createElement(input_ClearableLabeledInput, extends_extends({
-          size: size
-        }, _this.props, {
-          prefixCls: prefixCls,
-          inputType: "input",
-          value: fixControlledValue(value),
-          element: _this.renderInput(prefixCls, size, bordered, input),
-          handleReset: _this.handleReset,
-          ref: _this.saveClearableInput,
-          direction: direction,
-          focused: focused,
-          triggerFocus: _this.focus,
-          bordered: bordered,
-          suffix: showCountSuffix
-        }));
-      });
-    };
-
-    var value = typeof props.value === 'undefined' ? props.defaultValue : props.value;
-    _this.state = {
-      value: value,
-      focused: false,
-      // eslint-disable-next-line react/no-unused-state
-      prevValue: props.value
-    };
-    return _this;
-  }
-
-  _createClass(Input, [{
-    key: "componentDidMount",
-    value: function componentDidMount() {
-      this.clearPasswordValueAttribute();
-    } // Since polyfill `getSnapshotBeforeUpdate` need work with `componentDidUpdate`.
-    // We keep an empty function here.
-
-  }, {
-    key: "componentDidUpdate",
-    value: function componentDidUpdate() {}
-  }, {
-    key: "getSnapshotBeforeUpdate",
-    value: function getSnapshotBeforeUpdate(prevProps) {
-      if (hasPrefixSuffix(prevProps) !== hasPrefixSuffix(this.props)) {
-        devWarning(this.input !== document.activeElement, 'Input', "When Input is focused, dynamic add or remove prefix / suffix will make it lose focus caused by dom structure change. Read more: https://ant.design/components/input/#FAQ");
-      }
-
-      return null;
-    }
-  }, {
-    key: "componentWillUnmount",
-    value: function componentWillUnmount() {
-      if (this.removePasswordTimeout) {
-        clearTimeout(this.removePasswordTimeout);
-      }
-    }
-  }, {
-    key: "blur",
-    value: function blur() {
-      this.input.blur();
-    }
-  }, {
-    key: "setSelectionRange",
-    value: function setSelectionRange(start, end, direction) {
-      this.input.setSelectionRange(start, end, direction);
-    }
-  }, {
-    key: "select",
-    value: function select() {
-      this.input.select();
-    }
-  }, {
-    key: "setValue",
-    value: function setValue(value, callback) {
-      if (this.props.value === undefined) {
-        this.setState({
-          value: value
-        }, callback);
-      } else {
-        callback === null || callback === void 0 ? void 0 : callback();
-      }
-    }
-  }, {
-    key: "render",
-    value: function render() {
-      return /*#__PURE__*/react.createElement(ConfigConsumer, null, this.renderComponent);
-    }
-  }], [{
-    key: "getDerivedStateFromProps",
-    value: function getDerivedStateFromProps(nextProps, _ref3) {
-      var prevValue = _ref3.prevValue;
-      var newState = {
-        prevValue: nextProps.value
-      };
-
-      if (nextProps.value !== undefined || prevValue !== nextProps.value) {
-        newState.value = nextProps.value;
-      }
-
-      if (nextProps.disabled) {
-        newState.focused = false;
-      }
-
-      return newState;
-    }
-  }]);
-
-  return Input;
-}(react.Component);
-
-Input_Input.defaultProps = {
-  type: 'text'
-};
-/* harmony default export */ const input_Input = (Input_Input);
-;// CONCATENATED MODULE: ../node_modules/antd/es/input/Group.js
-
-
-
-
-
-var Group = function Group(props) {
-  return /*#__PURE__*/react.createElement(ConfigConsumer, null, function (_ref) {
-    var _classNames;
-
-    var getPrefixCls = _ref.getPrefixCls,
-        direction = _ref.direction;
-    var customizePrefixCls = props.prefixCls,
-        _props$className = props.className,
-        className = _props$className === void 0 ? '' : _props$className;
-    var prefixCls = getPrefixCls('input-group', customizePrefixCls);
-    var cls = classnames_default()(prefixCls, (_classNames = {}, _defineProperty(_classNames, "".concat(prefixCls, "-lg"), props.size === 'large'), _defineProperty(_classNames, "".concat(prefixCls, "-sm"), props.size === 'small'), _defineProperty(_classNames, "".concat(prefixCls, "-compact"), props.compact), _defineProperty(_classNames, "".concat(prefixCls, "-rtl"), direction === 'rtl'), _classNames), className);
-    return /*#__PURE__*/react.createElement("span", {
-      className: cls,
-      style: props.style,
-      onMouseEnter: props.onMouseEnter,
-      onMouseLeave: props.onMouseLeave,
-      onFocus: props.onFocus,
-      onBlur: props.onBlur
-    }, props.children);
-  });
-};
-
-/* harmony default export */ const input_Group = (Group);
-;// CONCATENATED MODULE: ../node_modules/antd/es/input/Search.js
-
-
-
-var Search_rest = undefined && undefined.__rest || function (s, e) {
-  var t = {};
-
-  for (var p in s) {
-    if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0) t[p] = s[p];
-  }
-
-  if (s != null && typeof Object.getOwnPropertySymbols === "function") for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-    if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i])) t[p[i]] = s[p[i]];
-  }
-  return t;
-};
-
-
-
-
-
-
-
-
-
-
-var Search = /*#__PURE__*/react.forwardRef(function (props, ref) {
-  var _classNames;
-
-  var customizePrefixCls = props.prefixCls,
-      customizeInputPrefixCls = props.inputPrefixCls,
-      className = props.className,
-      customizeSize = props.size,
-      suffix = props.suffix,
-      _props$enterButton = props.enterButton,
-      enterButton = _props$enterButton === void 0 ? false : _props$enterButton,
-      addonAfter = props.addonAfter,
-      loading = props.loading,
-      disabled = props.disabled,
-      customOnSearch = props.onSearch,
-      customOnChange = props.onChange,
-      restProps = Search_rest(props, ["prefixCls", "inputPrefixCls", "className", "size", "suffix", "enterButton", "addonAfter", "loading", "disabled", "onSearch", "onChange"]);
-
-  var _React$useContext = react.useContext(ConfigContext),
-      getPrefixCls = _React$useContext.getPrefixCls,
-      direction = _React$useContext.direction;
-
-  var contextSize = react.useContext(config_provider_SizeContext);
-  var size = customizeSize || contextSize;
-  var inputRef = react.useRef(null);
-
-  var onChange = function onChange(e) {
-    if (e && e.target && e.type === 'click' && customOnSearch) {
-      customOnSearch(e.target.value, e);
-    }
-
-    if (customOnChange) {
-      customOnChange(e);
-    }
-  };
-
-  var onMouseDown = function onMouseDown(e) {
-    var _a;
-
-    if (document.activeElement === ((_a = inputRef.current) === null || _a === void 0 ? void 0 : _a.input)) {
-      e.preventDefault();
-    }
-  };
-
-  var onSearch = function onSearch(e) {
-    var _a;
-
-    if (customOnSearch) {
-      customOnSearch((_a = inputRef.current) === null || _a === void 0 ? void 0 : _a.input.value, e);
-    }
-  };
-
-  var prefixCls = getPrefixCls('input-search', customizePrefixCls);
-  var inputPrefixCls = getPrefixCls('input', customizeInputPrefixCls);
-  var searchIcon = typeof enterButton === 'boolean' ? /*#__PURE__*/react.createElement(icons_SearchOutlined, null) : null;
-  var btnClassName = "".concat(prefixCls, "-button");
-  var button;
-  var enterButtonAsElement = enterButton || {};
-  var isAntdButton = enterButtonAsElement.type && enterButtonAsElement.type.__ANT_BUTTON === true;
-
-  if (isAntdButton || enterButtonAsElement.type === 'button') {
-    button = cloneElement(enterButtonAsElement, extends_extends({
-      onMouseDown: onMouseDown,
-      onClick: function onClick(e) {
-        var _a, _b;
-
-        (_b = (_a = enterButtonAsElement === null || enterButtonAsElement === void 0 ? void 0 : enterButtonAsElement.props) === null || _a === void 0 ? void 0 : _a.onClick) === null || _b === void 0 ? void 0 : _b.call(_a, e);
-        onSearch(e);
-      },
-      key: 'enterButton'
-    }, isAntdButton ? {
-      className: btnClassName,
-      size: size
-    } : {}));
-  } else {
-    button = /*#__PURE__*/react.createElement(es_button, {
-      className: btnClassName,
-      type: enterButton ? 'primary' : undefined,
-      size: size,
-      disabled: disabled,
-      key: "enterButton",
-      onMouseDown: onMouseDown,
-      onClick: onSearch,
-      loading: loading,
-      icon: searchIcon
-    }, enterButton);
-  }
-
-  if (addonAfter) {
-    button = [button, cloneElement(addonAfter, {
-      key: 'addonAfter'
-    })];
-  }
-
-  var cls = classnames_default()(prefixCls, (_classNames = {}, _defineProperty(_classNames, "".concat(prefixCls, "-rtl"), direction === 'rtl'), _defineProperty(_classNames, "".concat(prefixCls, "-").concat(size), !!size), _defineProperty(_classNames, "".concat(prefixCls, "-with-button"), !!enterButton), _classNames), className);
-  return /*#__PURE__*/react.createElement(input_Input, extends_extends({
-    ref: composeRef(inputRef, ref),
-    onPressEnter: onSearch
-  }, restProps, {
-    size: size,
-    prefixCls: inputPrefixCls,
-    addonAfter: button,
-    suffix: suffix,
-    onChange: onChange,
-    className: cls,
-    disabled: disabled
-  }));
-});
-Search.displayName = 'Search';
-/* harmony default export */ const input_Search = (Search);
-;// CONCATENATED MODULE: ../node_modules/rc-textarea/es/calculateNodeHeight.js
-// Thanks to https://github.com/andreypopp/react-textarea-autosize/
-
-/**
- * calculateNodeHeight(uiTextNode, useCache = false)
- */
-var HIDDEN_TEXTAREA_STYLE = "\n  min-height:0 !important;\n  max-height:none !important;\n  height:0 !important;\n  visibility:hidden !important;\n  overflow:hidden !important;\n  position:absolute !important;\n  z-index:-1000 !important;\n  top:0 !important;\n  right:0 !important\n";
-var SIZING_STYLE = ['letter-spacing', 'line-height', 'padding-top', 'padding-bottom', 'font-family', 'font-weight', 'font-size', 'font-variant', 'text-rendering', 'text-transform', 'width', 'text-indent', 'padding-left', 'padding-right', 'border-width', 'box-sizing', 'word-break'];
-var computedStyleCache = {};
-var hiddenTextarea;
-function calculateNodeStyling(node) {
-  var useCache = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-  var nodeRef = node.getAttribute('id') || node.getAttribute('data-reactid') || node.getAttribute('name');
-
-  if (useCache && computedStyleCache[nodeRef]) {
-    return computedStyleCache[nodeRef];
-  }
-
-  var style = window.getComputedStyle(node);
-  var boxSizing = style.getPropertyValue('box-sizing') || style.getPropertyValue('-moz-box-sizing') || style.getPropertyValue('-webkit-box-sizing');
-  var paddingSize = parseFloat(style.getPropertyValue('padding-bottom')) + parseFloat(style.getPropertyValue('padding-top'));
-  var borderSize = parseFloat(style.getPropertyValue('border-bottom-width')) + parseFloat(style.getPropertyValue('border-top-width'));
-  var sizingStyle = SIZING_STYLE.map(function (name) {
-    return "".concat(name, ":").concat(style.getPropertyValue(name));
-  }).join(';');
-  var nodeInfo = {
-    sizingStyle: sizingStyle,
-    paddingSize: paddingSize,
-    borderSize: borderSize,
-    boxSizing: boxSizing
-  };
-
-  if (useCache && nodeRef) {
-    computedStyleCache[nodeRef] = nodeInfo;
-  }
-
-  return nodeInfo;
-}
-function calculateNodeHeight(uiTextNode) {
-  var useCache = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-  var minRows = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
-  var maxRows = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
-
-  if (!hiddenTextarea) {
-    hiddenTextarea = document.createElement('textarea');
-    hiddenTextarea.setAttribute('tab-index', '-1');
-    hiddenTextarea.setAttribute('aria-hidden', 'true');
-    document.body.appendChild(hiddenTextarea);
-  } // Fix wrap="off" issue
-  // https://github.com/ant-design/ant-design/issues/6577
-
-
-  if (uiTextNode.getAttribute('wrap')) {
-    hiddenTextarea.setAttribute('wrap', uiTextNode.getAttribute('wrap'));
-  } else {
-    hiddenTextarea.removeAttribute('wrap');
-  } // Copy all CSS properties that have an impact on the height of the content in
-  // the textbox
-
-
-  var _calculateNodeStyling = calculateNodeStyling(uiTextNode, useCache),
-      paddingSize = _calculateNodeStyling.paddingSize,
-      borderSize = _calculateNodeStyling.borderSize,
-      boxSizing = _calculateNodeStyling.boxSizing,
-      sizingStyle = _calculateNodeStyling.sizingStyle; // Need to have the overflow attribute to hide the scrollbar otherwise
-  // text-lines will not calculated properly as the shadow will technically be
-  // narrower for content
-
-
-  hiddenTextarea.setAttribute('style', "".concat(sizingStyle, ";").concat(HIDDEN_TEXTAREA_STYLE));
-  hiddenTextarea.value = uiTextNode.value || uiTextNode.placeholder || '';
-  var minHeight = Number.MIN_SAFE_INTEGER;
-  var maxHeight = Number.MAX_SAFE_INTEGER;
-  var height = hiddenTextarea.scrollHeight;
-  var overflowY;
-
-  if (boxSizing === 'border-box') {
-    // border-box: add border, since height = content + padding + border
-    height += borderSize;
-  } else if (boxSizing === 'content-box') {
-    // remove padding, since height = content
-    height -= paddingSize;
-  }
-
-  if (minRows !== null || maxRows !== null) {
-    // measure height of a textarea with a single row
-    hiddenTextarea.value = ' ';
-    var singleRowHeight = hiddenTextarea.scrollHeight - paddingSize;
-
-    if (minRows !== null) {
-      minHeight = singleRowHeight * minRows;
-
-      if (boxSizing === 'border-box') {
-        minHeight = minHeight + paddingSize + borderSize;
-      }
-
-      height = Math.max(minHeight, height);
-    }
-
-    if (maxRows !== null) {
-      maxHeight = singleRowHeight * maxRows;
-
-      if (boxSizing === 'border-box') {
-        maxHeight = maxHeight + paddingSize + borderSize;
-      }
-
-      overflowY = height > maxHeight ? '' : 'hidden';
-      height = Math.min(maxHeight, height);
-    }
-  }
-
-  return {
-    height: height,
-    minHeight: minHeight,
-    maxHeight: maxHeight,
-    overflowY: overflowY,
-    resize: 'none'
-  };
-}
-// EXTERNAL MODULE: ../node_modules/shallowequal/index.js
-var shallowequal = __webpack_require__(4445);
-var shallowequal_default = /*#__PURE__*/__webpack_require__.n(shallowequal);
-;// CONCATENATED MODULE: ../node_modules/rc-textarea/es/ResizableTextArea.js
-
-
-
-
-
-
-
-
-
-
-
-
- // eslint-disable-next-line @typescript-eslint/naming-convention
-
-var RESIZE_STATUS;
-
-(function (RESIZE_STATUS) {
-  RESIZE_STATUS[RESIZE_STATUS["NONE"] = 0] = "NONE";
-  RESIZE_STATUS[RESIZE_STATUS["RESIZING"] = 1] = "RESIZING";
-  RESIZE_STATUS[RESIZE_STATUS["RESIZED"] = 2] = "RESIZED";
-})(RESIZE_STATUS || (RESIZE_STATUS = {}));
-
-var ResizableTextArea = /*#__PURE__*/function (_React$Component) {
-  _inherits(ResizableTextArea, _React$Component);
-
-  var _super = _createSuper(ResizableTextArea);
-
-  function ResizableTextArea(props) {
-    var _this;
-
-    _classCallCheck(this, ResizableTextArea);
-
-    _this = _super.call(this, props);
-    _this.nextFrameActionId = void 0;
-    _this.resizeFrameId = void 0;
-    _this.textArea = void 0;
-
-    _this.saveTextArea = function (textArea) {
-      _this.textArea = textArea;
-    };
-
-    _this.handleResize = function (size) {
-      var resizeStatus = _this.state.resizeStatus;
-      var _this$props = _this.props,
-          autoSize = _this$props.autoSize,
-          onResize = _this$props.onResize;
-
-      if (resizeStatus !== RESIZE_STATUS.NONE) {
-        return;
-      }
-
-      if (typeof onResize === 'function') {
-        onResize(size);
-      }
-
-      if (autoSize) {
-        _this.resizeOnNextFrame();
-      }
-    };
-
-    _this.resizeOnNextFrame = function () {
-      cancelAnimationFrame(_this.nextFrameActionId);
-      _this.nextFrameActionId = requestAnimationFrame(_this.resizeTextarea);
-    };
-
-    _this.resizeTextarea = function () {
-      var autoSize = _this.props.autoSize;
-
-      if (!autoSize || !_this.textArea) {
-        return;
-      }
-
-      var minRows = autoSize.minRows,
-          maxRows = autoSize.maxRows;
-      var textareaStyles = calculateNodeHeight(_this.textArea, false, minRows, maxRows);
-
-      _this.setState({
-        textareaStyles: textareaStyles,
-        resizeStatus: RESIZE_STATUS.RESIZING
-      }, function () {
-        cancelAnimationFrame(_this.resizeFrameId);
-        _this.resizeFrameId = requestAnimationFrame(function () {
-          _this.setState({
-            resizeStatus: RESIZE_STATUS.RESIZED
-          }, function () {
-            _this.resizeFrameId = requestAnimationFrame(function () {
-              _this.setState({
-                resizeStatus: RESIZE_STATUS.NONE
-              });
-
-              _this.fixFirefoxAutoScroll();
-            });
-          });
-        });
-      });
-    };
-
-    _this.renderTextArea = function () {
-      var _this$props2 = _this.props,
-          _this$props2$prefixCl = _this$props2.prefixCls,
-          prefixCls = _this$props2$prefixCl === void 0 ? 'rc-textarea' : _this$props2$prefixCl,
-          autoSize = _this$props2.autoSize,
-          onResize = _this$props2.onResize,
-          className = _this$props2.className,
-          disabled = _this$props2.disabled;
-      var _this$state = _this.state,
-          textareaStyles = _this$state.textareaStyles,
-          resizeStatus = _this$state.resizeStatus;
-      var otherProps = omit(_this.props, ['prefixCls', 'onPressEnter', 'autoSize', 'defaultValue', 'onResize']);
-      var cls = classnames_default()(prefixCls, className, _defineProperty({}, "".concat(prefixCls, "-disabled"), disabled)); // Fix https://github.com/ant-design/ant-design/issues/6776
-      // Make sure it could be reset when using form.getFieldDecorator
-
-      if ('value' in otherProps) {
-        otherProps.value = otherProps.value || '';
-      }
-
-      var style = _objectSpread2(_objectSpread2(_objectSpread2({}, _this.props.style), textareaStyles), resizeStatus === RESIZE_STATUS.RESIZING ? // React will warning when mix `overflow` & `overflowY`.
-      // We need to define this separately.
-      {
-        overflowX: 'hidden',
-        overflowY: 'hidden'
-      } : null);
-
-      return /*#__PURE__*/react.createElement(rc_resize_observer_es, {
-        onResize: _this.handleResize,
-        disabled: !(autoSize || onResize)
-      }, /*#__PURE__*/react.createElement("textarea", extends_extends({}, otherProps, {
-        className: cls,
-        style: style,
-        ref: _this.saveTextArea
-      })));
-    };
-
-    _this.state = {
-      textareaStyles: {},
-      resizeStatus: RESIZE_STATUS.NONE
-    };
-    return _this;
-  }
-
-  _createClass(ResizableTextArea, [{
-    key: "componentDidUpdate",
-    value: function componentDidUpdate(prevProps) {
-      // Re-render with the new content or new autoSize property then recalculate the height as required.
-      if (prevProps.value !== this.props.value || !shallowequal_default()(prevProps.autoSize, this.props.autoSize)) {
-        this.resizeTextarea();
-      }
-    }
-  }, {
-    key: "componentWillUnmount",
-    value: function componentWillUnmount() {
-      cancelAnimationFrame(this.nextFrameActionId);
-      cancelAnimationFrame(this.resizeFrameId);
-    } // https://github.com/ant-design/ant-design/issues/21870
-
-  }, {
-    key: "fixFirefoxAutoScroll",
-    value: function fixFirefoxAutoScroll() {
-      try {
-        if (document.activeElement === this.textArea) {
-          var currentStart = this.textArea.selectionStart;
-          var currentEnd = this.textArea.selectionEnd;
-          this.textArea.setSelectionRange(currentStart, currentEnd);
-        }
-      } catch (e) {// Fix error in Chrome:
-        // Failed to read the 'selectionStart' property from 'HTMLInputElement'
-        // http://stackoverflow.com/q/21177489/3040605
-      }
-    }
-  }, {
-    key: "render",
-    value: function render() {
-      return this.renderTextArea();
-    }
-  }]);
-
-  return ResizableTextArea;
-}(react.Component);
-
-/* harmony default export */ const es_ResizableTextArea = (ResizableTextArea);
-;// CONCATENATED MODULE: ../node_modules/rc-textarea/es/index.js
-
-
-
-
-
-
-
-
-var TextArea = /*#__PURE__*/function (_React$Component) {
-  _inherits(TextArea, _React$Component);
-
-  var _super = _createSuper(TextArea);
-
-  function TextArea(props) {
-    var _this;
-
-    _classCallCheck(this, TextArea);
-
-    _this = _super.call(this, props);
-    _this.resizableTextArea = void 0;
-
-    _this.focus = function () {
-      _this.resizableTextArea.textArea.focus();
-    };
-
-    _this.saveTextArea = function (resizableTextArea) {
-      _this.resizableTextArea = resizableTextArea;
-    };
-
-    _this.handleChange = function (e) {
-      var onChange = _this.props.onChange;
-
-      _this.setValue(e.target.value, function () {
-        _this.resizableTextArea.resizeTextarea();
-      });
-
-      if (onChange) {
-        onChange(e);
-      }
-    };
-
-    _this.handleKeyDown = function (e) {
-      var _this$props = _this.props,
-          onPressEnter = _this$props.onPressEnter,
-          onKeyDown = _this$props.onKeyDown;
-
-      if (e.keyCode === 13 && onPressEnter) {
-        onPressEnter(e);
-      }
-
-      if (onKeyDown) {
-        onKeyDown(e);
-      }
-    };
-
-    var value = typeof props.value === 'undefined' || props.value === null ? props.defaultValue : props.value;
-    _this.state = {
-      value: value
-    };
-    return _this;
-  }
-
-  _createClass(TextArea, [{
-    key: "setValue",
-    value: function setValue(value, callback) {
-      if (!('value' in this.props)) {
-        this.setState({
-          value: value
-        }, callback);
-      }
-    }
-  }, {
-    key: "blur",
-    value: function blur() {
-      this.resizableTextArea.textArea.blur();
-    }
-  }, {
-    key: "render",
-    value: function render() {
-      return /*#__PURE__*/react.createElement(es_ResizableTextArea, extends_extends({}, this.props, {
-        value: this.state.value,
-        onKeyDown: this.handleKeyDown,
-        onChange: this.handleChange,
-        ref: this.saveTextArea
-      }));
-    }
-  }], [{
-    key: "getDerivedStateFromProps",
-    value: function getDerivedStateFromProps(nextProps) {
-      if ('value' in nextProps) {
-        return {
-          value: nextProps.value
-        };
-      }
-
-      return null;
-    }
-  }]);
-
-  return TextArea;
-}(react.Component);
-
-
-/* harmony default export */ const rc_textarea_es = (TextArea);
-;// CONCATENATED MODULE: ../node_modules/antd/es/input/TextArea.js
-
-
-
-
-
-
-var TextArea_rest = undefined && undefined.__rest || function (s, e) {
-  var t = {};
-
-  for (var p in s) {
-    if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0) t[p] = s[p];
-  }
-
-  if (s != null && typeof Object.getOwnPropertySymbols === "function") for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-    if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i])) t[p[i]] = s[p[i]];
-  }
-  return t;
-};
-
-
-
-
-
-
-
-
-
-
-
-function fixEmojiLength(value, maxLength) {
-  return _toConsumableArray(value || '').slice(0, maxLength).join('');
-}
-
-var TextArea_TextArea = /*#__PURE__*/react.forwardRef(function (_a, ref) {
-  var _classNames;
-
-  var customizePrefixCls = _a.prefixCls,
-      _a$bordered = _a.bordered,
-      bordered = _a$bordered === void 0 ? true : _a$bordered,
-      _a$showCount = _a.showCount,
-      showCount = _a$showCount === void 0 ? false : _a$showCount,
-      maxLength = _a.maxLength,
-      className = _a.className,
-      style = _a.style,
-      customizeSize = _a.size,
-      onCompositionStart = _a.onCompositionStart,
-      onCompositionEnd = _a.onCompositionEnd,
-      onChange = _a.onChange,
-      props = TextArea_rest(_a, ["prefixCls", "bordered", "showCount", "maxLength", "className", "style", "size", "onCompositionStart", "onCompositionEnd", "onChange"]);
-
-  var _React$useContext = react.useContext(ConfigContext),
-      getPrefixCls = _React$useContext.getPrefixCls,
-      direction = _React$useContext.direction;
-
-  var size = react.useContext(config_provider_SizeContext);
-  var innerRef = react.useRef(null);
-  var clearableInputRef = react.useRef(null);
-
-  var _React$useState = react.useState(false),
-      _React$useState2 = _slicedToArray(_React$useState, 2),
-      compositing = _React$useState2[0],
-      setCompositing = _React$useState2[1];
-
-  var _useMergedState = useControlledState(props.defaultValue, {
-    value: props.value
-  }),
-      _useMergedState2 = _slicedToArray(_useMergedState, 2),
-      value = _useMergedState2[0],
-      setValue = _useMergedState2[1];
-
-  var handleSetValue = function handleSetValue(val, callback) {
-    if (props.value === undefined) {
-      setValue(val);
-      callback === null || callback === void 0 ? void 0 : callback();
-    }
-  }; // =========================== Value Update ===========================
-  // Max length value
-
-
-  var hasMaxLength = Number(maxLength) > 0;
-
-  var onInternalCompositionStart = function onInternalCompositionStart(e) {
-    setCompositing(true);
-    onCompositionStart === null || onCompositionStart === void 0 ? void 0 : onCompositionStart(e);
-  };
-
-  var onInternalCompositionEnd = function onInternalCompositionEnd(e) {
-    setCompositing(false);
-    var triggerValue = e.currentTarget.value;
-
-    if (hasMaxLength) {
-      triggerValue = fixEmojiLength(triggerValue, maxLength);
-    } // Patch composition onChange when value changed
-
-
-    if (triggerValue !== value) {
-      handleSetValue(triggerValue);
-      resolveOnChange(e.currentTarget, e, onChange, triggerValue);
-    }
-
-    onCompositionEnd === null || onCompositionEnd === void 0 ? void 0 : onCompositionEnd(e);
-  };
-
-  var handleChange = function handleChange(e) {
-    var triggerValue = e.target.value;
-
-    if (!compositing && hasMaxLength) {
-      triggerValue = fixEmojiLength(triggerValue, maxLength);
-    }
-
-    handleSetValue(triggerValue);
-    resolveOnChange(e.currentTarget, e, onChange, triggerValue);
-  }; // ============================== Reset ===============================
-
-
-  var handleReset = function handleReset(e) {
-    var _a, _b;
-
-    handleSetValue('', function () {
-      var _a;
-
-      (_a = innerRef.current) === null || _a === void 0 ? void 0 : _a.focus();
-    });
-    resolveOnChange((_b = (_a = innerRef.current) === null || _a === void 0 ? void 0 : _a.resizableTextArea) === null || _b === void 0 ? void 0 : _b.textArea, e, onChange);
-  };
-
-  var prefixCls = getPrefixCls('input', customizePrefixCls);
-  react.useImperativeHandle(ref, function () {
-    var _a;
-
-    return {
-      resizableTextArea: (_a = innerRef.current) === null || _a === void 0 ? void 0 : _a.resizableTextArea,
-      focus: function focus(option) {
-        var _a, _b;
-
-        triggerFocus((_b = (_a = innerRef.current) === null || _a === void 0 ? void 0 : _a.resizableTextArea) === null || _b === void 0 ? void 0 : _b.textArea, option);
-      },
-      blur: function blur() {
-        var _a;
-
-        return (_a = innerRef.current) === null || _a === void 0 ? void 0 : _a.blur();
-      }
-    };
-  });
-  var textArea = /*#__PURE__*/react.createElement(rc_textarea_es, extends_extends({}, omit(props, ['allowClear']), {
-    className: classnames_default()((_classNames = {}, _defineProperty(_classNames, "".concat(prefixCls, "-borderless"), !bordered), _defineProperty(_classNames, className, className && !showCount), _defineProperty(_classNames, "".concat(prefixCls, "-sm"), size === 'small' || customizeSize === 'small'), _defineProperty(_classNames, "".concat(prefixCls, "-lg"), size === 'large' || customizeSize === 'large'), _classNames)),
-    style: showCount ? undefined : style,
-    prefixCls: prefixCls,
-    onCompositionStart: onInternalCompositionStart,
-    onChange: handleChange,
-    onCompositionEnd: onInternalCompositionEnd,
-    ref: innerRef
-  }));
-  var val = fixControlledValue(value);
-
-  if (!compositing && hasMaxLength && (props.value === null || props.value === undefined)) {
-    // fix #27612 将value转为数组进行截取，解决 '😂'.length === 2 等emoji表情导致的截取乱码的问题
-    val = fixEmojiLength(val, maxLength);
-  } // TextArea
-
-
-  var textareaNode = /*#__PURE__*/react.createElement(input_ClearableLabeledInput, extends_extends({}, props, {
-    prefixCls: prefixCls,
-    direction: direction,
-    inputType: "text",
-    value: val,
-    element: textArea,
-    handleReset: handleReset,
-    ref: clearableInputRef,
-    bordered: bordered,
-    style: showCount ? undefined : style
-  })); // Only show text area wrapper when needed
-
-  if (showCount) {
-    var valueLength = _toConsumableArray(val).length;
-
-    var dataCount = '';
-
-    if (typeof_typeof(showCount) === 'object') {
-      dataCount = showCount.formatter({
-        count: valueLength,
-        maxLength: maxLength
-      });
-    } else {
-      dataCount = "".concat(valueLength).concat(hasMaxLength ? " / ".concat(maxLength) : '');
-    }
-
-    return /*#__PURE__*/react.createElement("div", {
-      className: classnames_default()("".concat(prefixCls, "-textarea"), _defineProperty({}, "".concat(prefixCls, "-textarea-rtl"), direction === 'rtl'), "".concat(prefixCls, "-textarea-show-count"), className),
-      style: style,
-      "data-count": dataCount
-    }, textareaNode);
-  }
-
-  return textareaNode;
-});
-/* harmony default export */ const input_TextArea = (TextArea_TextArea);
-;// CONCATENATED MODULE: ../node_modules/@ant-design/icons-svg/es/asn/EyeOutlined.js
-// This icon file is generated automatically.
-var EyeOutlined = { "icon": { "tag": "svg", "attrs": { "viewBox": "64 64 896 896", "focusable": "false" }, "children": [{ "tag": "path", "attrs": { "d": "M942.2 486.2C847.4 286.5 704.1 186 512 186c-192.2 0-335.4 100.5-430.2 300.3a60.3 60.3 0 000 51.5C176.6 737.5 319.9 838 512 838c192.2 0 335.4-100.5 430.2-300.3 7.7-16.2 7.7-35 0-51.5zM512 766c-161.3 0-279.4-81.8-362.7-254C232.6 339.8 350.7 258 512 258c161.3 0 279.4 81.8 362.7 254C791.5 684.2 673.4 766 512 766zm-4-430c-97.2 0-176 78.8-176 176s78.8 176 176 176 176-78.8 176-176-78.8-176-176-176zm0 288c-61.9 0-112-50.1-112-112s50.1-112 112-112 112 50.1 112 112-50.1 112-112 112z" } }] }, "name": "eye", "theme": "outlined" };
-/* harmony default export */ const asn_EyeOutlined = (EyeOutlined);
-
-;// CONCATENATED MODULE: ../node_modules/@ant-design/icons/es/icons/EyeOutlined.js
-
-// GENERATE BY ./scripts/generate.ts
-// DON NOT EDIT IT MANUALLY
-
-
-
-
-var EyeOutlined_EyeOutlined = function EyeOutlined(props, ref) {
-  return /*#__PURE__*/react.createElement(AntdIcon, _objectSpread2(_objectSpread2({}, props), {}, {
-    ref: ref,
-    icon: asn_EyeOutlined
-  }));
-};
-
-EyeOutlined_EyeOutlined.displayName = 'EyeOutlined';
-/* harmony default export */ const icons_EyeOutlined = (/*#__PURE__*/react.forwardRef(EyeOutlined_EyeOutlined));
-;// CONCATENATED MODULE: ../node_modules/@ant-design/icons-svg/es/asn/EyeInvisibleOutlined.js
-// This icon file is generated automatically.
-var EyeInvisibleOutlined = { "icon": { "tag": "svg", "attrs": { "viewBox": "64 64 896 896", "focusable": "false" }, "children": [{ "tag": "path", "attrs": { "d": "M942.2 486.2Q889.47 375.11 816.7 305l-50.88 50.88C807.31 395.53 843.45 447.4 874.7 512 791.5 684.2 673.4 766 512 766q-72.67 0-133.87-22.38L323 798.75Q408 838 512 838q288.3 0 430.2-300.3a60.29 60.29 0 000-51.5zm-63.57-320.64L836 122.88a8 8 0 00-11.32 0L715.31 232.2Q624.86 186 512 186q-288.3 0-430.2 300.3a60.3 60.3 0 000 51.5q56.69 119.4 136.5 191.41L112.48 835a8 8 0 000 11.31L155.17 889a8 8 0 0011.31 0l712.15-712.12a8 8 0 000-11.32zM149.3 512C232.6 339.8 350.7 258 512 258c54.54 0 104.13 9.36 149.12 28.39l-70.3 70.3a176 176 0 00-238.13 238.13l-83.42 83.42C223.1 637.49 183.3 582.28 149.3 512zm246.7 0a112.11 112.11 0 01146.2-106.69L401.31 546.2A112 112 0 01396 512z" } }, { "tag": "path", "attrs": { "d": "M508 624c-3.46 0-6.87-.16-10.25-.47l-52.82 52.82a176.09 176.09 0 00227.42-227.42l-52.82 52.82c.31 3.38.47 6.79.47 10.25a111.94 111.94 0 01-112 112z" } }] }, "name": "eye-invisible", "theme": "outlined" };
-/* harmony default export */ const asn_EyeInvisibleOutlined = (EyeInvisibleOutlined);
-
-;// CONCATENATED MODULE: ../node_modules/@ant-design/icons/es/icons/EyeInvisibleOutlined.js
-
-// GENERATE BY ./scripts/generate.ts
-// DON NOT EDIT IT MANUALLY
-
-
-
-
-var EyeInvisibleOutlined_EyeInvisibleOutlined = function EyeInvisibleOutlined(props, ref) {
-  return /*#__PURE__*/react.createElement(AntdIcon, _objectSpread2(_objectSpread2({}, props), {}, {
-    ref: ref,
-    icon: asn_EyeInvisibleOutlined
-  }));
-};
-
-EyeInvisibleOutlined_EyeInvisibleOutlined.displayName = 'EyeInvisibleOutlined';
-/* harmony default export */ const icons_EyeInvisibleOutlined = (/*#__PURE__*/react.forwardRef(EyeInvisibleOutlined_EyeInvisibleOutlined));
-;// CONCATENATED MODULE: ../node_modules/antd/es/input/Password.js
-
-
-
-
-var Password_rest = undefined && undefined.__rest || function (s, e) {
-  var t = {};
-
-  for (var p in s) {
-    if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0) t[p] = s[p];
-  }
-
-  if (s != null && typeof Object.getOwnPropertySymbols === "function") for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-    if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i])) t[p[i]] = s[p[i]];
-  }
-  return t;
-};
-
-
-
-
-
-
-
-
-
-var ActionMap = {
-  click: 'onClick',
-  hover: 'onMouseOver'
-};
-var Password = /*#__PURE__*/react.forwardRef(function (props, ref) {
-  var _useState = (0,react.useState)(false),
-      _useState2 = _slicedToArray(_useState, 2),
-      visible = _useState2[0],
-      setVisible = _useState2[1];
-
-  var onVisibleChange = function onVisibleChange() {
-    var disabled = props.disabled;
-
-    if (disabled) {
-      return;
-    }
-
-    setVisible(!visible);
-  };
-
-  var getIcon = function getIcon(prefixCls) {
-    var _iconProps;
-
-    var action = props.action,
-        _props$iconRender = props.iconRender,
-        iconRender = _props$iconRender === void 0 ? function () {
-      return null;
-    } : _props$iconRender;
-    var iconTrigger = ActionMap[action] || '';
-    var icon = iconRender(visible);
-    var iconProps = (_iconProps = {}, _defineProperty(_iconProps, iconTrigger, onVisibleChange), _defineProperty(_iconProps, "className", "".concat(prefixCls, "-icon")), _defineProperty(_iconProps, "key", 'passwordIcon'), _defineProperty(_iconProps, "onMouseDown", function onMouseDown(e) {
-      // Prevent focused state lost
-      // https://github.com/ant-design/ant-design/issues/15173
-      e.preventDefault();
-    }), _defineProperty(_iconProps, "onMouseUp", function onMouseUp(e) {
-      // Prevent caret position change
-      // https://github.com/ant-design/ant-design/issues/23524
-      e.preventDefault();
-    }), _iconProps);
-    return /*#__PURE__*/react.cloneElement( /*#__PURE__*/react.isValidElement(icon) ? icon : /*#__PURE__*/react.createElement("span", null, icon), iconProps);
-  };
-
-  var renderPassword = function renderPassword(_ref) {
-    var getPrefixCls = _ref.getPrefixCls;
-
-    var className = props.className,
-        customizePrefixCls = props.prefixCls,
-        customizeInputPrefixCls = props.inputPrefixCls,
-        size = props.size,
-        visibilityToggle = props.visibilityToggle,
-        restProps = Password_rest(props, ["className", "prefixCls", "inputPrefixCls", "size", "visibilityToggle"]);
-
-    var inputPrefixCls = getPrefixCls('input', customizeInputPrefixCls);
-    var prefixCls = getPrefixCls('input-password', customizePrefixCls);
-    var suffixIcon = visibilityToggle && getIcon(prefixCls);
-    var inputClassName = classnames_default()(prefixCls, className, _defineProperty({}, "".concat(prefixCls, "-").concat(size), !!size));
-
-    var omittedProps = extends_extends(extends_extends({}, omit(restProps, ['suffix', 'iconRender'])), {
-      type: visible ? 'text' : 'password',
-      className: inputClassName,
-      prefixCls: inputPrefixCls,
-      suffix: suffixIcon
-    });
-
-    if (size) {
-      omittedProps.size = size;
-    }
-
-    return /*#__PURE__*/react.createElement(input_Input, extends_extends({
-      ref: ref
-    }, omittedProps));
-  };
-
-  return /*#__PURE__*/react.createElement(ConfigConsumer, null, renderPassword);
-});
-Password.defaultProps = {
-  action: 'click',
-  visibilityToggle: true,
-  iconRender: function iconRender(visible) {
-    return visible ? /*#__PURE__*/react.createElement(icons_EyeOutlined, null) : /*#__PURE__*/react.createElement(icons_EyeInvisibleOutlined, null);
-  }
-};
-Password.displayName = 'Password';
-/* harmony default export */ const input_Password = (Password);
-;// CONCATENATED MODULE: ../node_modules/antd/es/input/index.js
-
-
-
-
-
-input_Input.Group = input_Group;
-input_Input.Search = input_Search;
-input_Input.TextArea = input_TextArea;
-input_Input.Password = input_Password;
-/* harmony default export */ const input = (input_Input);
 ;// CONCATENATED MODULE: ../node_modules/antd/es/space/Item.js
 
 
@@ -53466,7 +53466,7 @@ function Project(props) {
     callback.call(null, allData);
   }, [rendererData]);
   (0,react.useEffect)(function () {
-    console.log('--> props.data: ', data);
+    console.log('--> Project props.data: ', data);
     setRendererData(data);
   }, [data]); // A total of 2 runs before and after rendering
 
@@ -53618,13 +53618,15 @@ function uniqueArr(arr) {
 
 
 
-var Home_Option = es_select.Option; // for electron
+var Home_Option = es_select.Option;
+var Home_Search = input.Search; // for electron
 
 var Home_window$require = window.require('electron'),
     Home_ipcRenderer = Home_window$require.ipcRenderer;
 
 var resURLs = [];
-var resCategories = []; // Avoid EventEmitter memory leak detected
+var resCategories = [];
+var currentAllURLs = []; // Avoid EventEmitter memory leak detected
 
 Home_ipcRenderer.setMaxListeners(Infinity);
 function Home() {
@@ -53654,50 +53656,13 @@ function Home() {
   var _useState9 = (0,react.useState)(''),
       _useState10 = _slicedToArray(_useState9, 2),
       inputUrl = _useState10[0],
-      setInputUrl = _useState10[1]; // Modal 1
-  //------------------------------------------
+      setInputUrl = _useState10[1];
 
-
-  var _useState11 = (0,react.useState)(false),
+  var _useState11 = (0,react.useState)(''),
       _useState12 = _slicedToArray(_useState11, 2),
-      visible = _useState12[0],
-      setVisible = _useState12[1];
+      inputSearch = _useState12[0],
+      setInputSearch = _useState12[1]; //------------------------------------------
 
-  var _useState13 = (0,react.useState)(false),
-      _useState14 = _slicedToArray(_useState13, 2),
-      confirmLoading = _useState14[0],
-      setConfirmLoading = _useState14[1];
-
-  function showModal() {
-    setVisible(true); //clear input and select
-
-    resetInputField();
-  }
-
-  function handleOk() {
-    sendData();
-  }
-
-  function handleCancel() {
-    setVisible(false);
-  }
-
-  function handleSelect(value) {
-    setCategory(value);
-  }
-
-  function handleInputTitle(e) {
-    setInputTitle(e.target.value);
-  }
-
-  function handleInputUrl(e) {
-    setInputUrl(e.target.value);
-  }
-
-  function resetInputField() {
-    setInputTitle('');
-    setInputUrl('');
-  }
 
   function updateData() {
     // Unregister from ipcRenderer.on event listener
@@ -53724,7 +53689,8 @@ function Home() {
       _resURLs.splice(-1, 1); //remove the first empty item
 
 
-      setDataURLs(_resURLs); // Categories
+      setDataURLs(_resURLs);
+      currentAllURLs = _resURLs; // Categories
       //------------------
       // Initialize the database
 
@@ -53779,19 +53745,85 @@ function Home() {
     if (e.keyCode === 13) {
       sendData();
     }
+  } // Modal 1 and Form
+  //------------------------------------------
+
+
+  var _useState13 = (0,react.useState)(false),
+      _useState14 = _slicedToArray(_useState13, 2),
+      visible = _useState14[0],
+      setVisible = _useState14[1];
+
+  var _useState15 = (0,react.useState)(false),
+      _useState16 = _slicedToArray(_useState15, 2),
+      confirmLoading = _useState16[0],
+      setConfirmLoading = _useState16[1];
+
+  function showModalAddnew() {
+    setVisible(true); //clear input and select
+
+    resetInputField();
+  }
+
+  function handleOkAddnew() {
+    sendData();
+  }
+
+  function handleCancelAddnew() {
+    setVisible(false);
+  }
+
+  function handleSelectAddnew(value) {
+    setCategory(value);
+  }
+
+  function handleInputTitle(e) {
+    setInputTitle(e.target.value);
+  }
+
+  function handleInputUrl(e) {
+    setInputUrl(e.target.value);
+  }
+
+  function handleOkSearch(value) {
+    searchMatch(value);
+  }
+
+  function handleInputSearch(e) {
+    searchMatch(e.target.value);
+    setInputSearch(e.target.value);
+  }
+
+  function searchMatch(str) {
+    if (str.length > 0) {
+      str = str.toLowerCase(); // match search characters
+
+      var matchList = dataURLs.filter(function (item) {
+        return item.title.toLowerCase().includes(str) || item.link.toLowerCase().includes(str);
+      });
+      setDataURLs(matchList);
+    } else {
+      setDataURLs(currentAllURLs);
+    }
+  }
+
+  function resetInputField() {
+    setInputTitle('');
+    setInputUrl('');
+    setInputSearch('');
   } // Modal 2
   //------------------------------------------
 
 
-  var _useState15 = (0,react.useState)(null),
-      _useState16 = _slicedToArray(_useState15, 2),
-      appInfo = _useState16[0],
-      setAppInfo = _useState16[1];
-
-  var _useState17 = (0,react.useState)(false),
+  var _useState17 = (0,react.useState)(null),
       _useState18 = _slicedToArray(_useState17, 2),
-      visibleAbout = _useState18[0],
-      setVisibleAbout = _useState18[1];
+      appInfo = _useState18[0],
+      setAppInfo = _useState18[1];
+
+  var _useState19 = (0,react.useState)(false),
+      _useState20 = _slicedToArray(_useState19, 2),
+      visibleAbout = _useState20[0],
+      setVisibleAbout = _useState20[1];
 
   function showModalAbout(e) {
     e.preventDefault();
@@ -53800,20 +53832,20 @@ function Home() {
   //------------------------------------------
 
 
-  var _useState19 = (0,react.useState)(''),
-      _useState20 = _slicedToArray(_useState19, 2),
-      exportHTMLInfo = _useState20[0],
-      setExportHTMLInfo = _useState20[1];
-
-  var _useState21 = (0,react.useState)(false),
+  var _useState21 = (0,react.useState)(''),
       _useState22 = _slicedToArray(_useState21, 2),
-      visibleExportHTMLFile = _useState22[0],
-      setVisibleExportHTMLFile = _useState22[1];
+      exportHTMLInfo = _useState22[0],
+      setExportHTMLInfo = _useState22[1];
 
   var _useState23 = (0,react.useState)(false),
       _useState24 = _slicedToArray(_useState23, 2),
-      loadingExportHTMLFile = _useState24[0],
-      setLoadingExportHTMLFile = _useState24[1];
+      visibleExportHTMLFile = _useState24[0],
+      setVisibleExportHTMLFile = _useState24[1];
+
+  var _useState25 = (0,react.useState)(false),
+      _useState26 = _slicedToArray(_useState25, 2),
+      loadingExportHTMLFile = _useState26[0],
+      setLoadingExportHTMLFile = _useState26[1];
 
   function handleOkExportHTMLFile() {
     setLoadingExportHTMLFile(true); // Communicate asynchronously from a renderer process to the main process.
@@ -53856,7 +53888,7 @@ function Home() {
       type: "primary",
       size: "large",
       shape: "circle",
-      onClick: showModal
+      onClick: showModalAddnew
     }, /*#__PURE__*/react.createElement("svg", {
       "aria-hidden": "true",
       height: "25",
@@ -53894,9 +53926,23 @@ function Home() {
       href: "#",
       onClick: showModalAbout
     }, "About ", appInfo ? appInfo.name : null)),
-    contentArea: /*#__PURE__*/react.createElement(react.Fragment, null, dataURLs && dataURLs.length > 0 ? /*#__PURE__*/react.createElement(react.Fragment, null, /*#__PURE__*/react.createElement("div", {
+    contentArea: /*#__PURE__*/react.createElement(react.Fragment, null, /*#__PURE__*/react.createElement("div", {
       className: "content"
-    }, /*#__PURE__*/react.createElement(Group_Group, {
+    }, /*#__PURE__*/react.createElement("div", {
+      className: "app-search__wrapper",
+      style: {
+        marginBottom: "17px"
+      }
+    }, /*#__PURE__*/react.createElement(Home_Search, {
+      value: inputSearch,
+      placeholder: "Site Name or URL",
+      allowClear: true,
+      onSearch: handleOkSearch,
+      onChange: handleInputSearch,
+      style: {
+        width: "325px"
+      }
+    })), dataURLs && dataURLs.length > 0 ? /*#__PURE__*/react.createElement(react.Fragment, null, /*#__PURE__*/react.createElement(Group_Group, {
       data: dataURLs,
       cat: dataCategories,
       callback: function callback(res) {
@@ -53907,17 +53953,17 @@ function Home() {
 
         Home_ipcRenderer.send('DATA_UPDATED_SORTED_URLS', res);
       }
-    }))) : /*#__PURE__*/react.createElement(Welcome, null), /*#__PURE__*/react.createElement(AppInfo, {
+    })) : inputSearch === '' ? /*#__PURE__*/react.createElement(Welcome, null) : ''), /*#__PURE__*/react.createElement(AppInfo, {
       showText: null,
       version: ''
     }), /*#__PURE__*/react.createElement(modal, {
       title: "Add New",
       visible: visible,
-      onOk: handleOk,
+      onOk: handleOkAddnew,
       okText: "Confirm",
       cancelText: "Cancel",
       confirmLoading: confirmLoading,
-      onCancel: handleCancel,
+      onCancel: handleCancelAddnew,
       cancelButtonProps: {
         shape: "round"
       },
@@ -53961,7 +54007,7 @@ function Home() {
       style: {
         minWidth: "150px"
       },
-      onChange: handleSelect,
+      onChange: handleSelectAddnew,
       placeholder: "Choose a category",
       value: category
     }, dataCategories && dataCategories.length > 0 ? dataCategories.map(function (item, index) {
@@ -68136,7 +68182,7 @@ function Category() {
       dataTable = _useState2[0],
       setDataTable = _useState2[1];
 
-  function onFinish(values) {
+  function handleFinish(values) {
     appCatForm.resetFields(); // Communicate asynchronously from a renderer process to the main process.
 
     Category_ipcRenderer.send('DATA_UPDATED_CATEGORIES', values.catname); // Remove event to action buttons
@@ -68145,7 +68191,7 @@ function Category() {
     console.log('Success:', values);
   }
 
-  function onFinishFailed(errorInfo) {
+  function handleFinishFailed(errorInfo) {
     console.log('Failed:', errorInfo);
   }
 
@@ -68390,8 +68436,8 @@ function Category() {
       initialValues: {
         remember: true
       },
-      onFinish: onFinish,
-      onFinishFailed: onFinishFailed,
+      onFinish: handleFinish,
+      onFinishFailed: handleFinishFailed,
       autoComplete: "off"
     }, /*#__PURE__*/react.createElement(es_form.Item, {
       name: "catname",
@@ -68447,7 +68493,7 @@ function usePageViews() {
 
     var $style = document.createElement("style");
     document.head.appendChild($style);
-    $style.innerHTML = "\n    html,body {\n        height: 100%;\n    }\n    \n    body {\n        -webkit-app-region: drag;\n        font-family: 'Helvetica Neue', Helvetica, 'Microsoft YaHei', STXihei, 'PingFang SC','Hiragino Sans GB', Arial, sans-serif;\n    }\n    \n    #app, #main {\n        height: 100%;\n    }\n\n    /* Ant Design Styles*/\n    .ant-card,\n        .ant-modal-wrap,\n        .ant-table {\n        -webkit-app-region: no-drag;\n    }\n    \n    .ant-table-tbody>tr>td, \n        .ant-table-thead>tr>th, \n        .ant-table tfoot>tr>td, \n        .ant-table tfoot>tr>th {\n        padding: 8px;\n    }\n\n    .ant-btn-primary {\n      background-color: #4c7e1c;\n      border-color: #4c7e1c;\n      box-shadow: 0 2px 0 rgba(76, 126, 28, 0.5);\n      text-shadow: none;\n      transition: .1s ease-in-out;\n    }\n\n    .ant-btn:active,\n    .ant-btn:focus,\n    .ant-btn:hover {\n      color: #67a32e;\n      border-color: #4c7e1c;\n    }\n\n\n    .ant-btn-primary:active,\n    .ant-btn-primary:focus,\n    .ant-btn-primary:hover {\n      background: #67a32e;\n      border-color: #4c7e1c;\n      color: #fff;\n    }\n\n    .ant-modal-header,\n    .ant-modal-content {\n      border-radius: 12px;\n    }\n\n    .ant-select:not(.ant-select-disabled):hover .ant-select-selector,\n    .ant-input:hover {\n      border-color: #67a32e;\n    }\n\n    .ant-select.ant-select-focused .ant-select-selector,\n    .ant-select.ant-select-open .ant-select-selector {\n      border-color: #67a32e !important;\n    }\n\n    .ant-select .ant-select-selector {\n      box-shadow: none !important;\n    }\n  \n    .ant-input-focused, \n    .ant-input:focus {\n      border-color: #67a32e;\n      box-shadow: 0 0 0 2px rgb(17 124 4 / 20%);\n    }\n    .ant-select-item-option-selected:not(.ant-select-item-option-disabled) {\n      background-color: rgb(248, 248, 248);\n    }\n\n    ";
+    $style.innerHTML = "\n    html,body {\n        height: 100%;\n    }\n    \n    body {\n        -webkit-app-region: drag;\n        font-family: 'Helvetica Neue', Helvetica, 'Microsoft YaHei', STXihei, 'PingFang SC','Hiragino Sans GB', Arial, sans-serif;\n    }\n    \n    #app, #main {\n        height: 100%;\n    }\n\n    /* Ant Design Styles*/\n    .ant-card,\n        .ant-modal-wrap,\n        .ant-table {\n        -webkit-app-region: no-drag;\n    }\n    \n    .ant-table-tbody>tr>td, \n        .ant-table-thead>tr>th, \n        .ant-table tfoot>tr>td, \n        .ant-table tfoot>tr>th {\n        padding: 8px;\n    }\n\n    .ant-btn-primary {\n      background-color: #4c7e1c;\n      border-color: #4c7e1c;\n      box-shadow: 0 2px 0 rgba(76, 126, 28, 0.5);\n      text-shadow: none;\n      transition: .1s ease-in-out;\n    }\n\n    .ant-btn:active,\n    .ant-btn:focus,\n    .ant-btn:hover {\n      color: #67a32e;\n      border-color: #4c7e1c;\n    }\n\n\n    .ant-btn-primary:active,\n    .ant-btn-primary:focus,\n    .ant-btn-primary:hover {\n      background: #67a32e;\n      border-color: #4c7e1c;\n      color: #fff;\n    }\n\n    .ant-modal-header,\n    .ant-modal-content {\n      border-radius: 12px;\n    }\n\n    .ant-select:not(.ant-select-disabled):hover .ant-select-selector,\n    .ant-input:hover {\n      border-color: #67a32e;\n    }\n\n    .ant-select.ant-select-focused .ant-select-selector,\n    .ant-select.ant-select-open .ant-select-selector {\n      border-color: #67a32e !important;\n    }\n\n    .ant-select .ant-select-selector {\n      box-shadow: none !important;\n    }\n  \n    .ant-input-focused, \n    .ant-input:focus {\n      border-color: #67a32e;\n      box-shadow: 0 0 0 2px rgb(17 124 4 / 20%);\n    }\n    .ant-select-item-option-selected:not(.ant-select-item-option-disabled) {\n      background-color: rgb(248, 248, 248);\n    }\n\n    .app-search__wrapper .ant-input-search .ant-input-group .ant-input-affix-wrapper:not(:last-child) {\n      border-bottom-left-radius: 6px;\n      border-top-left-radius: 6px;\n    }\n\n    .app-search__wrapper .ant-input-search>.ant-input-group>.ant-input-group-addon:last-child .ant-input-search-button {\n      border-radius: 0 6px 6px 0;\n    }  \n\n    ";
   }, [theLocation]);
 }
 

@@ -56,7 +56,7 @@ export default function Category() {
     const [dataTable, setDataTable] = useState<any[]>([]);
 
     
-    function onFinish(values: any) {
+    function handleFinish(values: any) {
         appCatForm.resetFields();
 
         // Communicate asynchronously from a renderer process to the main process.
@@ -68,7 +68,7 @@ export default function Category() {
         console.log('Success:', values);
     }
 
-    function onFinishFailed(errorInfo: any){
+    function handleFinishFailed(errorInfo: any){
         console.log('Failed:', errorInfo);
     }
 
@@ -341,8 +341,8 @@ export default function Category() {
                         labelWrap
                         wrapperCol={{ flex: 1 }}
                         initialValues={{ remember: true }}
-                        onFinish={onFinish}
-                        onFinishFailed={onFinishFailed}
+                        onFinish={handleFinish}
+                        onFinishFailed={handleFinishFailed}
                         autoComplete="off"
                         
                         >

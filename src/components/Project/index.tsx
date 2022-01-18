@@ -164,7 +164,7 @@ export default function Project(props: ProjectProps ) {
 
     useEffect(() => {
 
-        console.log('--> props.data: ',  data);
+        console.log('--> Project props.data: ',  data);
         setRendererData(data);
         
     }, [data]);  // A total of 2 runs before and after rendering

@@ -12,11 +12,14 @@ import uniqueArr from '@/helpers/uniqueArr';
 import 'antd/dist/antd.css';
 
 const { Option } = Select;
+const { Search } = Input;
 
 // for electron
 const { ipcRenderer } = window.require('electron');
 let resURLs: any[] = [];
 let resCategories: any[] = [];
+let currentAllURLs: any[] = [];
+
 
 // Avoid EventEmitter memory leak detected
 ipcRenderer.setMaxListeners(Infinity);
@@ -32,48 +35,10 @@ export default function Home() {
     const [category, setCategory] = useState<string>();
     const [inputTitle, setInputTitle] = useState<string>('');
     const [inputUrl, setInputUrl] = useState<string>('');
+    const [inputSearch, setInputSearch] = useState<string>('');
 
 
-
-    // Modal 1
     //------------------------------------------
-    const [visible, setVisible] = useState<boolean>(false);
-    const [confirmLoading, setConfirmLoading] = useState<boolean>(false);
-
-    function showModal() {
-        setVisible(true);
-
-        //clear input and select
-        resetInputField();
-
-    }
-
-    function handleOk() {
-        sendData();
-    }
-
-    function handleCancel() {
-        setVisible(false);
-    }
-
-
-    function handleSelect(value) {
-        setCategory(value);
-    }
-
-    function handleInputTitle(e) {
-        setInputTitle(e.target.value);
-    }
-
-    function handleInputUrl(e) {
-        setInputUrl(e.target.value);
-    }
-
-    function resetInputField() {
-        setInputTitle('');
-        setInputUrl('');
-    }
-
     function updateData() {
 
         // Unregister from ipcRenderer.on event listener
@@ -103,6 +68,8 @@ export default function Home() {
             _resURLs.splice(-1, 1); //remove the first empty item
 
             setDataURLs(_resURLs);
+
+            currentAllURLs = _resURLs;
 
             // Categories
             //------------------
@@ -157,6 +124,79 @@ export default function Home() {
         if (e.keyCode === 13) {
             sendData();
         }
+    }
+
+
+
+    // Modal 1 and Form
+    //------------------------------------------
+    const [visible, setVisible] = useState<boolean>(false);
+    const [confirmLoading, setConfirmLoading] = useState<boolean>(false);
+
+    function showModalAddnew() {
+        setVisible(true);
+
+        //clear input and select
+        resetInputField();
+
+    }
+
+    function handleOkAddnew() {
+        sendData();
+    }
+
+    function handleCancelAddnew() {
+        setVisible(false);
+    }
+
+
+    function handleSelectAddnew(value) {
+        setCategory(value);
+    }
+
+    function handleInputTitle(e) {
+        setInputTitle(e.target.value);
+    }
+
+    function handleInputUrl(e) {
+        setInputUrl(e.target.value);
+    }
+
+    function handleOkSearch(value) {
+        searchMatch(value);
+    }    
+    
+    function handleInputSearch(e) {
+        searchMatch(e.target.value);
+        setInputSearch(e.target.value);
+    }
+
+
+    function searchMatch(str) {
+
+        if ( str.length > 0 ) {
+            str = str.toLowerCase();
+
+            // match search characters
+            const matchList = dataURLs.filter( (item) => {
+                return item.title.toLowerCase().includes(str) || item.link.toLowerCase().includes(str);
+            });
+
+            setDataURLs(matchList);
+        } else {
+            setDataURLs(currentAllURLs);
+        }
+
+        
+        
+
+    }    
+                
+
+    function resetInputField() {
+        setInputTitle('');
+        setInputUrl('');
+        setInputSearch('');
     }
 
 
@@ -227,7 +267,7 @@ export default function Home() {
                 primaryBtnArea={<>
 
                     <div className="addnew">
-                        <Button type="primary" size="large" shape="circle" onClick={showModal}>
+                        <Button type="primary" size="large" shape="circle" onClick={showModalAddnew}>
                             <svg aria-hidden="true" height="25" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path fill="#fff" d="M416 208H272V64c0-17.67-14.33-32-32-32h-32c-17.67 0-32 14.33-32 32v144H32c-17.67 0-32 14.33-32 32v32c0 17.67 14.33 32 32 32h144v144c0 17.67 14.33 32 32 32h32c17.67 0 32-14.33 32-32V304h144c17.67 0 32-14.33 32-32v-32c0-17.67-14.33-32-32-32z"></path></svg>
                         </Button>
                     </div>
@@ -245,10 +285,11 @@ export default function Home() {
                 </>}
                 contentArea={<>
 
+                    <div className="content">
 
-                    {dataURLs && dataURLs.length > 0 ? <>
-
-                        <div className="content">
+                        <div className="app-search__wrapper" style={{marginBottom:"17px"}}><Search value={inputSearch} placeholder="Site Name or URL" allowClear onSearch={handleOkSearch} onChange={handleInputSearch} style={{ width:"325px" }} /></div>
+                        
+                        {dataURLs && dataURLs.length > 0 ? <>
 
                             <Group data={dataURLs} cat={dataCategories} callback={(res) => {
                                 console.log('--> update database: ', res);
@@ -262,10 +303,11 @@ export default function Home() {
 
                             }} />
 
+                        </> : (inputSearch === '' ? <Welcome /> : '')}
 
-                        </div>
 
-                    </> : <Welcome />}
+                    </div>
+
 
                     <AppInfo showText={null} version={''} />
 
@@ -273,11 +315,11 @@ export default function Home() {
                     <Modal
                         title="Add New"
                         visible={visible}
-                        onOk={handleOk}
+                        onOk={handleOkAddnew}
                         okText="Confirm"
                         cancelText="Cancel"
                         confirmLoading={confirmLoading}
-                        onCancel={handleCancel}
+                        onCancel={handleCancelAddnew}
                         cancelButtonProps={{ shape: "round" }}
                         okButtonProps={{ shape: "round" }}
                     >
@@ -287,7 +329,7 @@ export default function Home() {
                                 <Input placeholder="https://" id="app-input-url" ref={refInputUrl} style={{ width: "325px" }} value={inputUrl} onChange={handleInputUrl} /> <span style={{ color: "red", fontSize: "14px", position: "absolute", marginTop: "-23px", left: "310px" }}>*</span><br />
                                 <Select
                                     style={{ minWidth: "150px" }}
-                                    onChange={handleSelect}
+                                    onChange={handleSelectAddnew}
                                     placeholder="Choose a category"
                                     value={category}
                                 >

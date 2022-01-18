@@ -100,6 +100,15 @@ function usePageViews() {
       background-color: rgb(248, 248, 248);
     }
 
+    .app-search__wrapper .ant-input-search .ant-input-group .ant-input-affix-wrapper:not(:last-child) {
+      border-bottom-left-radius: 6px;
+      border-top-left-radius: 6px;
+    }
+
+    .app-search__wrapper .ant-input-search>.ant-input-group>.ant-input-group-addon:last-child .ant-input-search-button {
+      border-radius: 0 6px 6px 0;
+    }  
+
     `;
 
 
