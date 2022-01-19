@@ -21,10 +21,11 @@ F-Curator is an offline application that comes at you all day long and curates y
 [Package (macOS)](package/macOS/F-Curator.dmg)
 
 
-
 ## Getting Started
 
-[https://youtu.be/VYdzttKU5H0](https://youtu.be/VYdzttKU5H0)
+[Official Website](https://xizon.github.io/F-Curator-Official-Website/)
+
+[Video Overview](https://youtu.be/VYdzttKU5H0)
 
 
 ![quick overview](public/assets/images/main/preview.jpg)
