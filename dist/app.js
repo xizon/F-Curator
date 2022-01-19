@@ -3,7 +3,7 @@
  * 	Boot Helpers
  *
  * 	@source: https://github.com/xizon/f-curator
- * 	@version: 1.2.0 (January 19, 2022)
+ * 	@version: 1.2.1 (January 20, 2022)
  * 	@author: UIUX Lab <uiuxlab@gmail.com>
  * 	@license: MIT
  *
@@ -48701,6 +48701,8 @@ function Layout(props) {
   }, primaryBtnArea || null, /*#__PURE__*/react.createElement("div", {
     className: "content__sidebar"
   }, /*#__PURE__*/react.createElement("div", {
+    className: "panel-dragarea"
+  }), /*#__PURE__*/react.createElement("div", {
     className: "panel-center"
   }), /*#__PURE__*/react.createElement("div", {
     className: "board"
@@ -53624,6 +53626,7 @@ var Home_Search = input.Search; // for electron
 var Home_window$require = window.require('electron'),
     Home_ipcRenderer = Home_window$require.ipcRenderer;
 
+var isMac = process.platform === 'darwin';
 var resURLs = [];
 var resCategories = [];
 var currentAllURLs = []; // Avoid EventEmitter memory leak detected
@@ -53863,8 +53866,30 @@ function Home() {
 
   function hideModalExportHTMLFile() {
     setVisibleExportHTMLFile(false);
-  } //------------------------------------------
+  } // Button action of Windows (DOM element associated with preload.js)
+  //------------------------------------------
 
+
+  function minimizeFn() {
+    // Communicate asynchronously from a renderer process to the main process.
+    Home_ipcRenderer.send('WINDOWS_BUTTON_MIN', false);
+  }
+
+  ;
+
+  function maximizeFn() {
+    // Communicate asynchronously from a renderer process to the main process.
+    Home_ipcRenderer.send('WINDOWS_BUTTON_MAX', false);
+  }
+
+  ;
+
+  function quitFn() {
+    // Communicate asynchronously from a renderer process to the main process.
+    Home_ipcRenderer.send('WINDOWS_BUTTON_CLOSE', false);
+  }
+
+  ; //------------------------------------------
 
   (0,react.useEffect)(function () {
     // Receiving on main process
@@ -53880,7 +53905,49 @@ function Home() {
     };
   }, []); // Empty array ensures that effect is only run on mount and unmount
 
-  return /*#__PURE__*/react.createElement(react.Fragment, null, /*#__PURE__*/react.createElement(Layout, {
+  return /*#__PURE__*/react.createElement(react.Fragment, null, !isMac ? /*#__PURE__*/react.createElement("nav", {
+    id: "title-bar"
+  }, /*#__PURE__*/react.createElement("div", {
+    id: "titleshown"
+  }), /*#__PURE__*/react.createElement("div", {
+    id: "buttons"
+  }, /*#__PURE__*/react.createElement("div", {
+    id: "minimize",
+    onClick: minimizeFn
+  }, /*#__PURE__*/react.createElement("span", null, /*#__PURE__*/react.createElement("svg", {
+    "aria-hidden": "true",
+    height: "12",
+    role: "img",
+    xmlns: "http://www.w3.org/2000/svg",
+    viewBox: "0 0 448 512"
+  }, /*#__PURE__*/react.createElement("path", {
+    fill: "#fff",
+    d: "M416 208H32c-17.67 0-32 14.33-32 32v32c0 17.67 14.33 32 32 32h384c17.67 0 32-14.33 32-32v-32c0-17.67-14.33-32-32-32z"
+  })))), /*#__PURE__*/react.createElement("div", {
+    id: "maximize",
+    onClick: maximizeFn
+  }, /*#__PURE__*/react.createElement("span", null, /*#__PURE__*/react.createElement("svg", {
+    "aria-hidden": "true",
+    height: "12",
+    role: "img",
+    xmlns: "http://www.w3.org/2000/svg",
+    viewBox: "0 0 448 512"
+  }, /*#__PURE__*/react.createElement("path", {
+    fill: "#fff",
+    d: "M400 32H48C21.5 32 0 53.5 0 80v352c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V80c0-26.5-21.5-48-48-48zm-6 400H54c-3.3 0-6-2.7-6-6V86c0-3.3 2.7-6 6-6h340c3.3 0 6 2.7 6 6v340c0 3.3-2.7 6-6 6z"
+  })))), /*#__PURE__*/react.createElement("div", {
+    id: "quit",
+    onClick: quitFn
+  }, /*#__PURE__*/react.createElement("span", null, /*#__PURE__*/react.createElement("svg", {
+    "aria-hidden": "true",
+    height: "12",
+    role: "img",
+    xmlns: "http://www.w3.org/2000/svg",
+    viewBox: "0 0 352 512"
+  }, /*#__PURE__*/react.createElement("path", {
+    fill: "#fff",
+    d: "M242.72 256l100.07-100.07c12.28-12.28 12.28-32.19 0-44.48l-22.24-22.24c-12.28-12.28-32.19-12.28-44.48 0L176 189.28 75.93 89.21c-12.28-12.28-32.19-12.28-44.48 0L9.21 111.45c-12.28 12.28-12.28 32.19 0 44.48L109.28 256 9.21 356.07c-12.28 12.28-12.28 32.19 0 44.48l22.24 22.24c12.28 12.28 32.2 12.28 44.48 0L176 322.72l100.07 100.07c12.28 12.28 32.2 12.28 44.48 0l22.24-22.24c12.28-12.28 12.28-32.19 0-44.48L242.72 256z"
+  })))))) : '', /*#__PURE__*/react.createElement(Layout, {
     logo: "assets/images/main/side-logo-white.png",
     primaryBtnArea: /*#__PURE__*/react.createElement(react.Fragment, null, /*#__PURE__*/react.createElement("div", {
       className: "addnew"
@@ -53927,7 +53994,10 @@ function Home() {
       onClick: showModalAbout
     }, "About ", appInfo ? appInfo.name : null)),
     contentArea: /*#__PURE__*/react.createElement(react.Fragment, null, /*#__PURE__*/react.createElement("div", {
-      className: "content"
+      className: "content",
+      style: {
+        paddingTop: !isMac ? "50px" : "20px"
+      }
     }, /*#__PURE__*/react.createElement("div", {
       className: "app-search__wrapper",
       style: {
@@ -68484,6 +68554,7 @@ function Category() {
 
 
 
+var App_isMac = process.platform === 'darwin';
 
 function usePageViews() {
   //Click the route to trigger the event
@@ -68493,7 +68564,7 @@ function usePageViews() {
 
     var $style = document.createElement("style");
     document.head.appendChild($style);
-    $style.innerHTML = "\n    html,body {\n        height: 100%;\n    }\n    \n    body {\n        -webkit-app-region: drag;\n        font-family: 'Helvetica Neue', Helvetica, 'Microsoft YaHei', STXihei, 'PingFang SC','Hiragino Sans GB', Arial, sans-serif;\n    }\n    \n    #app, #main {\n        height: 100%;\n    }\n\n    /* Ant Design Styles*/\n    .ant-card,\n        .ant-modal-wrap,\n        .ant-table {\n        -webkit-app-region: no-drag;\n    }\n    \n    .ant-table-tbody>tr>td, \n        .ant-table-thead>tr>th, \n        .ant-table tfoot>tr>td, \n        .ant-table tfoot>tr>th {\n        padding: 8px;\n    }\n\n    .ant-btn-primary {\n      background-color: #4c7e1c;\n      border-color: #4c7e1c;\n      box-shadow: 0 2px 0 rgba(76, 126, 28, 0.5);\n      text-shadow: none;\n      transition: .1s ease-in-out;\n    }\n\n    .ant-btn:active,\n    .ant-btn:focus,\n    .ant-btn:hover {\n      color: #67a32e;\n      border-color: #4c7e1c;\n    }\n\n\n    .ant-btn-primary:active,\n    .ant-btn-primary:focus,\n    .ant-btn-primary:hover {\n      background: #67a32e;\n      border-color: #4c7e1c;\n      color: #fff;\n    }\n\n    .ant-modal-header,\n    .ant-modal-content {\n      border-radius: 12px;\n    }\n\n    .ant-select:not(.ant-select-disabled):hover .ant-select-selector,\n    .ant-input:hover {\n      border-color: #67a32e;\n    }\n\n    .ant-select.ant-select-focused .ant-select-selector,\n    .ant-select.ant-select-open .ant-select-selector {\n      border-color: #67a32e !important;\n    }\n\n    .ant-select .ant-select-selector {\n      box-shadow: none !important;\n    }\n  \n    .ant-input-focused, \n    .ant-input:focus {\n      border-color: #67a32e;\n      box-shadow: 0 0 0 2px rgb(17 124 4 / 20%);\n    }\n    .ant-select-item-option-selected:not(.ant-select-item-option-disabled) {\n      background-color: rgb(248, 248, 248);\n    }\n\n    .app-search__wrapper .ant-input-search .ant-input-group .ant-input-affix-wrapper:not(:last-child) {\n      border-bottom-left-radius: 6px;\n      border-top-left-radius: 6px;\n    }\n\n    .app-search__wrapper .ant-input-search>.ant-input-group>.ant-input-group-addon:last-child .ant-input-search-button {\n      border-radius: 0 6px 6px 0;\n    }  \n\n    ";
+    $style.innerHTML = "\n    html,body {\n        height: 100%;\n    }\n    \n    body {\n        font-family: 'Helvetica Neue', Helvetica, 'Microsoft YaHei', STXihei, 'PingFang SC','Hiragino Sans GB', Arial, sans-serif;\n    }\n\n    .app-content__wrapper .content__sidebar .panel-dragarea {\n      -webkit-app-region: drag;\n    }\n    \n    #app, #main {\n        height: 100%;\n    }\n\n    /* Ant Design Styles*/\n    .ant-card,\n        .ant-modal-wrap,\n        .ant-table {\n        -webkit-app-region: no-drag;\n    }\n    \n    .ant-table-tbody>tr>td, \n        .ant-table-thead>tr>th, \n        .ant-table tfoot>tr>td, \n        .ant-table tfoot>tr>th {\n        padding: 8px;\n    }\n\n    .ant-btn-primary {\n      background-color: #4c7e1c;\n      border-color: #4c7e1c;\n      box-shadow: 0 2px 0 rgba(76, 126, 28, 0.5);\n      text-shadow: none;\n      transition: .1s ease-in-out;\n    }\n\n    .ant-btn:active,\n    .ant-btn:focus,\n    .ant-btn:hover {\n      color: #67a32e;\n      border-color: #4c7e1c;\n    }\n\n\n    .ant-btn-primary:active,\n    .ant-btn-primary:focus,\n    .ant-btn-primary:hover {\n      background: #67a32e;\n      border-color: #4c7e1c;\n      color: #fff;\n    }\n\n    .ant-modal-header,\n    .ant-modal-content {\n      border-radius: 12px;\n    }\n\n    .ant-select:not(.ant-select-disabled):hover .ant-select-selector,\n    .ant-input:hover {\n      border-color: #67a32e;\n    }\n\n    .ant-select.ant-select-focused .ant-select-selector,\n    .ant-select.ant-select-open .ant-select-selector {\n      border-color: #67a32e !important;\n    }\n\n    .ant-select .ant-select-selector {\n      box-shadow: none !important;\n    }\n  \n    .ant-input-focused, \n    .ant-input:focus {\n      border-color: #67a32e;\n      box-shadow: 0 0 0 2px rgb(17 124 4 / 20%);\n    }\n    .ant-select-item-option-selected:not(.ant-select-item-option-disabled) {\n      background-color: rgb(248, 248, 248);\n    }\n\n    .app-search__wrapper .ant-input-search .ant-input-group .ant-input-affix-wrapper:not(:last-child) {\n      border-bottom-left-radius: 6px;\n      border-top-left-radius: 6px;\n    }\n\n    .app-search__wrapper .ant-input-search>.ant-input-group>.ant-input-group-addon:last-child .ant-input-search-button {\n      border-radius: 0 6px 6px 0;\n    }  \n\n\n    /* Add buttons to app of Windows  */\n    nav#title-bar {\n        display: block;\n        width: 100%;\n        height: 30px;\n        background-color: #070906;\n        -webkit-app-region: drag;\n        -webkit-user-select: none;\n        position: fixed;\n        z-index: 1;\n    }\n    \n    nav#title-bar #titleshown {\n        width: 30%;\n        height: 100%;\n        line-height: 30px;\n        color: #f7f7f7;\n        float: left;\n        padding: 0 0 0 1em;\n    }\n    \n    nav#title-bar #buttons {\n        float: right;\n        width: 150px;\n        height: 100%;\n        line-height: 30px;\n        background-color: #222222;\n        -webkit-app-region: no-drag;\n    }\n    \n    nav#title-bar #buttons #minimize,\n    nav#title-bar #buttons #maximize,\n    nav#title-bar #buttons #quit {\n        float: left;\n        height: 100%;\n        width: 33%;\n        text-align: center;\n        color: #f7f7f7;\n        cursor: default;\n    }\n    \n    nav#title-bar #buttons #minimize:hover {\n        background-color: #070906aa;\n    }\n    nav#title-bar #buttons #maximize:hover {\n        background-color: #070906aa;\n    }\n    nav#title-bar #buttons #quit:hover {\n        background-color: #ff0000dd;\n    }\n\n    ";
   }, [theLocation]);
 }
 

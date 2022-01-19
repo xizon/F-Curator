@@ -35,6 +35,8 @@ export default function Layout(props: LayoutProps) {
       <div className="app-content__wrapper">
           {primaryBtnArea || null}
           <div className="content__sidebar">
+              <div className="panel-dragarea">
+              </div>
               <div className="panel-center">
               </div>
               <div className="board">

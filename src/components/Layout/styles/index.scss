@@ -60,6 +60,16 @@
 	  display: flex;
 	  justify-content: center;
 	  position: relative;
+
+	  .panel-dragarea {
+		  background-color: transparent;
+		  position: absolute;
+		  width: 100%;
+		  height: 300px;
+		  left: 0;
+		  top: 0;
+		  display: block;
+	  }
   
 	  .panel-center {
 		text-align: right;

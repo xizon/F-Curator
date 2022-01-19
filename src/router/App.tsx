@@ -9,7 +9,7 @@ import Home from '@/views/_pages/Home';
 import Category from '@/views/_pages/Category';
 import NoMatch from '@/views/_pages/404';
 
-
+const isMac = process.platform === 'darwin';
 
 function usePageViews() {
   //Click the route to trigger the event
@@ -26,8 +26,11 @@ function usePageViews() {
     }
     
     body {
-        -webkit-app-region: drag;
         font-family: 'Helvetica Neue', Helvetica, 'Microsoft YaHei', STXihei, 'PingFang SC','Hiragino Sans GB', Arial, sans-serif;
+    }
+
+    .app-content__wrapper .content__sidebar .panel-dragarea {
+      -webkit-app-region: drag;
     }
     
     #app, #main {
@@ -108,6 +111,58 @@ function usePageViews() {
     .app-search__wrapper .ant-input-search>.ant-input-group>.ant-input-group-addon:last-child .ant-input-search-button {
       border-radius: 0 6px 6px 0;
     }  
+
+
+    /* Add buttons to app of Windows  */
+    nav#title-bar {
+        display: block;
+        width: 100%;
+        height: 30px;
+        background-color: #070906;
+        -webkit-app-region: drag;
+        -webkit-user-select: none;
+        position: fixed;
+        z-index: 1;
+    }
+    
+    nav#title-bar #titleshown {
+        width: 30%;
+        height: 100%;
+        line-height: 30px;
+        color: #f7f7f7;
+        float: left;
+        padding: 0 0 0 1em;
+    }
+    
+    nav#title-bar #buttons {
+        float: right;
+        width: 150px;
+        height: 100%;
+        line-height: 30px;
+        background-color: #222222;
+        -webkit-app-region: no-drag;
+    }
+    
+    nav#title-bar #buttons #minimize,
+    nav#title-bar #buttons #maximize,
+    nav#title-bar #buttons #quit {
+        float: left;
+        height: 100%;
+        width: 33%;
+        text-align: center;
+        color: #f7f7f7;
+        cursor: default;
+    }
+    
+    nav#title-bar #buttons #minimize:hover {
+        background-color: #070906aa;
+    }
+    nav#title-bar #buttons #maximize:hover {
+        background-color: #070906aa;
+    }
+    nav#title-bar #buttons #quit:hover {
+        background-color: #ff0000dd;
+    }
 
     `;
 

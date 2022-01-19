@@ -8,10 +8,14 @@ const { app, BrowserWindow } = require('electron');
 const crawl = require('./crawl');
 const buildHtml = require('./build-html');
 const exportHtml = require('./export-html');  
+const isMac = process.platform === 'darwin';
+
 let win = null;
 
 // set dock icon
-app.dock.setIcon(path.join(__dirname, '../public/assets/images/icon.png'));
+if (isMac) {
+    app.dock.setIcon(path.join(__dirname, '../public/assets/images/icon.png'));
+}
 
 // Initialize the database
 const defaultCatText = 'Uncategorized';
@@ -76,6 +80,7 @@ function initRendererHomePage() {
          }
  
      `);
+
 }
 
 // This method will be called when Electron has finished
@@ -84,7 +89,6 @@ function initRendererHomePage() {
 //app.whenReady().then(createWindow);
 app.on('ready', () => {
     createWindow();
-
 
     /**
      * //////////////////////////////////////////////////////
@@ -212,6 +216,22 @@ app.on('ready', () => {
     });
 
 
+
+    // Button action of Windows
+    //------------------
+    ipcMain.on('WINDOWS_BUTTON_MIN', (event, data) => {
+        console.log('WINDOWS_BUTTON_MIN');
+        win.minimize();
+    });
+    ipcMain.on('WINDOWS_BUTTON_MAX', (event, data) => {
+        win.maximize();
+    });
+    ipcMain.on('WINDOWS_BUTTON_CLOSE', (event, data) => {
+        win.close();
+    });
+
+
+
     /**
      * //////////////////////////////////////////////////////
      * Simulate CommandOrControl+M in electron app
@@ -233,13 +253,15 @@ app.on('ready', () => {
     });
 
 
+ 
+
 })
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
 app.on('window-all-closed', () => {
-    if (process.platform !== 'darwin') {
+    if (!isMac) {
         app.quit();
     }
 });

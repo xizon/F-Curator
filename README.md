@@ -161,6 +161,11 @@ $ sudo npm rebuild node-sass
 ## Changelog
 
 
+#### = 1.2.1 (January 20, 2022) =
+
+* new: release windows package.
+* fix: Fix some compatibility issues in Windows
+
 
 #### = 1.2.0 (January 18, 2022) =
 
@@ -170,7 +175,7 @@ $ sudo npm rebuild node-sass
 * feat: Support quick search for URL and Site Name
 
 
-#### = 1.0.1 (January 17, 2022) =
+#### = 1.0.1 (January 14, 2022) =
 
 * Added command to compile package.
 

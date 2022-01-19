@@ -16,6 +16,7 @@ const { Search } = Input;
 
 // for electron
 const { ipcRenderer } = window.require('electron');
+const isMac = process.platform === 'darwin';
 let resURLs: any[] = [];
 let resCategories: any[] = [];
 let currentAllURLs: any[] = [];
@@ -238,6 +239,21 @@ export default function Home() {
     }    
 
 
+    // Button action of Windows (DOM element associated with preload.js)
+    //------------------------------------------
+    function minimizeFn() { 
+        // Communicate asynchronously from a renderer process to the main process.
+        ipcRenderer.send('WINDOWS_BUTTON_MIN', false); 
+    };
+    function maximizeFn() { 
+        // Communicate asynchronously from a renderer process to the main process.
+        ipcRenderer.send('WINDOWS_BUTTON_MAX', false); 
+    };
+    function quitFn() { 
+        // Communicate asynchronously from a renderer process to the main process.
+        ipcRenderer.send('WINDOWS_BUTTON_CLOSE', false); 
+    };
+
     //------------------------------------------
     useEffect(() => {
 
@@ -249,7 +265,7 @@ export default function Home() {
         // Remove event listeners on cleanup
         return () => {
             window.removeEventListener("keydown", handleKeyPress);
-
+   
             // Communicate asynchronously from a renderer process to the main process.
             ipcRenderer.send('DATA_UPDATED_URLS', false);
             ipcRenderer.send('GET_APP_INFO', false);
@@ -262,6 +278,19 @@ export default function Home() {
     return (
         <>
 
+            {/* Add buttons to app of Windows */}
+            {!isMac ? (
+                <nav id="title-bar">
+                    <div id="titleshown"></div>
+                    <div id="buttons">
+                        <div id="minimize" onClick={minimizeFn}><span><svg aria-hidden="true" height="12" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path fill="#fff" d="M416 208H32c-17.67 0-32 14.33-32 32v32c0 17.67 14.33 32 32 32h384c17.67 0 32-14.33 32-32v-32c0-17.67-14.33-32-32-32z"></path></svg></span></div>
+                        <div id="maximize" onClick={maximizeFn}><span><svg aria-hidden="true" height="12" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path fill="#fff" d="M400 32H48C21.5 32 0 53.5 0 80v352c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V80c0-26.5-21.5-48-48-48zm-6 400H54c-3.3 0-6-2.7-6-6V86c0-3.3 2.7-6 6-6h340c3.3 0 6 2.7 6 6v340c0 3.3-2.7 6-6 6z"></path></svg></span></div>
+                        <div id="quit" onClick={quitFn}><span><svg aria-hidden="true" height="12" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 352 512"><path fill="#fff" d="M242.72 256l100.07-100.07c12.28-12.28 12.28-32.19 0-44.48l-22.24-22.24c-12.28-12.28-32.19-12.28-44.48 0L176 189.28 75.93 89.21c-12.28-12.28-32.19-12.28-44.48 0L9.21 111.45c-12.28 12.28-12.28 32.19 0 44.48L109.28 256 9.21 356.07c-12.28 12.28-12.28 32.19 0 44.48l22.24 22.24c12.28 12.28 32.2 12.28 44.48 0L176 322.72l100.07 100.07c12.28 12.28 32.2 12.28 44.48 0l22.24-22.24c12.28-12.28 12.28-32.19 0-44.48L242.72 256z"></path></svg></span></div>
+                    </div>
+                </nav>
+            ) : ''}
+
+            
             <Layout
                 logo="assets/images/main/side-logo-white.png"
                 primaryBtnArea={<>
@@ -284,8 +313,8 @@ export default function Home() {
 
                 </>}
                 contentArea={<>
-
-                    <div className="content">
+                
+                    <div className="content" style={{paddingTop: (!isMac ? "50px" : "20px")}}>
 
                         <div className="app-search__wrapper" style={{marginBottom:"17px"}}><Search value={inputSearch} placeholder="Site Name or URL" allowClear onSearch={handleOkSearch} onChange={handleInputSearch} style={{ width:"325px" }} /></div>
                         
