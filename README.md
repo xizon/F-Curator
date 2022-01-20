@@ -18,9 +18,10 @@ F-Curator is an offline application that comes at you all day long and curates y
 
 ## Packages
 
-💿 [Mac](package/macOS/F-Curator.dmg) 
 
-📀 [Windows](package/windows/F-Curator(win).zip)
+![Mac](public/assets/images/apple-brands.svg) [Mac](package/macOS/F-Curator.dmg) 
+
+![Windows](public/assets/images/windows-brands.svg) [Windows](package/windows/F-Curator(win).zip)
 
 
 
