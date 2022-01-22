@@ -44,6 +44,7 @@ F-Curator is an offline application that comes at you all day long and curates y
 - **Category management** and clear list blocks
 - Drag and drop **sorting**
 - **Exporting HTML** that separates APP to use favorites
+- Support **importing database** package.
 - Support quick search for URL and Site Name
 - Judgment of URL validity and repetitiveness
 - Automatically extract resources local, such as icons
@@ -163,6 +164,11 @@ $ sudo npm rebuild node-sass
 
 
 ## Changelog
+
+#### = 1.3.0 (January 22, 2022) =
+
+* new: Support for importing database package.
+* new: Editable for each URL.
 
 
 #### = 1.2.1 (January 20, 2022) =

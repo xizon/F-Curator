@@ -3,7 +3,7 @@
  * 	Boot Helpers
  *
  * 	@source: https://github.com/xizon/f-curator
- * 	@version: 1.2.1 (January 20, 2022)
+ * 	@version: 1.3.0 (January 22, 2022)
  * 	@author: UIUX Lab <uiuxlab@gmail.com>
  * 	@license: MIT
  *
@@ -53205,22 +53205,75 @@ var Card = function Card(props) {
 Card.Grid = card_Grid;
 Card.Meta = card_Meta;
 /* harmony default export */ const card = (Card);
+;// CONCATENATED MODULE: ../src/helpers/isValidHttpUrl.ts
+/**
+ * Verify URL 
+ */
+function isValidHttpUrl(string) {
+  var url;
+
+  try {
+    url = new URL(string);
+  } catch (_) {
+    return false;
+  }
+
+  return url.protocol === "http:" || url.protocol === "https:";
+}
 ;// CONCATENATED MODULE: ../node_modules/antd/dist/antd.css
 // extracted by mini-css-extract-plugin
 
 ;// CONCATENATED MODULE: ../src/components/Project/Item.tsx
 
 
+
 var Item_excluded = ["data", "classifiedMapData", "catName", "title", "link", "icon", "draggable", "evDragEnd", "evDragStart"];
 
 
- // for electron
+
+
+var Item_Option = es_select.Option; // for electron
 
 var _window$require = window.require('electron'),
     ipcRenderer = _window$require.ipcRenderer; // Avoid EventEmitter memory leak detected
 
 
-ipcRenderer.setMaxListeners(Infinity);
+ipcRenderer.setMaxListeners(Infinity); // Get index of JSON Array
+
+function getIndexOf(arr, key, val) {
+  for (var i = 0; i < arr.length; i++) {
+    if (arr[i][key].toString() === val.toString()) {
+      return i;
+    }
+  }
+
+  return -1;
+} // Reorganize all data
+
+
+function reorganizeAllData(mapData, currentCatData, catName) {
+  var res = [];
+
+  if (mapData) {
+    // Update the currently sorted list of a single category 
+    mapData.set(catName, currentCatData); // Deconstructs all data from `mapData` and  
+    // merges sorted data of a single category 
+
+    var newDataSorted = [];
+    mapData.forEach(function (value, key) {
+      value.forEach(function (item) {
+        newDataSorted.push(item);
+      });
+    });
+    res = newDataSorted;
+  } else {
+    // Sorting without category area
+    res = currentCatData;
+  }
+
+  return res;
+}
+
 function Project_Item_Item(props) {
   var data = props.data,
       classifiedMapData = props.classifiedMapData,
@@ -53263,17 +53316,6 @@ function Project_Item_Item(props) {
         },
         onOk: function onOk() {
           var newData = data;
-
-          var getIndexOf = function getIndexOf(arr, key, val) {
-            for (var i = 0; i < arr.length; i++) {
-              if (arr[i][key].toString() === val.toString()) {
-                return i;
-              }
-            }
-
-            return -1;
-          };
-
           var deleteTarget = getIndexOf(newData, 'link', paramLink);
 
           if (deleteTarget !== -1) {
@@ -53281,33 +53323,168 @@ function Project_Item_Item(props) {
           } // Reorganize all data
 
 
-          var allData = [];
-
-          if (classifiedMapData) {
-            // Update the currently sorted list of a single category 
-            classifiedMapData.set(catName, newData); // Deconstructs all data from `classifiedMapData` and  
-            // merges sorted data of a single category 
-
-            var newDataSorted = [];
-            classifiedMapData.forEach(function (value, key) {
-              value.forEach(function (item) {
-                newDataSorted.push(item);
-              });
-            });
-            allData = newDataSorted;
-          } else {
-            // Sorting without category area
-            allData = newData;
-          } // Communicate asynchronously from a renderer process to the main process.
-
+          var allData = reorganizeAllData(classifiedMapData, newData, catName); // Communicate asynchronously from a renderer process to the main process.
 
           ipcRenderer.send('DATA_UPDATED_SORTED_URLS', allData);
           ipcRenderer.send('DATA_UPDATED_URLS', false);
         }
       });
     };
-  }, []);
-  return /*#__PURE__*/react.createElement(react.Fragment, null, /*#__PURE__*/react.createElement(es_col, extends_extends({
+  }, []); // Form (Edit)
+  //------------------------------------------
+
+  var refInputUrl = (0,react.useRef)(null);
+  var refInputTitle = (0,react.useRef)(null);
+
+  var _useState = (0,react.useState)([]),
+      _useState2 = _slicedToArray(_useState, 2),
+      dataCategories = _useState2[0],
+      setDataCategories = _useState2[1];
+
+  var _useState3 = (0,react.useState)(),
+      _useState4 = _slicedToArray(_useState3, 2),
+      category = _useState4[0],
+      setCategory = _useState4[1];
+
+  var _useState5 = (0,react.useState)(''),
+      _useState6 = _slicedToArray(_useState5, 2),
+      inputTitle = _useState6[0],
+      setInputTitle = _useState6[1];
+
+  var _useState7 = (0,react.useState)(''),
+      _useState8 = _slicedToArray(_useState7, 2),
+      inputUrl = _useState8[0],
+      setInputUrl = _useState8[1];
+
+  var _useState9 = (0,react.useState)(false),
+      _useState10 = _slicedToArray(_useState9, 2),
+      visible = _useState10[0],
+      setVisible = _useState10[1];
+
+  var _useState11 = (0,react.useState)(0),
+      _useState12 = _slicedToArray(_useState11, 2),
+      editIndex = _useState12[0],
+      setEditIndex = _useState12[1];
+
+  function showModalEdit(cat, title, link) {
+    setVisible(true); //update item info
+
+    setInputTitle(title);
+    setInputUrl(link);
+    setCategory(cat); //update current item index
+
+    var editTarget = getIndexOf(data, 'link', link);
+    setEditIndex(editTarget);
+  }
+
+  function handleOkEdit() {
+    var _refInputUrl$current, _refInputTitle$curren;
+
+    var _url = refInputUrl === null || refInputUrl === void 0 ? void 0 : (_refInputUrl$current = refInputUrl.current) === null || _refInputUrl$current === void 0 ? void 0 : _refInputUrl$current.input.value;
+
+    var _title = refInputTitle === null || refInputTitle === void 0 ? void 0 : (_refInputTitle$curren = refInputTitle.current) === null || _refInputTitle$curren === void 0 ? void 0 : _refInputTitle$curren.input.value;
+
+    var _cat = category;
+    var newData = data;
+
+    if (editIndex !== -1) {
+      newData[editIndex].category = _cat;
+      newData[editIndex].link = _url;
+      newData[editIndex].title = _title;
+    } // Reorganize all data
+
+
+    var allData = reorganizeAllData(classifiedMapData, newData, catName);
+
+    if (isValidHttpUrl(_url)) {
+      // Communicate asynchronously from a renderer process to the main process.
+      ipcRenderer.send('DATA_UPDATED_SORTED_URLS', allData);
+      ipcRenderer.send('DATA_UPDATED_URLS', false);
+      setVisible(false);
+    }
+  }
+
+  function handleCancelEdit() {
+    setVisible(false);
+  }
+
+  function handleSelectEdit(value) {
+    setCategory(value);
+  }
+
+  function handleInputTitle(e) {
+    setInputTitle(e.target.value);
+  }
+
+  function handleInputUrl(e) {
+    setInputUrl(e.target.value);
+  } //------------------------------------------
+
+
+  (0,react.useEffect)(function () {
+    // Update categories
+    setDataCategories(Array.from(classifiedMapData.keys()));
+  }, []); // Empty array ensures that effect is only run on mount and unmount
+
+  return /*#__PURE__*/react.createElement(react.Fragment, null, /*#__PURE__*/react.createElement(modal, {
+    title: "Edit",
+    visible: visible,
+    onOk: handleOkEdit,
+    okText: "Confirm",
+    cancelText: "Cancel",
+    onCancel: handleCancelEdit,
+    cancelButtonProps: {
+      shape: "round"
+    },
+    okButtonProps: {
+      shape: "round"
+    }
+  }, /*#__PURE__*/react.createElement(input.Group, {
+    compact: true,
+    style: {
+      textAlign: "left"
+    }
+  }, /*#__PURE__*/react.createElement(space, {
+    direction: "vertical"
+  }, /*#__PURE__*/react.createElement(input, {
+    placeholder: "Site Name",
+    id: "app-input-title",
+    ref: refInputTitle,
+    style: {
+      width: "325px"
+    },
+    value: inputTitle,
+    onChange: handleInputTitle
+  }), /*#__PURE__*/react.createElement("br", null), /*#__PURE__*/react.createElement(input, {
+    placeholder: "https://",
+    id: "app-input-url",
+    ref: refInputUrl,
+    style: {
+      width: "325px"
+    },
+    value: inputUrl,
+    onChange: handleInputUrl
+  }), " ", /*#__PURE__*/react.createElement("span", {
+    style: {
+      color: "red",
+      fontSize: "14px",
+      position: "absolute",
+      marginTop: "-23px",
+      left: "310px"
+    }
+  }, "*"), /*#__PURE__*/react.createElement("br", null), /*#__PURE__*/react.createElement(es_select, {
+    style: {
+      minWidth: "150px"
+    },
+    onChange: handleSelectEdit,
+    placeholder: "Choose a category",
+    value: category
+  }, dataCategories && dataCategories.length > 0 ? dataCategories.map(function (item, index) {
+    return /*#__PURE__*/react.createElement(Item_Option, {
+      key: index,
+      value: item
+    }, item);
+  }) : '')))), /*#__PURE__*/react.createElement(es_col, extends_extends({
     draggable: draggable || false,
     onDragEnd: evDragEnd,
     onDragStart: evDragStart,
@@ -53350,6 +53527,20 @@ function Project_Item_Item(props) {
   }, /*#__PURE__*/react.createElement("path", {
     fill: "#cbcbcb",
     d: "M32 464a48 48 0 0 0 48 48h288a48 48 0 0 0 48-48V128H32zm272-256a16 16 0 0 1 32 0v224a16 16 0 0 1-32 0zm-96 0a16 16 0 0 1 32 0v224a16 16 0 0 1-32 0zm-96 0a16 16 0 0 1 32 0v224a16 16 0 0 1-32 0zM432 32H312l-9.4-18.7A24 24 0 0 0 281.1 0H166.8a23.72 23.72 0 0 0-21.4 13.3L136 32H16A16 16 0 0 0 0 48v32a16 16 0 0 0 16 16h416a16 16 0 0 0 16-16V48a16 16 0 0 0-16-16z"
+  }))), /*#__PURE__*/react.createElement("a", {
+    className: "app-editbtn-project",
+    onClick: function onClick(e) {
+      return showModalEdit(catName, title, link);
+    }
+  }, /*#__PURE__*/react.createElement("svg", {
+    "aria-hidden": "true",
+    height: "15",
+    role: "img",
+    xmlns: "http://www.w3.org/2000/svg",
+    viewBox: "0 0 576 512"
+  }, /*#__PURE__*/react.createElement("path", {
+    fill: "#cbcbcb",
+    d: "M402.6 83.2l90.2 90.2c3.8 3.8 3.8 10 0 13.8L274.4 405.6l-92.8 10.3c-12.4 1.4-22.9-9.1-21.5-21.5l10.3-92.8L388.8 83.2c3.8-3.8 10-3.8 13.8 0zm162-22.9l-48.8-48.8c-15.2-15.2-39.9-15.2-55.2 0l-35.4 35.4c-3.8 3.8-3.8 10 0 13.8l90.2 90.2c3.8 3.8 10 3.8 13.8 0l35.4-35.4c15.2-15.3 15.2-40 0-55.2zM384 346.2V448H64V128h229.8c3.2 0 6.2-1.3 8.5-3.5l40-40c7.6-7.6 2.2-20.5-8.5-20.5H48C21.5 64 0 85.5 0 112v352c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V306.2c0-10.7-12.9-16-20.5-8.5l-40 40c-2.2 2.3-3.5 5.3-3.5 8.5z"
   }))))));
 }
 ;// CONCATENATED MODULE: ../src/components/Project/index.tsx
@@ -53572,21 +53763,6 @@ function Welcome(props) {
     className: "app-welcome"
   }, /*#__PURE__*/react.createElement("div", null)));
 }
-;// CONCATENATED MODULE: ../src/helpers/isValidHttpUrl.ts
-/**
- * Verify URL 
- */
-function isValidHttpUrl(string) {
-  var url;
-
-  try {
-    url = new URL(string);
-  } catch (_) {
-    return false;
-  }
-
-  return url.protocol === "http:" || url.protocol === "https:";
-}
 // EXTERNAL MODULE: ../node_modules/lodash/lodash.js
 var lodash = __webpack_require__(8784);
 ;// CONCATENATED MODULE: ../src/helpers/uniqueArr.ts
@@ -53671,7 +53847,8 @@ function Home() {
     // Unregister from ipcRenderer.on event listener
     Home_ipcRenderer.removeAllListeners('INITIALIZE_DATA');
     Home_ipcRenderer.removeAllListeners('APP_INFO');
-    Home_ipcRenderer.removeAllListeners('EXPORT_INFO'); // Receiving on main process
+    Home_ipcRenderer.removeAllListeners('EXPORT_INFO');
+    Home_ipcRenderer.removeAllListeners('IMPORT_INFO'); // Receiving on main process
 
     Home_ipcRenderer.on('INITIALIZE_DATA', function (event, curData) {
       // Modal action
@@ -53718,8 +53895,21 @@ function Home() {
       });
     });
     Home_ipcRenderer.on('EXPORT_INFO', function (event, curData) {
-      setExportHTMLInfo(curData);
-      setLoadingExportHTMLFile(false);
+      if (curData.ok) setExportHTMLInfo(curData.ok);
+      if (curData.error) setExportHTMLInfo(curData.error);
+      setLoadingExportHTMLFile(false); //hide buttons
+
+      Array.prototype.slice.call(document.querySelectorAll('.app-export-modalbtn')).forEach(function (node) {
+        node.style.display = 'none';
+      });
+    });
+    Home_ipcRenderer.on('IMPORT_INFO', function (event, curData) {
+      if (curData.ok) setImportHTMLInfo(curData.ok);
+      if (curData.error) setImportHTMLInfo(curData.error); //hide buttons
+
+      Array.prototype.slice.call(document.querySelectorAll('.app-import-modalbtn')).forEach(function (node) {
+        node.style.display = 'none';
+      });
     });
   }
 
@@ -53748,7 +53938,7 @@ function Home() {
     if (e.keyCode === 13) {
       sendData();
     }
-  } // Modal 1 and Form
+  } // Modal 1 and Form (Add New)
   //------------------------------------------
 
 
@@ -53814,7 +54004,7 @@ function Home() {
     setInputTitle('');
     setInputUrl('');
     setInputSearch('');
-  } // Modal 2
+  } // Modal 2 (About)
   //------------------------------------------
 
 
@@ -53831,7 +54021,7 @@ function Home() {
   function showModalAbout(e) {
     e.preventDefault();
     setVisibleAbout(true);
-  } // Modal 3
+  } // Modal 3 (Export HTML)
   //------------------------------------------
 
 
@@ -53866,6 +54056,35 @@ function Home() {
 
   function hideModalExportHTMLFile() {
     setVisibleExportHTMLFile(false);
+  } // Modal 4 (File Upload for database)
+  //------------------------------------------
+
+
+  var _useState27 = (0,react.useState)(''),
+      _useState28 = _slicedToArray(_useState27, 2),
+      importHTMLInfo = _useState28[0],
+      setImportHTMLInfo = _useState28[1];
+
+  var _useState29 = (0,react.useState)(false),
+      _useState30 = _slicedToArray(_useState29, 2),
+      visibleImportHTMLFile = _useState30[0],
+      setVisibleImportHTMLFile = _useState30[1];
+
+  function handleOkImportHTMLFile() {
+    // Communicate asynchronously from a renderer process to the main process.
+    Home_ipcRenderer.send('IMPORT_DATABASE', false);
+  }
+
+  function handleCancelImportHTMLFile() {
+    hideModalImportHTMLFile();
+  }
+
+  function showModalImportHTMLFile() {
+    setVisibleImportHTMLFile(true);
+  }
+
+  function hideModalImportHTMLFile() {
+    setVisibleImportHTMLFile(false);
   } // Button action of Windows (DOM element associated with preload.js)
   //------------------------------------------
 
@@ -53875,21 +54094,16 @@ function Home() {
     Home_ipcRenderer.send('WINDOWS_BUTTON_MIN', false);
   }
 
-  ;
-
   function maximizeFn() {
     // Communicate asynchronously from a renderer process to the main process.
     Home_ipcRenderer.send('WINDOWS_BUTTON_MAX', false);
   }
 
-  ;
-
   function quitFn() {
     // Communicate asynchronously from a renderer process to the main process.
     Home_ipcRenderer.send('WINDOWS_BUTTON_CLOSE', false);
-  }
+  } //------------------------------------------
 
-  ; //------------------------------------------
 
   (0,react.useEffect)(function () {
     // Receiving on main process
@@ -53990,6 +54204,18 @@ function Home() {
       fill: "#d5d5d5",
       d: "M216 0h80c13.3 0 24 10.7 24 24v168h87.7c17.8 0 26.7 21.5 14.1 34.1L269.7 378.3c-7.5 7.5-19.8 7.5-27.3 0L90.1 226.1c-12.6-12.6-3.7-34.1 14.1-34.1H192V24c0-13.3 10.7-24 24-24zm296 376v112c0 13.3-10.7 24-24 24H24c-13.3 0-24-10.7-24-24V376c0-13.3 10.7-24 24-24h146.7l49 49c20.1 20.1 52.5 20.1 72.6 0l49-49H488c13.3 0 24 10.7 24 24zm-124 88c0-11-9-20-20-20s-20 9-20 20 9 20 20 20 20-9 20-20zm64 0c0-11-9-20-20-20s-20 9-20 20 9 20 20 20 20-9 20-20z"
     })), " Export HTML"), /*#__PURE__*/react.createElement("a", {
+      href: "#",
+      onClick: showModalImportHTMLFile
+    }, /*#__PURE__*/react.createElement("svg", {
+      "aria-hidden": "true",
+      height: "12",
+      role: "img",
+      xmlns: "http://www.w3.org/2000/svg",
+      viewBox: "0 0 512 512"
+    }, /*#__PURE__*/react.createElement("path", {
+      fill: "#d5d5d5",
+      d: "M512 48v288c0 26.5-21.5 48-48 48h-48V176c0-44.1-35.9-80-80-80H128V48c0-26.5 21.5-48 48-48h288c26.5 0 48 21.5 48 48zM384 176v288c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V176c0-26.5 21.5-48 48-48h288c26.5 0 48 21.5 48 48zm-68 28c0-6.6-5.4-12-12-12H76c-6.6 0-12 5.4-12 12v52h252v-52z"
+    })), " Import Database"), /*#__PURE__*/react.createElement("a", {
       href: "#",
       onClick: showModalAbout
     }, "About ", appInfo ? appInfo.name : null)),
@@ -54118,21 +54344,78 @@ function Home() {
         shape: "round"
       },
       footer: [/*#__PURE__*/react.createElement(es_button, {
+        className: "app-export-modalbtn",
         key: "back",
         shape: "round",
         onClick: handleCancelExportHTMLFile
       }, "Cancel"), /*#__PURE__*/react.createElement(es_button, {
+        className: "app-export-modalbtn",
         key: "submit",
         type: "primary",
         shape: "round",
         loading: loadingExportHTMLFile,
         onClick: handleOkExportHTMLFile
       }, "Export")]
-    }, /*#__PURE__*/react.createElement("p", null, exportHTMLInfo && exportHTMLInfo !== '' ? /*#__PURE__*/react.createElement(react.Fragment, null, "Package ", /*#__PURE__*/react.createElement("strong", {
+    }, /*#__PURE__*/react.createElement("p", null, exportHTMLInfo && exportHTMLInfo !== '' ? /*#__PURE__*/react.createElement(react.Fragment, null, /*#__PURE__*/react.createElement("svg", {
+      "aria-hidden": "true",
+      style: {
+        verticalAlign: "middle"
+      },
+      height: "16",
+      role: "img",
+      xmlns: "http://www.w3.org/2000/svg",
+      viewBox: "0 0 512 512"
+    }, /*#__PURE__*/react.createElement("path", {
+      fill: "green",
+      d: "M504 256c0 136.967-111.033 248-248 248S8 392.967 8 256 119.033 8 256 8s248 111.033 248 248zM227.314 387.314l184-184c6.248-6.248 6.248-16.379 0-22.627l-22.627-22.627c-6.248-6.249-16.379-6.249-22.628 0L216 308.118l-70.059-70.059c-6.248-6.248-16.379-6.248-22.628 0l-22.627 22.627c-6.248 6.248-6.248 16.379 0 22.627l104 104c6.249 6.249 16.379 6.249 22.628.001z"
+    })), " Package ", /*#__PURE__*/react.createElement("strong", {
       style: {
         color: "green"
       }
-    }, exportHTMLInfo), " exported successfully, please check your computer desktop.") : 'Export an HTML file package that you can use directly in any operating system\'s browser.')))
+    }, exportHTMLInfo), " exported successfully, please check your computer desktop.") : 'Export an HTML file package that you can use directly in any operating system\'s browser.')), /*#__PURE__*/react.createElement(modal, {
+      title: "Import Database",
+      visible: visibleImportHTMLFile,
+      onOk: showModalImportHTMLFile,
+      onCancel: handleCancelImportHTMLFile,
+      cancelButtonProps: {
+        shape: "round"
+      },
+      okButtonProps: {
+        shape: "round"
+      },
+      footer: [/*#__PURE__*/react.createElement(es_button, {
+        className: "app-import-modalbtn",
+        key: "back",
+        shape: "round",
+        onClick: handleCancelImportHTMLFile
+      }, "Cancel"), /*#__PURE__*/react.createElement(es_button, {
+        className: "app-import-modalbtn",
+        key: "submit",
+        type: "primary",
+        shape: "round",
+        onClick: handleOkImportHTMLFile
+      }, "Import Zip")]
+    }, /*#__PURE__*/react.createElement("p", null, importHTMLInfo && importHTMLInfo !== '' ? /*#__PURE__*/react.createElement(react.Fragment, null, /*#__PURE__*/react.createElement("svg", {
+      "aria-hidden": "true",
+      style: {
+        verticalAlign: "middle"
+      },
+      height: "16",
+      role: "img",
+      xmlns: "http://www.w3.org/2000/svg",
+      viewBox: "0 0 512 512"
+    }, /*#__PURE__*/react.createElement("path", {
+      fill: "green",
+      d: "M504 256c0 136.967-111.033 248-248 248S8 392.967 8 256 119.033 8 256 8s248 111.033 248 248zM227.314 387.314l184-184c6.248-6.248 6.248-16.379 0-22.627l-22.627-22.627c-6.248-6.249-16.379-6.249-22.628 0L216 308.118l-70.059-70.059c-6.248-6.248-16.379-6.248-22.628 0l-22.627 22.627c-6.248 6.248-6.248 16.379 0 22.627l104 104c6.249 6.249 16.379 6.249 22.628.001z"
+    })), " ", /*#__PURE__*/react.createElement("strong", {
+      style: {
+        color: "green"
+      }
+    }, "Data restored successfully, please restart your app.")) : /*#__PURE__*/react.createElement(react.Fragment, null, 'File Upload for database. It must be a ', /*#__PURE__*/react.createElement("code", {
+      style: {
+        color: "orange"
+      }
+    }, ".zip"), " ", 'file containing HTML imported by the app.'))))
   }));
 }
 ;// CONCATENATED MODULE: ../node_modules/antd/es/form/context.js

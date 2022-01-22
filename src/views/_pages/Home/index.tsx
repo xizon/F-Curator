@@ -46,6 +46,7 @@ export default function Home() {
         ipcRenderer.removeAllListeners('INITIALIZE_DATA');
         ipcRenderer.removeAllListeners('APP_INFO');
         ipcRenderer.removeAllListeners('EXPORT_INFO');
+        ipcRenderer.removeAllListeners('IMPORT_INFO');
 
         // Receiving on main process
         ipcRenderer.on('INITIALIZE_DATA', (event, curData) => {
@@ -96,10 +97,29 @@ export default function Home() {
         });
 
         ipcRenderer.on('EXPORT_INFO', (event, curData) => {
-            setExportHTMLInfo(curData);
+            if ( curData.ok ) setExportHTMLInfo(curData.ok);
+            if ( curData.error ) setExportHTMLInfo(curData.error);
             setLoadingExportHTMLFile(false);
+
+
+            //hide buttons
+            Array.prototype.slice.call( document.querySelectorAll( '.app-export-modalbtn' ) ).forEach( (node) => {
+                node.style.display = 'none';
+            });
         });
 
+        ipcRenderer.on('IMPORT_INFO', (event, curData) => {
+            if ( curData.ok ) setImportHTMLInfo(curData.ok);
+            if ( curData.error ) setImportHTMLInfo(curData.error);
+
+            //hide buttons
+            Array.prototype.slice.call( document.querySelectorAll( '.app-import-modalbtn' ) ).forEach( (node) => {
+                node.style.display = 'none';
+            });
+        });
+
+
+        
         
 
     }
@@ -129,7 +149,7 @@ export default function Home() {
 
 
 
-    // Modal 1 and Form
+    // Modal 1 and Form (Add New)
     //------------------------------------------
     const [visible, setVisible] = useState<boolean>(false);
     const [confirmLoading, setConfirmLoading] = useState<boolean>(false);
@@ -201,7 +221,7 @@ export default function Home() {
     }
 
 
-    // Modal 2
+    // Modal 2 (About)
     //------------------------------------------
     const [appInfo, setAppInfo] = useState<any | null>(null);
     const [visibleAbout, setVisibleAbout] = useState<boolean>(false);
@@ -212,7 +232,7 @@ export default function Home() {
 
 
 
-    // Modal 3
+    // Modal 3 (Export HTML)
     //------------------------------------------
     const [exportHTMLInfo, setExportHTMLInfo] = useState<string>('');
     const [visibleExportHTMLFile, setVisibleExportHTMLFile] = useState<boolean>(false);
@@ -239,20 +259,45 @@ export default function Home() {
     }    
 
 
+    // Modal 4 (File Upload for database)
+    //------------------------------------------
+    const [importHTMLInfo, setImportHTMLInfo] = useState<string>('');
+    const [visibleImportHTMLFile, setVisibleImportHTMLFile] = useState<boolean>(false);
+    
+    
+    function handleOkImportHTMLFile() {
+        // Communicate asynchronously from a renderer process to the main process.
+        ipcRenderer.send('IMPORT_DATABASE', false);
+    }
+    
+    function handleCancelImportHTMLFile() {
+        hideModalImportHTMLFile();
+    }
+    
+    function showModalImportHTMLFile() {
+        setVisibleImportHTMLFile(true);
+    }
+    
+    function hideModalImportHTMLFile() {
+        setVisibleImportHTMLFile(false);
+    }    
+    
+    
     // Button action of Windows (DOM element associated with preload.js)
     //------------------------------------------
     function minimizeFn() { 
         // Communicate asynchronously from a renderer process to the main process.
         ipcRenderer.send('WINDOWS_BUTTON_MIN', false); 
-    };
+    }
     function maximizeFn() { 
         // Communicate asynchronously from a renderer process to the main process.
         ipcRenderer.send('WINDOWS_BUTTON_MAX', false); 
-    };
+    }
     function quitFn() { 
         // Communicate asynchronously from a renderer process to the main process.
         ipcRenderer.send('WINDOWS_BUTTON_CLOSE', false); 
-    };
+    }
+
 
     //------------------------------------------
     useEffect(() => {
@@ -306,7 +351,11 @@ export default function Home() {
                     <Link to="/category"><svg aria-hidden="true" height="12" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path fill="#d5d5d5" d="M12.83 352h262.34A12.82 12.82 0 0 0 288 339.17v-38.34A12.82 12.82 0 0 0 275.17 288H12.83A12.82 12.82 0 0 0 0 300.83v38.34A12.82 12.82 0 0 0 12.83 352zm0-256h262.34A12.82 12.82 0 0 0 288 83.17V44.83A12.82 12.82 0 0 0 275.17 32H12.83A12.82 12.82 0 0 0 0 44.83v38.34A12.82 12.82 0 0 0 12.83 96zM432 160H16a16 16 0 0 0-16 16v32a16 16 0 0 0 16 16h416a16 16 0 0 0 16-16v-32a16 16 0 0 0-16-16zm0 256H16a16 16 0 0 0-16 16v32a16 16 0 0 0 16 16h416a16 16 0 0 0 16-16v-32a16 16 0 0 0-16-16z"></path></svg> Category Edit</Link>
 
                     <a href="#" onClick={showModalExportHTMLFile}>
-<svg aria-hidden="true" height="12" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="#d5d5d5" d="M216 0h80c13.3 0 24 10.7 24 24v168h87.7c17.8 0 26.7 21.5 14.1 34.1L269.7 378.3c-7.5 7.5-19.8 7.5-27.3 0L90.1 226.1c-12.6-12.6-3.7-34.1 14.1-34.1H192V24c0-13.3 10.7-24 24-24zm296 376v112c0 13.3-10.7 24-24 24H24c-13.3 0-24-10.7-24-24V376c0-13.3 10.7-24 24-24h146.7l49 49c20.1 20.1 52.5 20.1 72.6 0l49-49H488c13.3 0 24 10.7 24 24zm-124 88c0-11-9-20-20-20s-20 9-20 20 9 20 20 20 20-9 20-20zm64 0c0-11-9-20-20-20s-20 9-20 20 9 20 20 20 20-9 20-20z"></path></svg> Export HTML</a>
+                        <svg aria-hidden="true" height="12" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="#d5d5d5" d="M216 0h80c13.3 0 24 10.7 24 24v168h87.7c17.8 0 26.7 21.5 14.1 34.1L269.7 378.3c-7.5 7.5-19.8 7.5-27.3 0L90.1 226.1c-12.6-12.6-3.7-34.1 14.1-34.1H192V24c0-13.3 10.7-24 24-24zm296 376v112c0 13.3-10.7 24-24 24H24c-13.3 0-24-10.7-24-24V376c0-13.3 10.7-24 24-24h146.7l49 49c20.1 20.1 52.5 20.1 72.6 0l49-49H488c13.3 0 24 10.7 24 24zm-124 88c0-11-9-20-20-20s-20 9-20 20 9 20 20 20 20-9 20-20zm64 0c0-11-9-20-20-20s-20 9-20 20 9 20 20 20 20-9 20-20z"></path></svg> Export HTML</a>
+
+                    <a href="#" onClick={showModalImportHTMLFile}>
+                        <svg aria-hidden="true" height="12" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="#d5d5d5" d="M512 48v288c0 26.5-21.5 48-48 48h-48V176c0-44.1-35.9-80-80-80H128V48c0-26.5 21.5-48 48-48h288c26.5 0 48 21.5 48 48zM384 176v288c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V176c0-26.5 21.5-48 48-48h288c26.5 0 48 21.5 48 48zm-68 28c0-6.6-5.4-12-12-12H76c-6.6 0-12 5.4-12 12v52h252v-52z"></path></svg> Import Database</a>
+
 
                     <a href="#" onClick={showModalAbout}>About {appInfo ? appInfo.name : null}</a>
                     
@@ -397,18 +446,36 @@ export default function Home() {
                         cancelButtonProps={{ shape: "round" }}
                         okButtonProps={{ shape: "round" }}
                         footer={[
-                            <Button key="back" shape="round" onClick={handleCancelExportHTMLFile}>
-                              Cancel
+                            <Button className="app-export-modalbtn" key="back" shape="round" onClick={handleCancelExportHTMLFile}>
+                                Cancel
                             </Button>,
-                            <Button key="submit" type="primary" shape="round" loading={loadingExportHTMLFile} onClick={handleOkExportHTMLFile}>
-                              Export
+                            <Button className="app-export-modalbtn" key="submit" type="primary" shape="round" loading={loadingExportHTMLFile} onClick={handleOkExportHTMLFile}>
+                                Export
                             </Button>,
-                          ]}  
+                        ]}
                     >
-                        <p>{exportHTMLInfo && exportHTMLInfo !== '' ? <>Package <strong style={{color:"green"}}>{exportHTMLInfo}</strong> exported successfully, please check your computer desktop.</> : 'Export an HTML file package that you can use directly in any operating system\'s browser.'}</p>
+                        <p>{exportHTMLInfo && exportHTMLInfo !== '' ? <><svg aria-hidden="true" style={{verticalAlign:"middle"}} height="16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="green" d="M504 256c0 136.967-111.033 248-248 248S8 392.967 8 256 119.033 8 256 8s248 111.033 248 248zM227.314 387.314l184-184c6.248-6.248 6.248-16.379 0-22.627l-22.627-22.627c-6.248-6.249-16.379-6.249-22.628 0L216 308.118l-70.059-70.059c-6.248-6.248-16.379-6.248-22.628 0l-22.627 22.627c-6.248 6.248-6.248 16.379 0 22.627l104 104c6.249 6.249 16.379 6.249 22.628.001z"></path></svg> Package <strong style={{ color: "green" }}>{exportHTMLInfo}</strong> exported successfully, please check your computer desktop.</> : 'Export an HTML file package that you can use directly in any operating system\'s browser.'}</p>
                     </Modal>
-                    
 
+
+                    <Modal
+                        title="Import Database"
+                        visible={visibleImportHTMLFile}
+                        onOk={showModalImportHTMLFile}
+                        onCancel={handleCancelImportHTMLFile}
+                        cancelButtonProps={{ shape: "round" }}
+                        okButtonProps={{ shape: "round" }}
+                        footer={[
+                            <Button className="app-import-modalbtn" key="back" shape="round" onClick={handleCancelImportHTMLFile}>
+                                Cancel
+                            </Button>,
+                            <Button className="app-import-modalbtn" key="submit" type="primary" shape="round" onClick={handleOkImportHTMLFile}>
+                                Import Zip
+                            </Button>,
+                        ]}
+                    >
+                        <p>{importHTMLInfo && importHTMLInfo !== '' ? <><svg aria-hidden="true" style={{verticalAlign:"middle"}} height="16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="green" d="M504 256c0 136.967-111.033 248-248 248S8 392.967 8 256 119.033 8 256 8s248 111.033 248 248zM227.314 387.314l184-184c6.248-6.248 6.248-16.379 0-22.627l-22.627-22.627c-6.248-6.249-16.379-6.249-22.628 0L216 308.118l-70.059-70.059c-6.248-6.248-16.379-6.248-22.628 0l-22.627 22.627c-6.248 6.248-6.248 16.379 0 22.627l104 104c6.249 6.249 16.379 6.249 22.628.001z"></path></svg> <strong style={{ color: "green" }}>Data restored successfully, please restart your app.</strong></> : <>{'File Upload for database. It must be a '}<code style={{color:"orange"}}>.zip</code> {'file containing HTML imported by the app.'}</>}</p>
+                    </Modal>
 
                 </>}
             />

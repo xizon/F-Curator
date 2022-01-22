@@ -124,7 +124,9 @@
 		color: #c5c5c5;
 		vertical-align: middle;
 		transition: .1s ease-in-out;
-  
+		width: 95%;
+		text-align: left;
+		  
 		&:hover {
 		  background-color: rgba(221, 221, 221, 0.2);
 		}

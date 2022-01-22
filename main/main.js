@@ -8,6 +8,7 @@ const { app, BrowserWindow } = require('electron');
 const crawl = require('./crawl');
 const buildHtml = require('./build-html');
 const exportHtml = require('./export-html');  
+const restoreDatabase = require('./restore-database');  
 const isMac = process.platform === 'darwin';
 
 let win = null;
@@ -205,13 +206,13 @@ app.on('ready', () => {
             
             buildHtml(htmlFilePath, folderPath, folderName, logoPath, function() {
                 exportHtml( function(res) {
-                    win.webContents.send('EXPORT_INFO', res);
+                    win.webContents.send('EXPORT_INFO', {"ok": res});
                 });
             });
             
             
         }).catch(err => {
-            console.log(err);
+            win.webContents.send('EXPORT_INFO', {"error": err});
         });
     });
 
@@ -229,6 +230,77 @@ app.on('ready', () => {
     ipcMain.on('WINDOWS_BUTTON_CLOSE', (event, data) => {
         win.close();
     });
+
+
+    // Import database 
+    //------------------
+    ipcMain.on('IMPORT_DATABASE', (event, data) => {
+        const { dialog } = require('electron');
+        let filepath = undefined;
+
+        // If the platform is 'win32' or 'Linux'
+        if (!isMac) {
+            // Resolves to a Promise<Object>
+            dialog.showOpenDialog({
+                title: 'Select the Zip File to be uploaded',
+                defaultPath: path.join(__dirname, '../public/assets/'),
+                buttonLabel: 'Upload',
+                // Restricting the user to only Text Files.
+                filters: [
+                    {
+                        name: 'Zip Files',
+                        extensions: ['zip']
+                    },],
+                // Specifying the File Selector Property
+                properties: ['openFile']
+            }).then(file => {
+                // Stating whether dialog operation was
+                // cancelled or not.
+                console.log(file.canceled);
+                if (!file.canceled) {
+                    // Updating the GLOBAL filepath variable 
+                    // to user-selected file.
+                    filepath = file.filePaths[0].toString();
+
+                    //unzip database
+                    restoreDatabase(filepath, function(res) {
+                        win.webContents.send('IMPORT_INFO', {"ok": res});
+                    });
+                }
+            }).catch(err => {
+                win.webContents.send('IMPORT_INFO', {"error": err});
+            });
+        }
+        else {
+            // If the platform is 'darwin' (macOS)
+            dialog.showOpenDialog({
+                title: 'Select the Zip File to be uploaded',
+                defaultPath: path.join(__dirname, '../public/assets/'),
+                buttonLabel: 'Upload',
+                filters: [
+                    {
+                        name: 'Zip Files',
+                        extensions: ['zip']
+                    },],
+                // Specifying the File Selector and Directory 
+                // Selector Property In macOS
+                properties: ['openFile', 'openDirectory']
+            }).then(file => {
+                console.log(file.canceled);
+                if (!file.canceled) {
+                    filepath = file.filePaths[0].toString();
+                    
+                    //unzip database
+                    restoreDatabase(filepath, function(res) {
+                        win.webContents.send('IMPORT_INFO', {"ok": res});
+                    });
+                }
+            }).catch(err => {
+                win.webContents.send('IMPORT_INFO', {"error": err});
+            });
+        }
+    });
+
 
 
 

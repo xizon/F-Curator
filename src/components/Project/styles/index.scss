@@ -42,16 +42,44 @@
 
 
 /* Delete button */
-.app-deletebtn-project {
+.app-deletebtn-project,
+.app-editbtn-project {
     position: absolute;
     right: 5px;
 	top: 4px;
     transform: scale(0.8);
 	display: none;
+	background: #fff;
+}
+
+.app-editbtn-project {
+	right: 18px;
 }
 
 .ant-card:hover {
-    .app-deletebtn-project {
+	
+    .app-deletebtn-project,
+	.app-editbtn-project {
 		display: block;
 	}
+
 }
+
+.ant-card {
+	
+    .app-deletebtn-project:hover {
+		path {
+			fill: #f00;
+		}
+	}
+
+	.app-editbtn-project:hover {
+		path {
+			fill: #333;
+		}
+	}
+
+}
+
+
+

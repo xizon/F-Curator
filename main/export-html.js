@@ -29,7 +29,7 @@
  }
  
  function exportHtml( fn ) {
-     // Dind the desktop path of macOS
+     // Find the desktop path of macOS
      const homeDir = require('os').homedir(); // See: https://www.npmjs.com/package/os
      const desktopDir = `${homeDir}/Desktop`;
      zipDirectory(dabaBasePath, `${desktopDir}/${applicationName}-html.zip`).then((res) => {
