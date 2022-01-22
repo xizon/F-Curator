@@ -47,7 +47,7 @@ F-Curator is an offline application that comes at you all day long and curates y
 - Support **importing database** package.
 - Support quick search for URL and Site Name
 - Judgment of URL validity and repetitiveness
-- Automatically extract resources local, such as icons
+- Automatically extract the remote resources, such as icons
 
 
 ## File Structures
