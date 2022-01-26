@@ -165,6 +165,12 @@ $ sudo npm rebuild node-sass
 
 ## Changelog
 
+
+#### = 1.3.1 (January 26, 2022) =
+
+* new: Support application version detection.
+
+
 #### = 1.3.0 (January 22, 2022) =
 
 * new: Support for importing database package.

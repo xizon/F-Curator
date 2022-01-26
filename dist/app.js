@@ -3,7 +3,7 @@
  * 	Boot Helpers
  *
  * 	@source: https://github.com/xizon/f-curator
- * 	@version: 1.3.0 (January 22, 2022)
+ * 	@version: 1.2.0 (January 26, 2022)
  * 	@author: UIUX Lab <uiuxlab@gmail.com>
  * 	@license: MIT
  *
@@ -80,6 +80,127 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 		__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 	} else {}
 }());
+
+
+/***/ }),
+
+/***/ 6012:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+
+
+var deselectCurrent = __webpack_require__(3185);
+
+var clipboardToIE11Formatting = {
+  "text/plain": "Text",
+  "text/html": "Url",
+  "default": "Text"
+}
+
+var defaultMessage = "Copy to clipboard: #{key}, Enter";
+
+function format(message) {
+  var copyKey = (/mac os x/i.test(navigator.userAgent) ? "⌘" : "Ctrl") + "+C";
+  return message.replace(/#{\s*key\s*}/g, copyKey);
+}
+
+function copy(text, options) {
+  var debug,
+    message,
+    reselectPrevious,
+    range,
+    selection,
+    mark,
+    success = false;
+  if (!options) {
+    options = {};
+  }
+  debug = options.debug || false;
+  try {
+    reselectPrevious = deselectCurrent();
+
+    range = document.createRange();
+    selection = document.getSelection();
+
+    mark = document.createElement("span");
+    mark.textContent = text;
+    // reset user styles for span element
+    mark.style.all = "unset";
+    // prevents scrolling to the end of the page
+    mark.style.position = "fixed";
+    mark.style.top = 0;
+    mark.style.clip = "rect(0, 0, 0, 0)";
+    // used to preserve spaces and line breaks
+    mark.style.whiteSpace = "pre";
+    // do not inherit user-select (it may be `none`)
+    mark.style.webkitUserSelect = "text";
+    mark.style.MozUserSelect = "text";
+    mark.style.msUserSelect = "text";
+    mark.style.userSelect = "text";
+    mark.addEventListener("copy", function(e) {
+      e.stopPropagation();
+      if (options.format) {
+        e.preventDefault();
+        if (typeof e.clipboardData === "undefined") { // IE 11
+          debug && console.warn("unable to use e.clipboardData");
+          debug && console.warn("trying IE specific stuff");
+          window.clipboardData.clearData();
+          var format = clipboardToIE11Formatting[options.format] || clipboardToIE11Formatting["default"]
+          window.clipboardData.setData(format, text);
+        } else { // all other browsers
+          e.clipboardData.clearData();
+          e.clipboardData.setData(options.format, text);
+        }
+      }
+      if (options.onCopy) {
+        e.preventDefault();
+        options.onCopy(e.clipboardData);
+      }
+    });
+
+    document.body.appendChild(mark);
+
+    range.selectNodeContents(mark);
+    selection.addRange(range);
+
+    var successful = document.execCommand("copy");
+    if (!successful) {
+      throw new Error("copy command was unsuccessful");
+    }
+    success = true;
+  } catch (err) {
+    debug && console.error("unable to copy using execCommand: ", err);
+    debug && console.warn("trying IE specific stuff");
+    try {
+      window.clipboardData.setData(options.format || "text", text);
+      options.onCopy && options.onCopy(window.clipboardData);
+      success = true;
+    } catch (err) {
+      debug && console.error("unable to copy using clipboardData: ", err);
+      debug && console.error("falling back to prompt");
+      message = format("message" in options ? options.message : defaultMessage);
+      window.prompt(message, text);
+    }
+  } finally {
+    if (selection) {
+      if (typeof selection.removeRange == "function") {
+        selection.removeRange(range);
+      } else {
+        selection.removeAllRanges();
+      }
+    }
+
+    if (mark) {
+      document.body.removeChild(mark);
+    }
+    reselectPrevious();
+  }
+
+  return success;
+}
+
+module.exports = copy;
 
 
 /***/ }),
@@ -22714,6 +22835,52 @@ module.exports = function shallowEqual(objA, objB, compare, compareContext) {
 };
 
 
+/***/ }),
+
+/***/ 3185:
+/***/ ((module) => {
+
+
+module.exports = function () {
+  var selection = document.getSelection();
+  if (!selection.rangeCount) {
+    return function () {};
+  }
+  var active = document.activeElement;
+
+  var ranges = [];
+  for (var i = 0; i < selection.rangeCount; i++) {
+    ranges.push(selection.getRangeAt(i));
+  }
+
+  switch (active.tagName.toUpperCase()) { // .toUpperCase handles XHTML
+    case 'INPUT':
+    case 'TEXTAREA':
+      active.blur();
+      break;
+
+    default:
+      active = null;
+      break;
+  }
+
+  selection.removeAllRanges();
+  return function () {
+    selection.type === 'Caret' &&
+    selection.removeAllRanges();
+
+    if (!selection.rangeCount) {
+      ranges.forEach(function(range) {
+        selection.addRange(range);
+      });
+    }
+
+    active &&
+    active.focus();
+  };
+};
+
+
 /***/ })
 
 /******/ 	});
@@ -40397,1093 +40564,11 @@ input_Input.Search = input_Search;
 input_Input.TextArea = input_TextArea;
 input_Input.Password = input_Password;
 /* harmony default export */ const input = (input_Input);
-;// CONCATENATED MODULE: ../node_modules/rc-util/es/getScrollBarSize.js
-/* eslint-disable no-param-reassign */
-var cached;
-function getScrollBarSize(fresh) {
-  if (typeof document === 'undefined') {
-    return 0;
-  }
+;// CONCATENATED MODULE: ../node_modules/antd/es/typography/Typography.js
 
-  if (fresh || cached === undefined) {
-    var inner = document.createElement('div');
-    inner.style.width = '100%';
-    inner.style.height = '200px';
-    var outer = document.createElement('div');
-    var outerStyle = outer.style;
-    outerStyle.position = 'absolute';
-    outerStyle.top = '0';
-    outerStyle.left = '0';
-    outerStyle.pointerEvents = 'none';
-    outerStyle.visibility = 'hidden';
-    outerStyle.width = '200px';
-    outerStyle.height = '150px';
-    outerStyle.overflow = 'hidden';
-    outer.appendChild(inner);
-    document.body.appendChild(outer);
-    var widthContained = inner.offsetWidth;
-    outer.style.overflow = 'scroll';
-    var widthScroll = inner.offsetWidth;
 
-    if (widthContained === widthScroll) {
-      widthScroll = outer.clientWidth;
-    }
 
-    document.body.removeChild(outer);
-    cached = widthContained - widthScroll;
-  }
-
-  return cached;
-}
-
-function ensureSize(str) {
-  var match = str.match(/^(.*)px$/);
-  var value = Number(match === null || match === void 0 ? void 0 : match[1]);
-  return Number.isNaN(value) ? getScrollBarSize() : value;
-}
-
-function getTargetScrollBarSize(target) {
-  if (typeof document === 'undefined' || !target || !(target instanceof Element)) {
-    return {
-      width: 0,
-      height: 0
-    };
-  }
-
-  var _getComputedStyle = getComputedStyle(target, '::-webkit-scrollbar'),
-      width = _getComputedStyle.width,
-      height = _getComputedStyle.height;
-
-  return {
-    width: ensureSize(width),
-    height: ensureSize(height)
-  };
-}
-;// CONCATENATED MODULE: ../node_modules/rc-util/es/setStyle.js
-/**
- * Easy to set element style, return previous style
- * IE browser compatible(IE browser doesn't merge overflow style, need to set it separately)
- * https://github.com/ant-design/ant-design/issues/19393
- *
- */
-function setStyle(style) {
-  var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-
-  if (!style) {
-    return {};
-  }
-
-  var _options$element = options.element,
-      element = _options$element === void 0 ? document.body : _options$element;
-  var oldStyle = {};
-  var styleKeys = Object.keys(style); // IE browser compatible
-
-  styleKeys.forEach(function (key) {
-    oldStyle[key] = element.style[key];
-  });
-  styleKeys.forEach(function (key) {
-    element.style[key] = style[key];
-  });
-  return oldStyle;
-}
-
-/* harmony default export */ const es_setStyle = (setStyle);
-;// CONCATENATED MODULE: ../node_modules/rc-util/es/switchScrollingEffect.js
-
-
-
-function isBodyOverflowing() {
-  return document.body.scrollHeight > (window.innerHeight || document.documentElement.clientHeight) && window.innerWidth > document.body.offsetWidth;
-}
-
-var cacheStyle = {};
-/* harmony default export */ const switchScrollingEffect = (function (close) {
-  if (!isBodyOverflowing() && !close) {
-    return;
-  } // https://github.com/ant-design/ant-design/issues/19729
-
-
-  var scrollingEffectClassName = 'ant-scrolling-effect';
-  var scrollingEffectClassNameReg = new RegExp("".concat(scrollingEffectClassName), 'g');
-  var bodyClassName = document.body.className;
-
-  if (close) {
-    if (!scrollingEffectClassNameReg.test(bodyClassName)) return;
-    es_setStyle(cacheStyle);
-    cacheStyle = {};
-    document.body.className = bodyClassName.replace(scrollingEffectClassNameReg, '').trim();
-    return;
-  }
-
-  var scrollBarSize = getScrollBarSize();
-
-  if (scrollBarSize) {
-    cacheStyle = es_setStyle({
-      position: 'relative',
-      width: "calc(100% - ".concat(scrollBarSize, "px)")
-    });
-
-    if (!scrollingEffectClassNameReg.test(bodyClassName)) {
-      var addClassName = "".concat(bodyClassName, " ").concat(scrollingEffectClassName);
-      document.body.className = addClassName.trim();
-    }
-  }
-});
-;// CONCATENATED MODULE: ../node_modules/rc-util/es/Dom/scrollLocker.js
-
-
-
-
-var locks = [];
-var scrollingEffectClassName = 'ant-scrolling-effect';
-var scrollingEffectClassNameReg = new RegExp("".concat(scrollingEffectClassName), 'g');
-var scrollLocker_uuid = 0; // https://github.com/ant-design/ant-design/issues/19340
-// https://github.com/ant-design/ant-design/issues/19332
-
-var scrollLocker_cacheStyle = new Map();
-
-var ScrollLocker = function ScrollLocker(_options) {
-  var _this = this;
-
-  _classCallCheck(this, ScrollLocker);
-
-  this.lockTarget = void 0;
-  this.options = void 0;
-
-  this.getContainer = function () {
-    var _this$options;
-
-    return (_this$options = _this.options) === null || _this$options === void 0 ? void 0 : _this$options.container;
-  };
-
-  this.reLock = function (options) {
-    var findLock = locks.find(function (_ref) {
-      var target = _ref.target;
-      return target === _this.lockTarget;
-    });
-
-    if (findLock) {
-      _this.unLock();
-    }
-
-    _this.options = options;
-
-    if (findLock) {
-      findLock.options = options;
-
-      _this.lock();
-    }
-  };
-
-  this.lock = function () {
-    var _this$options3;
-
-    // If lockTarget exist return
-    if (locks.some(function (_ref2) {
-      var target = _ref2.target;
-      return target === _this.lockTarget;
-    })) {
-      return;
-    } // If same container effect, return
-
-
-    if (locks.some(function (_ref3) {
-      var _this$options2;
-
-      var options = _ref3.options;
-      return (options === null || options === void 0 ? void 0 : options.container) === ((_this$options2 = _this.options) === null || _this$options2 === void 0 ? void 0 : _this$options2.container);
-    })) {
-      locks = [].concat(_toConsumableArray(locks), [{
-        target: _this.lockTarget,
-        options: _this.options
-      }]);
-      return;
-    }
-
-    var scrollBarSize = 0;
-    var container = ((_this$options3 = _this.options) === null || _this$options3 === void 0 ? void 0 : _this$options3.container) || document.body;
-
-    if (container === document.body && window.innerWidth - document.documentElement.clientWidth > 0 || container.scrollHeight > container.clientHeight) {
-      scrollBarSize = getScrollBarSize();
-    }
-
-    var containerClassName = container.className;
-
-    if (locks.filter(function (_ref4) {
-      var _this$options4;
-
-      var options = _ref4.options;
-      return (options === null || options === void 0 ? void 0 : options.container) === ((_this$options4 = _this.options) === null || _this$options4 === void 0 ? void 0 : _this$options4.container);
-    }).length === 0) {
-      scrollLocker_cacheStyle.set(container, es_setStyle({
-        width: scrollBarSize !== 0 ? "calc(100% - ".concat(scrollBarSize, "px)") : undefined,
-        overflow: 'hidden',
-        overflowX: 'hidden',
-        overflowY: 'hidden'
-      }, {
-        element: container
-      }));
-    } // https://github.com/ant-design/ant-design/issues/19729
-
-
-    if (!scrollingEffectClassNameReg.test(containerClassName)) {
-      var addClassName = "".concat(containerClassName, " ").concat(scrollingEffectClassName);
-      container.className = addClassName.trim();
-    }
-
-    locks = [].concat(_toConsumableArray(locks), [{
-      target: _this.lockTarget,
-      options: _this.options
-    }]);
-  };
-
-  this.unLock = function () {
-    var _this$options5;
-
-    var findLock = locks.find(function (_ref5) {
-      var target = _ref5.target;
-      return target === _this.lockTarget;
-    });
-    locks = locks.filter(function (_ref6) {
-      var target = _ref6.target;
-      return target !== _this.lockTarget;
-    });
-
-    if (!findLock || locks.some(function (_ref7) {
-      var _findLock$options;
-
-      var options = _ref7.options;
-      return (options === null || options === void 0 ? void 0 : options.container) === ((_findLock$options = findLock.options) === null || _findLock$options === void 0 ? void 0 : _findLock$options.container);
-    })) {
-      return;
-    } // Remove Effect
-
-
-    var container = ((_this$options5 = _this.options) === null || _this$options5 === void 0 ? void 0 : _this$options5.container) || document.body;
-    var containerClassName = container.className;
-    if (!scrollingEffectClassNameReg.test(containerClassName)) return;
-    es_setStyle(scrollLocker_cacheStyle.get(container), {
-      element: container
-    });
-    scrollLocker_cacheStyle.delete(container);
-    container.className = container.className.replace(scrollingEffectClassNameReg, '').trim();
-  };
-
-  // eslint-disable-next-line no-plusplus
-  this.lockTarget = scrollLocker_uuid++;
-  this.options = _options;
-};
-
-
-;// CONCATENATED MODULE: ../node_modules/rc-util/es/PortalWrapper.js
-
-
-
-
-
-
-/* eslint-disable no-underscore-dangle,react/require-default-props */
-
-
-
-
-
-
-
-var openCount = 0;
-var supportDom = canUseDom();
-/** @private Test usage only */
-
-function getOpenCount() {
-  return  false ? 0 : 0;
-} // https://github.com/ant-design/ant-design/issues/19340
-// https://github.com/ant-design/ant-design/issues/19332
-
-var cacheOverflow = {};
-
-var PortalWrapper_getParent = function getParent(getContainer) {
-  if (!supportDom) {
-    return null;
-  }
-
-  if (getContainer) {
-    if (typeof getContainer === 'string') {
-      return document.querySelectorAll(getContainer)[0];
-    }
-
-    if (typeof getContainer === 'function') {
-      return getContainer();
-    }
-
-    if (typeof_typeof(getContainer) === 'object' && getContainer instanceof window.HTMLElement) {
-      return getContainer;
-    }
-  }
-
-  return document.body;
-};
-
-var PortalWrapper = /*#__PURE__*/function (_React$Component) {
-  _inherits(PortalWrapper, _React$Component);
-
-  var _super = _createSuper(PortalWrapper);
-
-  function PortalWrapper(props) {
-    var _this;
-
-    _classCallCheck(this, PortalWrapper);
-
-    _this = _super.call(this, props);
-    _this.container = void 0;
-    _this.componentRef = /*#__PURE__*/react.createRef();
-    _this.rafId = void 0;
-    _this.scrollLocker = void 0;
-    _this.renderComponent = void 0;
-
-    _this.updateScrollLocker = function (prevProps) {
-      var _ref = prevProps || {},
-          prevVisible = _ref.visible;
-
-      var _this$props = _this.props,
-          getContainer = _this$props.getContainer,
-          visible = _this$props.visible;
-
-      if (visible && visible !== prevVisible && supportDom && PortalWrapper_getParent(getContainer) !== _this.scrollLocker.getContainer()) {
-        _this.scrollLocker.reLock({
-          container: PortalWrapper_getParent(getContainer)
-        });
-      }
-    };
-
-    _this.updateOpenCount = function (prevProps) {
-      var _ref2 = prevProps || {},
-          prevVisible = _ref2.visible,
-          prevGetContainer = _ref2.getContainer;
-
-      var _this$props2 = _this.props,
-          visible = _this$props2.visible,
-          getContainer = _this$props2.getContainer; // Update count
-
-      if (visible !== prevVisible && supportDom && PortalWrapper_getParent(getContainer) === document.body) {
-        if (visible && !prevVisible) {
-          openCount += 1;
-        } else if (prevProps) {
-          openCount -= 1;
-        }
-      } // Clean up container if needed
-
-
-      var getContainerIsFunc = typeof getContainer === 'function' && typeof prevGetContainer === 'function';
-
-      if (getContainerIsFunc ? getContainer.toString() !== prevGetContainer.toString() : getContainer !== prevGetContainer) {
-        _this.removeCurrentContainer();
-      }
-    };
-
-    _this.attachToParent = function () {
-      var force = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
-
-      if (force || _this.container && !_this.container.parentNode) {
-        var parent = PortalWrapper_getParent(_this.props.getContainer);
-
-        if (parent) {
-          parent.appendChild(_this.container);
-          return true;
-        }
-
-        return false;
-      }
-
-      return true;
-    };
-
-    _this.getContainer = function () {
-      if (!supportDom) {
-        return null;
-      }
-
-      if (!_this.container) {
-        _this.container = document.createElement('div');
-
-        _this.attachToParent(true);
-      }
-
-      _this.setWrapperClassName();
-
-      return _this.container;
-    };
-
-    _this.setWrapperClassName = function () {
-      var wrapperClassName = _this.props.wrapperClassName;
-
-      if (_this.container && wrapperClassName && wrapperClassName !== _this.container.className) {
-        _this.container.className = wrapperClassName;
-      }
-    };
-
-    _this.removeCurrentContainer = function () {
-      var _this$container, _this$container$paren;
-
-      // Portal will remove from `parentNode`.
-      // Let's handle this again to avoid refactor issue.
-      (_this$container = _this.container) === null || _this$container === void 0 ? void 0 : (_this$container$paren = _this$container.parentNode) === null || _this$container$paren === void 0 ? void 0 : _this$container$paren.removeChild(_this.container);
-    };
-
-    _this.switchScrollingEffect = function () {
-      if (openCount === 1 && !Object.keys(cacheOverflow).length) {
-        switchScrollingEffect(); // Must be set after switchScrollingEffect
-
-        cacheOverflow = es_setStyle({
-          overflow: 'hidden',
-          overflowX: 'hidden',
-          overflowY: 'hidden'
-        });
-      } else if (!openCount) {
-        es_setStyle(cacheOverflow);
-        cacheOverflow = {};
-        switchScrollingEffect(true);
-      }
-    };
-
-    _this.scrollLocker = new ScrollLocker({
-      container: PortalWrapper_getParent(props.getContainer)
-    });
-    return _this;
-  }
-
-  _createClass(PortalWrapper, [{
-    key: "componentDidMount",
-    value: function componentDidMount() {
-      var _this2 = this;
-
-      this.updateOpenCount();
-
-      if (!this.attachToParent()) {
-        this.rafId = wrapperRaf(function () {
-          _this2.forceUpdate();
-        });
-      }
-    }
-  }, {
-    key: "componentDidUpdate",
-    value: function componentDidUpdate(prevProps) {
-      this.updateOpenCount(prevProps);
-      this.updateScrollLocker(prevProps);
-      this.setWrapperClassName();
-      this.attachToParent();
-    }
-  }, {
-    key: "componentWillUnmount",
-    value: function componentWillUnmount() {
-      var _this$props3 = this.props,
-          visible = _this$props3.visible,
-          getContainer = _this$props3.getContainer;
-
-      if (supportDom && PortalWrapper_getParent(getContainer) === document.body) {
-        // 离开时不会 render， 导到离开时数值不变，改用 func 。。
-        openCount = visible && openCount ? openCount - 1 : openCount;
-      }
-
-      this.removeCurrentContainer();
-      wrapperRaf.cancel(this.rafId);
-    }
-  }, {
-    key: "render",
-    value: function render() {
-      var _this$props4 = this.props,
-          children = _this$props4.children,
-          forceRender = _this$props4.forceRender,
-          visible = _this$props4.visible;
-      var portal = null;
-      var childProps = {
-        getOpenCount: function getOpenCount() {
-          return openCount;
-        },
-        getContainer: this.getContainer,
-        switchScrollingEffect: this.switchScrollingEffect,
-        scrollLocker: this.scrollLocker
-      };
-
-      if (forceRender || visible || this.componentRef.current) {
-        portal = /*#__PURE__*/react.createElement(es_Portal, {
-          getContainer: this.getContainer,
-          ref: this.componentRef
-        }, children(childProps));
-      }
-
-      return portal;
-    }
-  }]);
-
-  return PortalWrapper;
-}(react.Component);
-
-/* harmony default export */ const es_PortalWrapper = (PortalWrapper);
-;// CONCATENATED MODULE: ../node_modules/rc-dialog/es/Dialog/Mask.js
-
-
-
-
-
-function Mask_Mask(props) {
-  var prefixCls = props.prefixCls,
-      style = props.style,
-      visible = props.visible,
-      maskProps = props.maskProps,
-      motionName = props.motionName;
-  return /*#__PURE__*/react.createElement(es, {
-    key: "mask",
-    visible: visible,
-    motionName: motionName,
-    leavedClassName: "".concat(prefixCls, "-mask-hidden")
-  }, function (_ref) {
-    var motionClassName = _ref.className,
-        motionStyle = _ref.style;
-    return /*#__PURE__*/react.createElement("div", extends_extends({
-      style: _objectSpread2(_objectSpread2({}, motionStyle), style),
-      className: classnames_default()("".concat(prefixCls, "-mask"), motionClassName)
-    }, maskProps));
-  });
-}
-;// CONCATENATED MODULE: ../node_modules/rc-dialog/es/util.js
-// =============================== Motion ===============================
-function getMotionName(prefixCls, transitionName, animationName) {
-  var motionName = transitionName;
-
-  if (!motionName && animationName) {
-    motionName = "".concat(prefixCls, "-").concat(animationName);
-  }
-
-  return motionName;
-} // ================================ UUID ================================
-
-var util_uuid = -1;
-function util_getUUID() {
-  util_uuid += 1;
-  return util_uuid;
-} // =============================== Offset ===============================
-
-function util_getScroll(w, top) {
-  var ret = w["page".concat(top ? 'Y' : 'X', "Offset")];
-  var method = "scroll".concat(top ? 'Top' : 'Left');
-
-  if (typeof ret !== 'number') {
-    var d = w.document;
-    ret = d.documentElement[method];
-
-    if (typeof ret !== 'number') {
-      ret = d.body[method];
-    }
-  }
-
-  return ret;
-}
-
-function offset(el) {
-  var rect = el.getBoundingClientRect();
-  var pos = {
-    left: rect.left,
-    top: rect.top
-  };
-  var doc = el.ownerDocument;
-  var w = doc.defaultView || doc.parentWindow;
-  pos.left += util_getScroll(w);
-  pos.top += util_getScroll(w, true);
-  return pos;
-}
-;// CONCATENATED MODULE: ../node_modules/rc-dialog/es/Dialog/Content/MemoChildren.js
-
-/* harmony default export */ const MemoChildren = (/*#__PURE__*/react.memo(function (_ref) {
-  var children = _ref.children;
-  return children;
-}, function (_, _ref2) {
-  var shouldUpdate = _ref2.shouldUpdate;
-  return !shouldUpdate;
-}));
-;// CONCATENATED MODULE: ../node_modules/rc-dialog/es/Dialog/Content/index.js
-
-
-
-
-
-
-
-
-
-var sentinelStyle = {
-  width: 0,
-  height: 0,
-  overflow: 'hidden',
-  outline: 'none'
-};
-var Content = /*#__PURE__*/react.forwardRef(function (props, ref) {
-  var closable = props.closable,
-      prefixCls = props.prefixCls,
-      width = props.width,
-      height = props.height,
-      footer = props.footer,
-      title = props.title,
-      closeIcon = props.closeIcon,
-      style = props.style,
-      className = props.className,
-      visible = props.visible,
-      forceRender = props.forceRender,
-      bodyStyle = props.bodyStyle,
-      bodyProps = props.bodyProps,
-      children = props.children,
-      destroyOnClose = props.destroyOnClose,
-      modalRender = props.modalRender,
-      motionName = props.motionName,
-      ariaId = props.ariaId,
-      onClose = props.onClose,
-      onVisibleChanged = props.onVisibleChanged,
-      onMouseDown = props.onMouseDown,
-      onMouseUp = props.onMouseUp,
-      mousePosition = props.mousePosition;
-  var sentinelStartRef = (0,react.useRef)();
-  var sentinelEndRef = (0,react.useRef)();
-  var dialogRef = (0,react.useRef)(); // ============================== Ref ===============================
-
-  react.useImperativeHandle(ref, function () {
-    return {
-      focus: function focus() {
-        var _sentinelStartRef$cur;
-
-        (_sentinelStartRef$cur = sentinelStartRef.current) === null || _sentinelStartRef$cur === void 0 ? void 0 : _sentinelStartRef$cur.focus();
-      },
-      changeActive: function changeActive(next) {
-        var _document = document,
-            activeElement = _document.activeElement;
-
-        if (next && activeElement === sentinelEndRef.current) {
-          sentinelStartRef.current.focus();
-        } else if (!next && activeElement === sentinelStartRef.current) {
-          sentinelEndRef.current.focus();
-        }
-      }
-    };
-  }); // ============================= Style ==============================
-
-  var _React$useState = react.useState(),
-      _React$useState2 = _slicedToArray(_React$useState, 2),
-      transformOrigin = _React$useState2[0],
-      setTransformOrigin = _React$useState2[1];
-
-  var contentStyle = {};
-
-  if (width !== undefined) {
-    contentStyle.width = width;
-  }
-
-  if (height !== undefined) {
-    contentStyle.height = height;
-  }
-
-  if (transformOrigin) {
-    contentStyle.transformOrigin = transformOrigin;
-  }
-
-  function onPrepare() {
-    var elementOffset = offset(dialogRef.current);
-    setTransformOrigin(mousePosition ? "".concat(mousePosition.x - elementOffset.left, "px ").concat(mousePosition.y - elementOffset.top, "px") : '');
-  } // ============================= Render =============================
-
-
-  var footerNode;
-
-  if (footer) {
-    footerNode = /*#__PURE__*/react.createElement("div", {
-      className: "".concat(prefixCls, "-footer")
-    }, footer);
-  }
-
-  var headerNode;
-
-  if (title) {
-    headerNode = /*#__PURE__*/react.createElement("div", {
-      className: "".concat(prefixCls, "-header")
-    }, /*#__PURE__*/react.createElement("div", {
-      className: "".concat(prefixCls, "-title"),
-      id: ariaId
-    }, title));
-  }
-
-  var closer;
-
-  if (closable) {
-    closer = /*#__PURE__*/react.createElement("button", {
-      type: "button",
-      onClick: onClose,
-      "aria-label": "Close",
-      className: "".concat(prefixCls, "-close")
-    }, closeIcon || /*#__PURE__*/react.createElement("span", {
-      className: "".concat(prefixCls, "-close-x")
-    }));
-  }
-
-  var content = /*#__PURE__*/react.createElement("div", {
-    className: "".concat(prefixCls, "-content")
-  }, closer, headerNode, /*#__PURE__*/react.createElement("div", extends_extends({
-    className: "".concat(prefixCls, "-body"),
-    style: bodyStyle
-  }, bodyProps), children), footerNode);
-  return /*#__PURE__*/react.createElement(es, {
-    visible: visible,
-    onVisibleChanged: onVisibleChanged,
-    onAppearPrepare: onPrepare,
-    onEnterPrepare: onPrepare,
-    forceRender: forceRender,
-    motionName: motionName,
-    removeOnLeave: destroyOnClose,
-    ref: dialogRef
-  }, function (_ref, motionRef) {
-    var motionClassName = _ref.className,
-        motionStyle = _ref.style;
-    return /*#__PURE__*/react.createElement("div", {
-      key: "dialog-element",
-      role: "document",
-      ref: motionRef,
-      style: _objectSpread2(_objectSpread2(_objectSpread2({}, motionStyle), style), contentStyle),
-      className: classnames_default()(prefixCls, className, motionClassName),
-      onMouseDown: onMouseDown,
-      onMouseUp: onMouseUp
-    }, /*#__PURE__*/react.createElement("div", {
-      tabIndex: 0,
-      ref: sentinelStartRef,
-      style: sentinelStyle,
-      "aria-hidden": "true"
-    }), /*#__PURE__*/react.createElement(MemoChildren, {
-      shouldUpdate: visible || forceRender
-    }, modalRender ? modalRender(content) : content), /*#__PURE__*/react.createElement("div", {
-      tabIndex: 0,
-      ref: sentinelEndRef,
-      style: sentinelStyle,
-      "aria-hidden": "true"
-    }));
-  });
-});
-Content.displayName = 'Content';
-/* harmony default export */ const Dialog_Content = (Content);
-;// CONCATENATED MODULE: ../node_modules/rc-dialog/es/Dialog/index.js
-
-
-
-
-
-
-
-
-
-
-
-
-function Dialog(props) {
-  var _props$prefixCls = props.prefixCls,
-      prefixCls = _props$prefixCls === void 0 ? 'rc-dialog' : _props$prefixCls,
-      zIndex = props.zIndex,
-      _props$visible = props.visible,
-      visible = _props$visible === void 0 ? false : _props$visible,
-      _props$keyboard = props.keyboard,
-      keyboard = _props$keyboard === void 0 ? true : _props$keyboard,
-      _props$focusTriggerAf = props.focusTriggerAfterClose,
-      focusTriggerAfterClose = _props$focusTriggerAf === void 0 ? true : _props$focusTriggerAf,
-      scrollLocker = props.scrollLocker,
-      title = props.title,
-      wrapStyle = props.wrapStyle,
-      wrapClassName = props.wrapClassName,
-      wrapProps = props.wrapProps,
-      onClose = props.onClose,
-      afterClose = props.afterClose,
-      transitionName = props.transitionName,
-      animation = props.animation,
-      _props$closable = props.closable,
-      closable = _props$closable === void 0 ? true : _props$closable,
-      _props$mask = props.mask,
-      mask = _props$mask === void 0 ? true : _props$mask,
-      maskTransitionName = props.maskTransitionName,
-      maskAnimation = props.maskAnimation,
-      _props$maskClosable = props.maskClosable,
-      maskClosable = _props$maskClosable === void 0 ? true : _props$maskClosable,
-      maskStyle = props.maskStyle,
-      maskProps = props.maskProps;
-  var lastOutSideActiveElementRef = (0,react.useRef)();
-  var wrapperRef = (0,react.useRef)();
-  var contentRef = (0,react.useRef)();
-
-  var _React$useState = react.useState(visible),
-      _React$useState2 = _slicedToArray(_React$useState, 2),
-      animatedVisible = _React$useState2[0],
-      setAnimatedVisible = _React$useState2[1]; // ========================== Init ==========================
-
-
-  var ariaIdRef = (0,react.useRef)();
-
-  if (!ariaIdRef.current) {
-    ariaIdRef.current = "rcDialogTitle".concat(util_getUUID());
-  } // ========================= Events =========================
-
-
-  function onDialogVisibleChanged(newVisible) {
-    if (newVisible) {
-      // Try to focus
-      if (!contains(wrapperRef.current, document.activeElement)) {
-        var _contentRef$current;
-
-        lastOutSideActiveElementRef.current = document.activeElement;
-        (_contentRef$current = contentRef.current) === null || _contentRef$current === void 0 ? void 0 : _contentRef$current.focus();
-      }
-    } else {
-      // Clean up scroll bar & focus back
-      setAnimatedVisible(false);
-
-      if (mask && lastOutSideActiveElementRef.current && focusTriggerAfterClose) {
-        try {
-          lastOutSideActiveElementRef.current.focus({
-            preventScroll: true
-          });
-        } catch (e) {// Do nothing
-        }
-
-        lastOutSideActiveElementRef.current = null;
-      } // Trigger afterClose only when change visible from true to false
-
-
-      if (animatedVisible) {
-        afterClose === null || afterClose === void 0 ? void 0 : afterClose();
-      }
-    }
-  }
-
-  function onInternalClose(e) {
-    onClose === null || onClose === void 0 ? void 0 : onClose(e);
-  } // >>> Content
-
-
-  var contentClickRef = (0,react.useRef)(false);
-  var contentTimeoutRef = (0,react.useRef)(); // We need record content click incase content popup out of dialog
-
-  var onContentMouseDown = function onContentMouseDown() {
-    clearTimeout(contentTimeoutRef.current);
-    contentClickRef.current = true;
-  };
-
-  var onContentMouseUp = function onContentMouseUp() {
-    contentTimeoutRef.current = setTimeout(function () {
-      contentClickRef.current = false;
-    });
-  }; // >>> Wrapper
-  // Close only when element not on dialog
-
-
-  var onWrapperClick = null;
-
-  if (maskClosable) {
-    onWrapperClick = function onWrapperClick(e) {
-      if (contentClickRef.current) {
-        contentClickRef.current = false;
-      } else if (wrapperRef.current === e.target) {
-        onInternalClose(e);
-      }
-    };
-  }
-
-  function onWrapperKeyDown(e) {
-    if (keyboard && e.keyCode === es_KeyCode.ESC) {
-      e.stopPropagation();
-      onInternalClose(e);
-      return;
-    } // keep focus inside dialog
-
-
-    if (visible) {
-      if (e.keyCode === es_KeyCode.TAB) {
-        contentRef.current.changeActive(!e.shiftKey);
-      }
-    }
-  } // ========================= Effect =========================
-
-
-  (0,react.useEffect)(function () {
-    if (visible) {
-      setAnimatedVisible(true);
-    }
-
-    return function () {};
-  }, [visible]); // Remove direct should also check the scroll bar update
-
-  (0,react.useEffect)(function () {
-    return function () {
-      clearTimeout(contentTimeoutRef.current);
-    };
-  }, []);
-  (0,react.useEffect)(function () {
-    if (animatedVisible) {
-      scrollLocker === null || scrollLocker === void 0 ? void 0 : scrollLocker.lock();
-      return scrollLocker === null || scrollLocker === void 0 ? void 0 : scrollLocker.unLock;
-    }
-
-    return function () {};
-  }, [animatedVisible, scrollLocker]); // ========================= Render =========================
-
-  return /*#__PURE__*/react.createElement("div", extends_extends({
-    className: "".concat(prefixCls, "-root")
-  }, pickAttrs(props, {
-    data: true
-  })), /*#__PURE__*/react.createElement(Mask_Mask, {
-    prefixCls: prefixCls,
-    visible: mask && visible,
-    motionName: getMotionName(prefixCls, maskTransitionName, maskAnimation),
-    style: _objectSpread2({
-      zIndex: zIndex
-    }, maskStyle),
-    maskProps: maskProps
-  }), /*#__PURE__*/react.createElement("div", extends_extends({
-    tabIndex: -1,
-    onKeyDown: onWrapperKeyDown,
-    className: classnames_default()("".concat(prefixCls, "-wrap"), wrapClassName),
-    ref: wrapperRef,
-    onClick: onWrapperClick,
-    role: "dialog",
-    "aria-labelledby": title ? ariaIdRef.current : null,
-    style: _objectSpread2(_objectSpread2({
-      zIndex: zIndex
-    }, wrapStyle), {}, {
-      display: !animatedVisible ? 'none' : null
-    })
-  }, wrapProps), /*#__PURE__*/react.createElement(Dialog_Content, extends_extends({}, props, {
-    onMouseDown: onContentMouseDown,
-    onMouseUp: onContentMouseUp,
-    ref: contentRef,
-    closable: closable,
-    ariaId: ariaIdRef.current,
-    prefixCls: prefixCls,
-    visible: visible,
-    onClose: onInternalClose,
-    onVisibleChanged: onDialogVisibleChanged,
-    motionName: getMotionName(prefixCls, transitionName, animation)
-  }))));
-}
-;// CONCATENATED MODULE: ../node_modules/rc-dialog/es/DialogWrap.js
-
-
-
-
- // fix issue #10656
-
-/*
- * getContainer remarks
- * Custom container should not be return, because in the Portal component, it will remove the
- * return container element here, if the custom container is the only child of it's component,
- * like issue #10656, It will has a conflict with removeChild method in react-dom.
- * So here should add a child (div element) to custom container.
- * */
-
-var DialogWrap = function DialogWrap(props) {
-  var visible = props.visible,
-      getContainer = props.getContainer,
-      forceRender = props.forceRender,
-      _props$destroyOnClose = props.destroyOnClose,
-      destroyOnClose = _props$destroyOnClose === void 0 ? false : _props$destroyOnClose,
-      _afterClose = props.afterClose;
-
-  var _React$useState = react.useState(visible),
-      _React$useState2 = _slicedToArray(_React$useState, 2),
-      animatedVisible = _React$useState2[0],
-      setAnimatedVisible = _React$useState2[1];
-
-  react.useEffect(function () {
-    if (visible) {
-      setAnimatedVisible(true);
-    }
-  }, [visible]); // 渲染在当前 dom 里；
-
-  if (getContainer === false) {
-    return /*#__PURE__*/react.createElement(Dialog, extends_extends({}, props, {
-      getOpenCount: function getOpenCount() {
-        return 2;
-      } // 不对 body 做任何操作。。
-
-    }));
-  } // Destroy on close will remove wrapped div
-
-
-  if (!forceRender && destroyOnClose && !animatedVisible) {
-    return null;
-  }
-
-  return /*#__PURE__*/react.createElement(es_PortalWrapper, {
-    visible: visible,
-    forceRender: forceRender,
-    getContainer: getContainer
-  }, function (childProps) {
-    return /*#__PURE__*/react.createElement(Dialog, extends_extends({}, props, {
-      destroyOnClose: destroyOnClose,
-      afterClose: function afterClose() {
-        _afterClose === null || _afterClose === void 0 ? void 0 : _afterClose();
-        setAnimatedVisible(false);
-      }
-    }, childProps));
-  });
-};
-
-DialogWrap.displayName = 'Dialog';
-/* harmony default export */ const es_DialogWrap = (DialogWrap);
-;// CONCATENATED MODULE: ../node_modules/rc-dialog/es/index.js
-
-/* harmony default export */ const rc_dialog_es = (es_DialogWrap);
-;// CONCATENATED MODULE: ../node_modules/antd/es/modal/locale.js
-
-
-
-var runtimeLocale = extends_extends({}, locale_default.Modal);
-
-function changeConfirmLocale(newLocale) {
-  if (newLocale) {
-    runtimeLocale = extends_extends(extends_extends({}, runtimeLocale), newLocale);
-  } else {
-    runtimeLocale = extends_extends({}, locale_default.Modal);
-  }
-}
-function getConfirmLocale() {
-  return runtimeLocale;
-}
-;// CONCATENATED MODULE: ../node_modules/antd/es/_util/styleChecker.js
-
-
-var canUseDocElement = function canUseDocElement() {
-  return canUseDom() && window.document.documentElement;
-};
-
-var flexGapSupported;
-var detectFlexGapSupported = function detectFlexGapSupported() {
-  if (!canUseDocElement()) {
-    return false;
-  }
-
-  if (flexGapSupported !== undefined) {
-    return flexGapSupported;
-  } // create flex container with row-gap set
-
-
-  var flex = document.createElement('div');
-  flex.style.display = 'flex';
-  flex.style.flexDirection = 'column';
-  flex.style.rowGap = '1px'; // create two, elements inside it
-
-  flex.appendChild(document.createElement('div'));
-  flex.appendChild(document.createElement('div')); // append to the DOM (needed to obtain scrollHeight)
-
-  document.body.appendChild(flex);
-  flexGapSupported = flex.scrollHeight === 1; // flex container should be 1px high from the row-gap
-
-  document.body.removeChild(flex);
-  return flexGapSupported;
-};
-;// CONCATENATED MODULE: ../node_modules/antd/es/modal/Modal.js
-
-
-
-var Modal_rest = undefined && undefined.__rest || function (s, e) {
+var Typography_rest = undefined && undefined.__rest || function (s, e) {
   var t = {};
 
   for (var p in s) {
@@ -41502,113 +40587,51 @@ var Modal_rest = undefined && undefined.__rest || function (s, e) {
 
 
 
+var Typography = function Typography(_a, ref) {
+  var customizePrefixCls = _a.prefixCls,
+      _a$component = _a.component,
+      component = _a$component === void 0 ? 'article' : _a$component,
+      className = _a.className,
+      ariaLabel = _a['aria-label'],
+      setContentRef = _a.setContentRef,
+      children = _a.children,
+      restProps = Typography_rest(_a, ["prefixCls", "component", "className", 'aria-label', "setContentRef", "children"]);
 
+  var mergedRef = ref;
 
+  if (setContentRef) {
+    devWarning(false, 'Typography', '`setContentRef` is deprecated. Please use `ref` instead.');
+    mergedRef = composeRef(ref, setContentRef);
+  }
 
-
-
-var mousePosition; // ref: https://github.com/ant-design/ant-design/issues/15795
-
-var getClickPosition = function getClickPosition(e) {
-  mousePosition = {
-    x: e.pageX,
-    y: e.pageY
-  }; // 100ms 内发生过点击事件，则从点击位置动画展示
-  // 否则直接 zoom 展示
-  // 这样可以兼容非点击方式展开
-
-  setTimeout(function () {
-    mousePosition = null;
-  }, 100);
-}; // 只有点击事件支持从鼠标位置动画展开
-
-
-if (canUseDocElement()) {
-  document.documentElement.addEventListener('click', getClickPosition, true);
-}
-
-var Modal = function Modal(props) {
-  var _classNames;
-
-  var _React$useContext = react.useContext(ConfigContext),
-      getContextPopupContainer = _React$useContext.getPopupContainer,
-      getPrefixCls = _React$useContext.getPrefixCls,
-      direction = _React$useContext.direction;
-
-  var handleCancel = function handleCancel(e) {
-    var onCancel = props.onCancel;
-    onCancel === null || onCancel === void 0 ? void 0 : onCancel(e);
-  };
-
-  var handleOk = function handleOk(e) {
-    var onOk = props.onOk;
-    onOk === null || onOk === void 0 ? void 0 : onOk(e);
-  };
-
-  var renderFooter = function renderFooter(locale) {
-    var okText = props.okText,
-        okType = props.okType,
-        cancelText = props.cancelText,
-        confirmLoading = props.confirmLoading;
-    return /*#__PURE__*/react.createElement(react.Fragment, null, /*#__PURE__*/react.createElement(es_button, extends_extends({
-      onClick: handleCancel
-    }, props.cancelButtonProps), cancelText || locale.cancelText), /*#__PURE__*/react.createElement(es_button, extends_extends({}, convertLegacyProps(okType), {
-      loading: confirmLoading,
-      onClick: handleOk
-    }, props.okButtonProps), okText || locale.okText));
-  };
-
-  var customizePrefixCls = props.prefixCls,
-      footer = props.footer,
-      visible = props.visible,
-      wrapClassName = props.wrapClassName,
-      centered = props.centered,
-      getContainer = props.getContainer,
-      closeIcon = props.closeIcon,
-      _props$focusTriggerAf = props.focusTriggerAfterClose,
-      focusTriggerAfterClose = _props$focusTriggerAf === void 0 ? true : _props$focusTriggerAf,
-      restProps = Modal_rest(props, ["prefixCls", "footer", "visible", "wrapClassName", "centered", "getContainer", "closeIcon", "focusTriggerAfterClose"]);
-
-  var prefixCls = getPrefixCls('modal', customizePrefixCls);
-  var rootPrefixCls = getPrefixCls();
-  var defaultFooter = /*#__PURE__*/react.createElement(LocaleReceiver, {
-    componentName: "Modal",
-    defaultLocale: getConfirmLocale()
-  }, renderFooter);
-  var closeIconToRender = /*#__PURE__*/react.createElement("span", {
-    className: "".concat(prefixCls, "-close-x")
-  }, closeIcon || /*#__PURE__*/react.createElement(icons_CloseOutlined, {
-    className: "".concat(prefixCls, "-close-icon")
-  }));
-  var wrapClassNameExtended = classnames_default()(wrapClassName, (_classNames = {}, _defineProperty(_classNames, "".concat(prefixCls, "-centered"), !!centered), _defineProperty(_classNames, "".concat(prefixCls, "-wrap-rtl"), direction === 'rtl'), _classNames));
-  return /*#__PURE__*/react.createElement(rc_dialog_es, extends_extends({}, restProps, {
-    getContainer: getContainer === undefined ? getContextPopupContainer : getContainer,
-    prefixCls: prefixCls,
-    wrapClassName: wrapClassNameExtended,
-    footer: footer === undefined ? defaultFooter : footer,
-    visible: visible,
-    mousePosition: mousePosition,
-    onClose: handleCancel,
-    closeIcon: closeIconToRender,
-    focusTriggerAfterClose: focusTriggerAfterClose,
-    transitionName: motion_getTransitionName(rootPrefixCls, 'zoom', props.transitionName),
-    maskTransitionName: motion_getTransitionName(rootPrefixCls, 'fade', props.maskTransitionName)
-  }));
+  return /*#__PURE__*/react.createElement(ConfigConsumer, null, function (_ref) {
+    var getPrefixCls = _ref.getPrefixCls,
+        direction = _ref.direction;
+    var Component = component;
+    var prefixCls = getPrefixCls('typography', customizePrefixCls);
+    var componentClassName = classnames_default()(prefixCls, _defineProperty({}, "".concat(prefixCls, "-rtl"), direction === 'rtl'), className);
+    return /*#__PURE__*/react.createElement(Component, extends_extends({
+      className: componentClassName,
+      "aria-label": ariaLabel,
+      ref: mergedRef
+    }, restProps), children);
+  });
 };
 
-Modal.defaultProps = {
-  width: 520,
-  confirmLoading: false,
-  visible: false,
-  okType: 'primary'
-};
-/* harmony default export */ const modal_Modal = (Modal);
-;// CONCATENATED MODULE: ../node_modules/@ant-design/icons-svg/es/asn/InfoCircleOutlined.js
+var RefTypography = /*#__PURE__*/react.forwardRef(Typography);
+RefTypography.displayName = 'Typography'; // es default export should use const instead of let
+
+var ExportTypography = RefTypography;
+/* harmony default export */ const typography_Typography = (ExportTypography);
+// EXTERNAL MODULE: ../node_modules/copy-to-clipboard/index.js
+var copy_to_clipboard = __webpack_require__(6012);
+var copy_to_clipboard_default = /*#__PURE__*/__webpack_require__.n(copy_to_clipboard);
+;// CONCATENATED MODULE: ../node_modules/@ant-design/icons-svg/es/asn/EditOutlined.js
 // This icon file is generated automatically.
-var InfoCircleOutlined = { "icon": { "tag": "svg", "attrs": { "viewBox": "64 64 896 896", "focusable": "false" }, "children": [{ "tag": "path", "attrs": { "d": "M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64zm0 820c-205.4 0-372-166.6-372-372s166.6-372 372-372 372 166.6 372 372-166.6 372-372 372z" } }, { "tag": "path", "attrs": { "d": "M464 336a48 48 0 1096 0 48 48 0 10-96 0zm72 112h-48c-4.4 0-8 3.6-8 8v272c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8V456c0-4.4-3.6-8-8-8z" } }] }, "name": "info-circle", "theme": "outlined" };
-/* harmony default export */ const asn_InfoCircleOutlined = (InfoCircleOutlined);
+var EditOutlined = { "icon": { "tag": "svg", "attrs": { "viewBox": "64 64 896 896", "focusable": "false" }, "children": [{ "tag": "path", "attrs": { "d": "M257.7 752c2 0 4-.2 6-.5L431.9 722c2-.4 3.9-1.3 5.3-2.8l423.9-423.9a9.96 9.96 0 000-14.1L694.9 114.9c-1.9-1.9-4.4-2.9-7.1-2.9s-5.2 1-7.1 2.9L256.8 538.8c-1.5 1.5-2.4 3.3-2.8 5.3l-29.5 168.2a33.5 33.5 0 009.4 29.8c6.6 6.4 14.9 9.9 23.8 9.9zm67.4-174.4L687.8 215l73.3 73.3-362.7 362.6-88.9 15.7 15.6-89zM880 836H144c-17.7 0-32 14.3-32 32v36c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-36c0-17.7-14.3-32-32-32z" } }] }, "name": "edit", "theme": "outlined" };
+/* harmony default export */ const asn_EditOutlined = (EditOutlined);
 
-;// CONCATENATED MODULE: ../node_modules/@ant-design/icons/es/icons/InfoCircleOutlined.js
+;// CONCATENATED MODULE: ../node_modules/@ant-design/icons/es/icons/EditOutlined.js
 
 // GENERATE BY ./scripts/generate.ts
 // DON NOT EDIT IT MANUALLY
@@ -41616,21 +40639,21 @@ var InfoCircleOutlined = { "icon": { "tag": "svg", "attrs": { "viewBox": "64 64 
 
 
 
-var InfoCircleOutlined_InfoCircleOutlined = function InfoCircleOutlined(props, ref) {
+var EditOutlined_EditOutlined = function EditOutlined(props, ref) {
   return /*#__PURE__*/react.createElement(AntdIcon, _objectSpread2(_objectSpread2({}, props), {}, {
     ref: ref,
-    icon: asn_InfoCircleOutlined
+    icon: asn_EditOutlined
   }));
 };
 
-InfoCircleOutlined_InfoCircleOutlined.displayName = 'InfoCircleOutlined';
-/* harmony default export */ const icons_InfoCircleOutlined = (/*#__PURE__*/react.forwardRef(InfoCircleOutlined_InfoCircleOutlined));
-;// CONCATENATED MODULE: ../node_modules/@ant-design/icons-svg/es/asn/CheckCircleOutlined.js
+EditOutlined_EditOutlined.displayName = 'EditOutlined';
+/* harmony default export */ const icons_EditOutlined = (/*#__PURE__*/react.forwardRef(EditOutlined_EditOutlined));
+;// CONCATENATED MODULE: ../node_modules/@ant-design/icons-svg/es/asn/CopyOutlined.js
 // This icon file is generated automatically.
-var CheckCircleOutlined = { "icon": { "tag": "svg", "attrs": { "viewBox": "64 64 896 896", "focusable": "false" }, "children": [{ "tag": "path", "attrs": { "d": "M699 353h-46.9c-10.2 0-19.9 4.9-25.9 13.3L469 584.3l-71.2-98.8c-6-8.3-15.6-13.3-25.9-13.3H325c-6.5 0-10.3 7.4-6.5 12.7l124.6 172.8a31.8 31.8 0 0051.7 0l210.6-292c3.9-5.3.1-12.7-6.4-12.7z" } }, { "tag": "path", "attrs": { "d": "M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64zm0 820c-205.4 0-372-166.6-372-372s166.6-372 372-372 372 166.6 372 372-166.6 372-372 372z" } }] }, "name": "check-circle", "theme": "outlined" };
-/* harmony default export */ const asn_CheckCircleOutlined = (CheckCircleOutlined);
+var CopyOutlined = { "icon": { "tag": "svg", "attrs": { "viewBox": "64 64 896 896", "focusable": "false" }, "children": [{ "tag": "path", "attrs": { "d": "M832 64H296c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h496v688c0 4.4 3.6 8 8 8h56c4.4 0 8-3.6 8-8V96c0-17.7-14.3-32-32-32zM704 192H192c-17.7 0-32 14.3-32 32v530.7c0 8.5 3.4 16.6 9.4 22.6l173.3 173.3c2.2 2.2 4.7 4 7.4 5.5v1.9h4.2c3.5 1.3 7.2 2 11 2H704c17.7 0 32-14.3 32-32V224c0-17.7-14.3-32-32-32zM350 856.2L263.9 770H350v86.2zM664 888H414V746c0-22.1-17.9-40-40-40H232V264h432v624z" } }] }, "name": "copy", "theme": "outlined" };
+/* harmony default export */ const asn_CopyOutlined = (CopyOutlined);
 
-;// CONCATENATED MODULE: ../node_modules/@ant-design/icons/es/icons/CheckCircleOutlined.js
+;// CONCATENATED MODULE: ../node_modules/@ant-design/icons/es/icons/CopyOutlined.js
 
 // GENERATE BY ./scripts/generate.ts
 // DON NOT EDIT IT MANUALLY
@@ -41638,194 +40661,15 @@ var CheckCircleOutlined = { "icon": { "tag": "svg", "attrs": { "viewBox": "64 64
 
 
 
-var CheckCircleOutlined_CheckCircleOutlined = function CheckCircleOutlined(props, ref) {
+var CopyOutlined_CopyOutlined = function CopyOutlined(props, ref) {
   return /*#__PURE__*/react.createElement(AntdIcon, _objectSpread2(_objectSpread2({}, props), {}, {
     ref: ref,
-    icon: asn_CheckCircleOutlined
+    icon: asn_CopyOutlined
   }));
 };
 
-CheckCircleOutlined_CheckCircleOutlined.displayName = 'CheckCircleOutlined';
-/* harmony default export */ const icons_CheckCircleOutlined = (/*#__PURE__*/react.forwardRef(CheckCircleOutlined_CheckCircleOutlined));
-;// CONCATENATED MODULE: ../node_modules/@ant-design/icons-svg/es/asn/CloseCircleOutlined.js
-// This icon file is generated automatically.
-var CloseCircleOutlined = { "icon": { "tag": "svg", "attrs": { "viewBox": "64 64 896 896", "focusable": "false" }, "children": [{ "tag": "path", "attrs": { "d": "M685.4 354.8c0-4.4-3.6-8-8-8l-66 .3L512 465.6l-99.3-118.4-66.1-.3c-4.4 0-8 3.5-8 8 0 1.9.7 3.7 1.9 5.2l130.1 155L340.5 670a8.32 8.32 0 00-1.9 5.2c0 4.4 3.6 8 8 8l66.1-.3L512 564.4l99.3 118.4 66 .3c4.4 0 8-3.5 8-8 0-1.9-.7-3.7-1.9-5.2L553.5 515l130.1-155c1.2-1.4 1.8-3.3 1.8-5.2z" } }, { "tag": "path", "attrs": { "d": "M512 65C264.6 65 64 265.6 64 513s200.6 448 448 448 448-200.6 448-448S759.4 65 512 65zm0 820c-205.4 0-372-166.6-372-372s166.6-372 372-372 372 166.6 372 372-166.6 372-372 372z" } }] }, "name": "close-circle", "theme": "outlined" };
-/* harmony default export */ const asn_CloseCircleOutlined = (CloseCircleOutlined);
-
-;// CONCATENATED MODULE: ../node_modules/@ant-design/icons/es/icons/CloseCircleOutlined.js
-
-// GENERATE BY ./scripts/generate.ts
-// DON NOT EDIT IT MANUALLY
-
-
-
-
-var CloseCircleOutlined_CloseCircleOutlined = function CloseCircleOutlined(props, ref) {
-  return /*#__PURE__*/react.createElement(AntdIcon, _objectSpread2(_objectSpread2({}, props), {}, {
-    ref: ref,
-    icon: asn_CloseCircleOutlined
-  }));
-};
-
-CloseCircleOutlined_CloseCircleOutlined.displayName = 'CloseCircleOutlined';
-/* harmony default export */ const icons_CloseCircleOutlined = (/*#__PURE__*/react.forwardRef(CloseCircleOutlined_CloseCircleOutlined));
-;// CONCATENATED MODULE: ../node_modules/@ant-design/icons-svg/es/asn/ExclamationCircleOutlined.js
-// This icon file is generated automatically.
-var ExclamationCircleOutlined = { "icon": { "tag": "svg", "attrs": { "viewBox": "64 64 896 896", "focusable": "false" }, "children": [{ "tag": "path", "attrs": { "d": "M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64zm0 820c-205.4 0-372-166.6-372-372s166.6-372 372-372 372 166.6 372 372-166.6 372-372 372z" } }, { "tag": "path", "attrs": { "d": "M464 688a48 48 0 1096 0 48 48 0 10-96 0zm24-112h48c4.4 0 8-3.6 8-8V296c0-4.4-3.6-8-8-8h-48c-4.4 0-8 3.6-8 8v272c0 4.4 3.6 8 8 8z" } }] }, "name": "exclamation-circle", "theme": "outlined" };
-/* harmony default export */ const asn_ExclamationCircleOutlined = (ExclamationCircleOutlined);
-
-;// CONCATENATED MODULE: ../node_modules/@ant-design/icons/es/icons/ExclamationCircleOutlined.js
-
-// GENERATE BY ./scripts/generate.ts
-// DON NOT EDIT IT MANUALLY
-
-
-
-
-var ExclamationCircleOutlined_ExclamationCircleOutlined = function ExclamationCircleOutlined(props, ref) {
-  return /*#__PURE__*/react.createElement(AntdIcon, _objectSpread2(_objectSpread2({}, props), {}, {
-    ref: ref,
-    icon: asn_ExclamationCircleOutlined
-  }));
-};
-
-ExclamationCircleOutlined_ExclamationCircleOutlined.displayName = 'ExclamationCircleOutlined';
-/* harmony default export */ const icons_ExclamationCircleOutlined = (/*#__PURE__*/react.forwardRef(ExclamationCircleOutlined_ExclamationCircleOutlined));
-;// CONCATENATED MODULE: ../node_modules/antd/es/_util/hooks/useDestroyed.js
-
-function useDestroyed() {
-  var mountedRef = react.useRef(true);
-  react.useEffect(function () {
-    return function () {
-      mountedRef.current = false;
-    };
-  }, []);
-  return function () {
-    return !mountedRef.current;
-  };
-}
-;// CONCATENATED MODULE: ../node_modules/antd/es/_util/ActionButton.js
-
-
-
-
-
-
-
-function isThenable(thing) {
-  return !!(thing && !!thing.then);
-}
-
-var ActionButton = function ActionButton(props) {
-  var clickedRef = react.useRef(false);
-  var ref = react.useRef();
-  var isDestroyed = useDestroyed();
-
-  var _React$useState = react.useState(false),
-      _React$useState2 = _slicedToArray(_React$useState, 2),
-      loading = _React$useState2[0],
-      setLoading = _React$useState2[1];
-
-  react.useEffect(function () {
-    var timeoutId;
-
-    if (props.autoFocus) {
-      var $this = ref.current;
-      timeoutId = setTimeout(function () {
-        return $this.focus();
-      });
-    }
-
-    return function () {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-    };
-  }, []);
-
-  var handlePromiseOnOk = function handlePromiseOnOk(returnValueOfOnOk) {
-    var close = props.close;
-
-    if (!isThenable(returnValueOfOnOk)) {
-      return;
-    }
-
-    setLoading(true);
-    returnValueOfOnOk.then(function () {
-      if (!isDestroyed()) {
-        setLoading(false);
-      }
-
-      close.apply(void 0, arguments);
-      clickedRef.current = false;
-    }, function (e) {
-      // Emit error when catch promise reject
-      // eslint-disable-next-line no-console
-      console.error(e); // See: https://github.com/ant-design/ant-design/issues/6183
-
-      if (!isDestroyed()) {
-        setLoading(false);
-      }
-
-      clickedRef.current = false;
-    });
-  };
-
-  var onClick = function onClick(e) {
-    var actionFn = props.actionFn,
-        close = props.close;
-
-    if (clickedRef.current) {
-      return;
-    }
-
-    clickedRef.current = true;
-
-    if (!actionFn) {
-      close();
-      return;
-    }
-
-    var returnValueOfOnOk;
-
-    if (props.emitEvent) {
-      returnValueOfOnOk = actionFn(e);
-
-      if (props.quitOnNullishReturnValue && !isThenable(returnValueOfOnOk)) {
-        clickedRef.current = false;
-        close(e);
-        return;
-      }
-    } else if (actionFn.length) {
-      returnValueOfOnOk = actionFn(close); // https://github.com/ant-design/ant-design/issues/23358
-
-      clickedRef.current = false;
-    } else {
-      returnValueOfOnOk = actionFn();
-
-      if (!returnValueOfOnOk) {
-        close();
-        return;
-      }
-    }
-
-    handlePromiseOnOk(returnValueOfOnOk);
-  };
-
-  var type = props.type,
-      children = props.children,
-      prefixCls = props.prefixCls,
-      buttonProps = props.buttonProps;
-  return /*#__PURE__*/react.createElement(es_button, extends_extends({}, convertLegacyProps(type), {
-    onClick: onClick,
-    loading: loading,
-    prefixCls: prefixCls
-  }, buttonProps, {
-    ref: ref
-  }), children);
-};
-
-/* harmony default export */ const _util_ActionButton = (ActionButton);
+CopyOutlined_CopyOutlined.displayName = 'CopyOutlined';
+/* harmony default export */ const icons_CopyOutlined = (/*#__PURE__*/react.forwardRef(CopyOutlined_CopyOutlined));
 ;// CONCATENATED MODULE: ../node_modules/rc-field-form/es/FieldContext.js
 
 
@@ -45836,6 +44680,22 @@ function memoizeOne(resultFn, isEqual) {
 
 
 
+;// CONCATENATED MODULE: ../node_modules/antd/es/modal/locale.js
+
+
+
+var runtimeLocale = extends_extends({}, locale_default.Modal);
+
+function changeConfirmLocale(newLocale) {
+  if (newLocale) {
+    runtimeLocale = extends_extends(extends_extends({}, runtimeLocale), newLocale);
+  } else {
+    runtimeLocale = extends_extends({}, locale_default.Modal);
+  }
+}
+function getConfirmLocale() {
+  return runtimeLocale;
+}
 ;// CONCATENATED MODULE: ../node_modules/antd/es/locale-provider/index.js
 
 
@@ -46776,6 +45636,94 @@ var getInstance = function getInstance() {
   return  false ? 0 : null;
 };
 /* harmony default export */ const message = (api);
+;// CONCATENATED MODULE: ../node_modules/@ant-design/icons-svg/es/asn/CheckCircleOutlined.js
+// This icon file is generated automatically.
+var CheckCircleOutlined = { "icon": { "tag": "svg", "attrs": { "viewBox": "64 64 896 896", "focusable": "false" }, "children": [{ "tag": "path", "attrs": { "d": "M699 353h-46.9c-10.2 0-19.9 4.9-25.9 13.3L469 584.3l-71.2-98.8c-6-8.3-15.6-13.3-25.9-13.3H325c-6.5 0-10.3 7.4-6.5 12.7l124.6 172.8a31.8 31.8 0 0051.7 0l210.6-292c3.9-5.3.1-12.7-6.4-12.7z" } }, { "tag": "path", "attrs": { "d": "M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64zm0 820c-205.4 0-372-166.6-372-372s166.6-372 372-372 372 166.6 372 372-166.6 372-372 372z" } }] }, "name": "check-circle", "theme": "outlined" };
+/* harmony default export */ const asn_CheckCircleOutlined = (CheckCircleOutlined);
+
+;// CONCATENATED MODULE: ../node_modules/@ant-design/icons/es/icons/CheckCircleOutlined.js
+
+// GENERATE BY ./scripts/generate.ts
+// DON NOT EDIT IT MANUALLY
+
+
+
+
+var CheckCircleOutlined_CheckCircleOutlined = function CheckCircleOutlined(props, ref) {
+  return /*#__PURE__*/react.createElement(AntdIcon, _objectSpread2(_objectSpread2({}, props), {}, {
+    ref: ref,
+    icon: asn_CheckCircleOutlined
+  }));
+};
+
+CheckCircleOutlined_CheckCircleOutlined.displayName = 'CheckCircleOutlined';
+/* harmony default export */ const icons_CheckCircleOutlined = (/*#__PURE__*/react.forwardRef(CheckCircleOutlined_CheckCircleOutlined));
+;// CONCATENATED MODULE: ../node_modules/@ant-design/icons-svg/es/asn/CloseCircleOutlined.js
+// This icon file is generated automatically.
+var CloseCircleOutlined = { "icon": { "tag": "svg", "attrs": { "viewBox": "64 64 896 896", "focusable": "false" }, "children": [{ "tag": "path", "attrs": { "d": "M685.4 354.8c0-4.4-3.6-8-8-8l-66 .3L512 465.6l-99.3-118.4-66.1-.3c-4.4 0-8 3.5-8 8 0 1.9.7 3.7 1.9 5.2l130.1 155L340.5 670a8.32 8.32 0 00-1.9 5.2c0 4.4 3.6 8 8 8l66.1-.3L512 564.4l99.3 118.4 66 .3c4.4 0 8-3.5 8-8 0-1.9-.7-3.7-1.9-5.2L553.5 515l130.1-155c1.2-1.4 1.8-3.3 1.8-5.2z" } }, { "tag": "path", "attrs": { "d": "M512 65C264.6 65 64 265.6 64 513s200.6 448 448 448 448-200.6 448-448S759.4 65 512 65zm0 820c-205.4 0-372-166.6-372-372s166.6-372 372-372 372 166.6 372 372-166.6 372-372 372z" } }] }, "name": "close-circle", "theme": "outlined" };
+/* harmony default export */ const asn_CloseCircleOutlined = (CloseCircleOutlined);
+
+;// CONCATENATED MODULE: ../node_modules/@ant-design/icons/es/icons/CloseCircleOutlined.js
+
+// GENERATE BY ./scripts/generate.ts
+// DON NOT EDIT IT MANUALLY
+
+
+
+
+var CloseCircleOutlined_CloseCircleOutlined = function CloseCircleOutlined(props, ref) {
+  return /*#__PURE__*/react.createElement(AntdIcon, _objectSpread2(_objectSpread2({}, props), {}, {
+    ref: ref,
+    icon: asn_CloseCircleOutlined
+  }));
+};
+
+CloseCircleOutlined_CloseCircleOutlined.displayName = 'CloseCircleOutlined';
+/* harmony default export */ const icons_CloseCircleOutlined = (/*#__PURE__*/react.forwardRef(CloseCircleOutlined_CloseCircleOutlined));
+;// CONCATENATED MODULE: ../node_modules/@ant-design/icons-svg/es/asn/ExclamationCircleOutlined.js
+// This icon file is generated automatically.
+var ExclamationCircleOutlined = { "icon": { "tag": "svg", "attrs": { "viewBox": "64 64 896 896", "focusable": "false" }, "children": [{ "tag": "path", "attrs": { "d": "M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64zm0 820c-205.4 0-372-166.6-372-372s166.6-372 372-372 372 166.6 372 372-166.6 372-372 372z" } }, { "tag": "path", "attrs": { "d": "M464 688a48 48 0 1096 0 48 48 0 10-96 0zm24-112h48c4.4 0 8-3.6 8-8V296c0-4.4-3.6-8-8-8h-48c-4.4 0-8 3.6-8 8v272c0 4.4 3.6 8 8 8z" } }] }, "name": "exclamation-circle", "theme": "outlined" };
+/* harmony default export */ const asn_ExclamationCircleOutlined = (ExclamationCircleOutlined);
+
+;// CONCATENATED MODULE: ../node_modules/@ant-design/icons/es/icons/ExclamationCircleOutlined.js
+
+// GENERATE BY ./scripts/generate.ts
+// DON NOT EDIT IT MANUALLY
+
+
+
+
+var ExclamationCircleOutlined_ExclamationCircleOutlined = function ExclamationCircleOutlined(props, ref) {
+  return /*#__PURE__*/react.createElement(AntdIcon, _objectSpread2(_objectSpread2({}, props), {}, {
+    ref: ref,
+    icon: asn_ExclamationCircleOutlined
+  }));
+};
+
+ExclamationCircleOutlined_ExclamationCircleOutlined.displayName = 'ExclamationCircleOutlined';
+/* harmony default export */ const icons_ExclamationCircleOutlined = (/*#__PURE__*/react.forwardRef(ExclamationCircleOutlined_ExclamationCircleOutlined));
+;// CONCATENATED MODULE: ../node_modules/@ant-design/icons-svg/es/asn/InfoCircleOutlined.js
+// This icon file is generated automatically.
+var InfoCircleOutlined = { "icon": { "tag": "svg", "attrs": { "viewBox": "64 64 896 896", "focusable": "false" }, "children": [{ "tag": "path", "attrs": { "d": "M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64zm0 820c-205.4 0-372-166.6-372-372s166.6-372 372-372 372 166.6 372 372-166.6 372-372 372z" } }, { "tag": "path", "attrs": { "d": "M464 336a48 48 0 1096 0 48 48 0 10-96 0zm72 112h-48c-4.4 0-8 3.6-8 8v272c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8V456c0-4.4-3.6-8-8-8z" } }] }, "name": "info-circle", "theme": "outlined" };
+/* harmony default export */ const asn_InfoCircleOutlined = (InfoCircleOutlined);
+
+;// CONCATENATED MODULE: ../node_modules/@ant-design/icons/es/icons/InfoCircleOutlined.js
+
+// GENERATE BY ./scripts/generate.ts
+// DON NOT EDIT IT MANUALLY
+
+
+
+
+var InfoCircleOutlined_InfoCircleOutlined = function InfoCircleOutlined(props, ref) {
+  return /*#__PURE__*/react.createElement(AntdIcon, _objectSpread2(_objectSpread2({}, props), {}, {
+    ref: ref,
+    icon: asn_InfoCircleOutlined
+  }));
+};
+
+InfoCircleOutlined_InfoCircleOutlined.displayName = 'InfoCircleOutlined';
+/* harmony default export */ const icons_InfoCircleOutlined = (/*#__PURE__*/react.forwardRef(InfoCircleOutlined_InfoCircleOutlined));
 ;// CONCATENATED MODULE: ../node_modules/antd/es/notification/hooks/useNotification.js
 
 
@@ -47745,7 +46693,7 @@ function registerTheme(globalPrefixCls, theme) {
 
 
 
-var configConsumerProps = (/* unused pure expression or super */ null && (['getTargetContainer', 'getPopupContainer', 'rootPrefixCls', 'getPrefixCls', 'renderEmpty', 'csp', 'autoInsertSpaceInButton', 'locale', 'pageHeader'])); // These props is used by `useContext` directly in sub component
+var configConsumerProps = ['getTargetContainer', 'getPopupContainer', 'rootPrefixCls', 'getPrefixCls', 'renderEmpty', 'csp', 'autoInsertSpaceInButton', 'locale', 'pageHeader']; // These props is used by `useContext` directly in sub component
 
 var PASSED_PROPS = ['getTargetContainer', 'getPopupContainer', 'renderEmpty', 'pageHeader', 'input', 'form'];
 var config_provider_defaultPrefixCls = 'ant';
@@ -47936,6 +46884,3062 @@ ConfigProvider.ConfigContext = ConfigContext;
 ConfigProvider.SizeContext = config_provider_SizeContext;
 ConfigProvider.config = setGlobalConfig;
 /* harmony default export */ const config_provider = (ConfigProvider);
+;// CONCATENATED MODULE: ../node_modules/antd/es/_util/transButton.js
+
+
+var transButton_rest = undefined && undefined.__rest || function (s, e) {
+  var t = {};
+
+  for (var p in s) {
+    if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0) t[p] = s[p];
+  }
+
+  if (s != null && typeof Object.getOwnPropertySymbols === "function") for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+    if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i])) t[p[i]] = s[p[i]];
+  }
+  return t;
+};
+/**
+ * Wrap of sub component which need use as Button capacity (like Icon component).
+ *
+ * This helps accessibility reader to tread as a interactive button to operation.
+ */
+
+
+
+
+var inlineStyle = {
+  border: 0,
+  background: 'transparent',
+  padding: 0,
+  lineHeight: 'inherit',
+  display: 'inline-block'
+};
+var TransButton = /*#__PURE__*/react.forwardRef(function (props, ref) {
+  var onKeyDown = function onKeyDown(event) {
+    var keyCode = event.keyCode;
+
+    if (keyCode === es_KeyCode.ENTER) {
+      event.preventDefault();
+    }
+  };
+
+  var onKeyUp = function onKeyUp(event) {
+    var keyCode = event.keyCode;
+    var onClick = props.onClick;
+
+    if (keyCode === es_KeyCode.ENTER && onClick) {
+      onClick();
+    }
+  };
+
+  var style = props.style,
+      noStyle = props.noStyle,
+      disabled = props.disabled,
+      restProps = transButton_rest(props, ["style", "noStyle", "disabled"]);
+
+  var mergedStyle = {};
+
+  if (!noStyle) {
+    mergedStyle = extends_extends({}, inlineStyle);
+  }
+
+  if (disabled) {
+    mergedStyle.pointerEvents = 'none';
+  }
+
+  mergedStyle = extends_extends(extends_extends({}, mergedStyle), style);
+  return /*#__PURE__*/react.createElement("div", extends_extends({
+    role: "button",
+    tabIndex: 0,
+    ref: ref
+  }, restProps, {
+    onKeyDown: onKeyDown,
+    onKeyUp: onKeyUp,
+    style: mergedStyle
+  }));
+});
+/* harmony default export */ const transButton = (TransButton);
+;// CONCATENATED MODULE: ../node_modules/rc-util/es/Dom/styleChecker.js
+
+
+var isStyleNameSupport = function isStyleNameSupport(styleName) {
+  if (canUseDom() && window.document.documentElement) {
+    var styleNameList = Array.isArray(styleName) ? styleName : [styleName];
+    var documentElement = window.document.documentElement;
+    return styleNameList.some(function (name) {
+      return name in documentElement.style;
+    });
+  }
+
+  return false;
+};
+
+var isStyleValueSupport = function isStyleValueSupport(styleName, value) {
+  if (!isStyleNameSupport(styleName)) {
+    return false;
+  }
+
+  var ele = document.createElement('div');
+  var origin = ele.style[styleName];
+  ele.style[styleName] = value;
+  return ele.style[styleName] !== origin;
+};
+
+function isStyleSupport(styleName, styleValue) {
+  if (!Array.isArray(styleName) && styleValue !== undefined) {
+    return isStyleValueSupport(styleName, styleValue);
+  }
+
+  return isStyleNameSupport(styleName);
+}
+;// CONCATENATED MODULE: ../node_modules/rc-tooltip/es/placements.js
+var autoAdjustOverflow = {
+  adjustX: 1,
+  adjustY: 1
+};
+var targetOffset = [0, 0];
+var placements = {
+  left: {
+    points: ['cr', 'cl'],
+    overflow: autoAdjustOverflow,
+    offset: [-4, 0],
+    targetOffset: targetOffset
+  },
+  right: {
+    points: ['cl', 'cr'],
+    overflow: autoAdjustOverflow,
+    offset: [4, 0],
+    targetOffset: targetOffset
+  },
+  top: {
+    points: ['bc', 'tc'],
+    overflow: autoAdjustOverflow,
+    offset: [0, -4],
+    targetOffset: targetOffset
+  },
+  bottom: {
+    points: ['tc', 'bc'],
+    overflow: autoAdjustOverflow,
+    offset: [0, 4],
+    targetOffset: targetOffset
+  },
+  topLeft: {
+    points: ['bl', 'tl'],
+    overflow: autoAdjustOverflow,
+    offset: [0, -4],
+    targetOffset: targetOffset
+  },
+  leftTop: {
+    points: ['tr', 'tl'],
+    overflow: autoAdjustOverflow,
+    offset: [-4, 0],
+    targetOffset: targetOffset
+  },
+  topRight: {
+    points: ['br', 'tr'],
+    overflow: autoAdjustOverflow,
+    offset: [0, -4],
+    targetOffset: targetOffset
+  },
+  rightTop: {
+    points: ['tl', 'tr'],
+    overflow: autoAdjustOverflow,
+    offset: [4, 0],
+    targetOffset: targetOffset
+  },
+  bottomRight: {
+    points: ['tr', 'br'],
+    overflow: autoAdjustOverflow,
+    offset: [0, 4],
+    targetOffset: targetOffset
+  },
+  rightBottom: {
+    points: ['bl', 'br'],
+    overflow: autoAdjustOverflow,
+    offset: [4, 0],
+    targetOffset: targetOffset
+  },
+  bottomLeft: {
+    points: ['tl', 'bl'],
+    overflow: autoAdjustOverflow,
+    offset: [0, 4],
+    targetOffset: targetOffset
+  },
+  leftBottom: {
+    points: ['br', 'bl'],
+    overflow: autoAdjustOverflow,
+    offset: [-4, 0],
+    targetOffset: targetOffset
+  }
+};
+/* harmony default export */ const es_placements = ((/* unused pure expression or super */ null && (placements)));
+;// CONCATENATED MODULE: ../node_modules/rc-tooltip/es/Content.js
+
+
+var Content = function Content(props) {
+  var overlay = props.overlay,
+      prefixCls = props.prefixCls,
+      id = props.id,
+      overlayInnerStyle = props.overlayInnerStyle;
+  return /*#__PURE__*/react.createElement("div", {
+    className: "".concat(prefixCls, "-inner"),
+    id: id,
+    role: "tooltip",
+    style: overlayInnerStyle
+  }, typeof overlay === 'function' ? overlay() : overlay);
+};
+
+/* harmony default export */ const es_Content = (Content);
+;// CONCATENATED MODULE: ../node_modules/rc-tooltip/es/Tooltip.js
+
+
+
+
+
+
+
+
+
+
+var Tooltip = function Tooltip(props, ref) {
+  var overlayClassName = props.overlayClassName,
+      _props$trigger = props.trigger,
+      trigger = _props$trigger === void 0 ? ['hover'] : _props$trigger,
+      _props$mouseEnterDela = props.mouseEnterDelay,
+      mouseEnterDelay = _props$mouseEnterDela === void 0 ? 0 : _props$mouseEnterDela,
+      _props$mouseLeaveDela = props.mouseLeaveDelay,
+      mouseLeaveDelay = _props$mouseLeaveDela === void 0 ? 0.1 : _props$mouseLeaveDela,
+      overlayStyle = props.overlayStyle,
+      _props$prefixCls = props.prefixCls,
+      prefixCls = _props$prefixCls === void 0 ? 'rc-tooltip' : _props$prefixCls,
+      children = props.children,
+      onVisibleChange = props.onVisibleChange,
+      afterVisibleChange = props.afterVisibleChange,
+      transitionName = props.transitionName,
+      animation = props.animation,
+      motion = props.motion,
+      _props$placement = props.placement,
+      placement = _props$placement === void 0 ? 'right' : _props$placement,
+      _props$align = props.align,
+      align = _props$align === void 0 ? {} : _props$align,
+      _props$destroyTooltip = props.destroyTooltipOnHide,
+      destroyTooltipOnHide = _props$destroyTooltip === void 0 ? false : _props$destroyTooltip,
+      defaultVisible = props.defaultVisible,
+      getTooltipContainer = props.getTooltipContainer,
+      overlayInnerStyle = props.overlayInnerStyle,
+      restProps = objectWithoutProperties_objectWithoutProperties(props, ["overlayClassName", "trigger", "mouseEnterDelay", "mouseLeaveDelay", "overlayStyle", "prefixCls", "children", "onVisibleChange", "afterVisibleChange", "transitionName", "animation", "motion", "placement", "align", "destroyTooltipOnHide", "defaultVisible", "getTooltipContainer", "overlayInnerStyle"]);
+
+  var domRef = (0,react.useRef)(null);
+  (0,react.useImperativeHandle)(ref, function () {
+    return domRef.current;
+  });
+
+  var extraProps = _objectSpread2({}, restProps);
+
+  if ('visible' in props) {
+    extraProps.popupVisible = props.visible;
+  }
+
+  var getPopupElement = function getPopupElement() {
+    var _props$arrowContent = props.arrowContent,
+        arrowContent = _props$arrowContent === void 0 ? null : _props$arrowContent,
+        overlay = props.overlay,
+        id = props.id;
+    return [/*#__PURE__*/react.createElement("div", {
+      className: "".concat(prefixCls, "-arrow"),
+      key: "arrow"
+    }, arrowContent), /*#__PURE__*/react.createElement(es_Content, {
+      key: "content",
+      prefixCls: prefixCls,
+      id: id,
+      overlay: overlay,
+      overlayInnerStyle: overlayInnerStyle
+    })];
+  };
+
+  var destroyTooltip = false;
+  var autoDestroy = false;
+
+  if (typeof destroyTooltipOnHide === 'boolean') {
+    destroyTooltip = destroyTooltipOnHide;
+  } else if (destroyTooltipOnHide && typeof_typeof(destroyTooltipOnHide) === 'object') {
+    var keepParent = destroyTooltipOnHide.keepParent;
+    destroyTooltip = keepParent === true;
+    autoDestroy = keepParent === false;
+  }
+
+  return /*#__PURE__*/react.createElement(rc_trigger_es, extends_extends({
+    popupClassName: overlayClassName,
+    prefixCls: prefixCls,
+    popup: getPopupElement,
+    action: trigger,
+    builtinPlacements: placements,
+    popupPlacement: placement,
+    ref: domRef,
+    popupAlign: align,
+    getPopupContainer: getTooltipContainer,
+    onPopupVisibleChange: onVisibleChange,
+    afterPopupVisibleChange: afterVisibleChange,
+    popupTransitionName: transitionName,
+    popupAnimation: animation,
+    popupMotion: motion,
+    defaultPopupVisible: defaultVisible,
+    destroyPopupOnHide: destroyTooltip,
+    autoDestroy: autoDestroy,
+    mouseLeaveDelay: mouseLeaveDelay,
+    popupStyle: overlayStyle,
+    mouseEnterDelay: mouseEnterDelay
+  }, extraProps), children);
+};
+
+/* harmony default export */ const es_Tooltip = (/*#__PURE__*/(0,react.forwardRef)(Tooltip));
+;// CONCATENATED MODULE: ../node_modules/rc-tooltip/es/index.js
+
+/* harmony default export */ const rc_tooltip_es = (es_Tooltip);
+;// CONCATENATED MODULE: ../node_modules/antd/es/tooltip/placements.js
+
+
+var autoAdjustOverflowEnabled = {
+  adjustX: 1,
+  adjustY: 1
+};
+var autoAdjustOverflowDisabled = {
+  adjustX: 0,
+  adjustY: 0
+};
+var placements_targetOffset = [0, 0];
+function getOverflowOptions(autoAdjustOverflow) {
+  if (typeof autoAdjustOverflow === 'boolean') {
+    return autoAdjustOverflow ? autoAdjustOverflowEnabled : autoAdjustOverflowDisabled;
+  }
+
+  return extends_extends(extends_extends({}, autoAdjustOverflowDisabled), autoAdjustOverflow);
+}
+function getPlacements(config) {
+  var _config$arrowWidth = config.arrowWidth,
+      arrowWidth = _config$arrowWidth === void 0 ? 4 : _config$arrowWidth,
+      _config$horizontalArr = config.horizontalArrowShift,
+      horizontalArrowShift = _config$horizontalArr === void 0 ? 16 : _config$horizontalArr,
+      _config$verticalArrow = config.verticalArrowShift,
+      verticalArrowShift = _config$verticalArrow === void 0 ? 8 : _config$verticalArrow,
+      autoAdjustOverflow = config.autoAdjustOverflow;
+  var placementMap = {
+    left: {
+      points: ['cr', 'cl'],
+      offset: [-4, 0]
+    },
+    right: {
+      points: ['cl', 'cr'],
+      offset: [4, 0]
+    },
+    top: {
+      points: ['bc', 'tc'],
+      offset: [0, -4]
+    },
+    bottom: {
+      points: ['tc', 'bc'],
+      offset: [0, 4]
+    },
+    topLeft: {
+      points: ['bl', 'tc'],
+      offset: [-(horizontalArrowShift + arrowWidth), -4]
+    },
+    leftTop: {
+      points: ['tr', 'cl'],
+      offset: [-4, -(verticalArrowShift + arrowWidth)]
+    },
+    topRight: {
+      points: ['br', 'tc'],
+      offset: [horizontalArrowShift + arrowWidth, -4]
+    },
+    rightTop: {
+      points: ['tl', 'cr'],
+      offset: [4, -(verticalArrowShift + arrowWidth)]
+    },
+    bottomRight: {
+      points: ['tr', 'bc'],
+      offset: [horizontalArrowShift + arrowWidth, 4]
+    },
+    rightBottom: {
+      points: ['bl', 'cr'],
+      offset: [4, verticalArrowShift + arrowWidth]
+    },
+    bottomLeft: {
+      points: ['tl', 'bc'],
+      offset: [-(horizontalArrowShift + arrowWidth), 4]
+    },
+    leftBottom: {
+      points: ['br', 'cl'],
+      offset: [-4, verticalArrowShift + arrowWidth]
+    }
+  };
+  Object.keys(placementMap).forEach(function (key) {
+    placementMap[key] = config.arrowPointAtCenter ? extends_extends(extends_extends({}, placementMap[key]), {
+      overflow: getOverflowOptions(autoAdjustOverflow),
+      targetOffset: placements_targetOffset
+    }) : extends_extends(extends_extends({}, placements[key]), {
+      overflow: getOverflowOptions(autoAdjustOverflow)
+    });
+    placementMap[key].ignoreShake = true;
+  });
+  return placementMap;
+}
+;// CONCATENATED MODULE: ../node_modules/antd/es/_util/colors.js
+
+var PresetStatusColorTypes = tuple('success', 'processing', 'error', 'default', 'warning'); // eslint-disable-next-line import/prefer-default-export
+
+var PresetColorTypes = tuple('pink', 'red', 'yellow', 'orange', 'cyan', 'green', 'blue', 'purple', 'geekblue', 'magenta', 'volcano', 'gold', 'lime');
+;// CONCATENATED MODULE: ../node_modules/antd/es/tooltip/index.js
+
+
+
+
+var tooltip_rest = undefined && undefined.__rest || function (s, e) {
+  var t = {};
+
+  for (var p in s) {
+    if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0) t[p] = s[p];
+  }
+
+  if (s != null && typeof Object.getOwnPropertySymbols === "function") for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+    if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i])) t[p[i]] = s[p[i]];
+  }
+  return t;
+};
+
+
+
+
+
+
+
+
+
+
+
+var splitObject = function splitObject(obj, keys) {
+  var picked = {};
+
+  var omitted = extends_extends({}, obj);
+
+  keys.forEach(function (key) {
+    if (obj && key in obj) {
+      picked[key] = obj[key];
+      delete omitted[key];
+    }
+  });
+  return {
+    picked: picked,
+    omitted: omitted
+  };
+};
+
+var PresetColorRegex = new RegExp("^(".concat(PresetColorTypes.join('|'), ")(-inverse)?$")); // Fix Tooltip won't hide at disabled button
+// mouse events don't trigger at disabled button in Chrome
+// https://github.com/react-component/tooltip/issues/18
+
+function getDisabledCompatibleChildren(element, prefixCls) {
+  var elementType = element.type;
+
+  if ((elementType.__ANT_BUTTON === true || elementType.__ANT_SWITCH === true || elementType.__ANT_CHECKBOX === true || element.type === 'button') && element.props.disabled) {
+    // Pick some layout related style properties up to span
+    // Prevent layout bugs like https://github.com/ant-design/ant-design/issues/5254
+    var _splitObject = splitObject(element.props.style, ['position', 'left', 'right', 'top', 'bottom', 'float', 'display', 'zIndex']),
+        picked = _splitObject.picked,
+        omitted = _splitObject.omitted;
+
+    var spanStyle = extends_extends(extends_extends({
+      display: 'inline-block'
+    }, picked), {
+      cursor: 'not-allowed',
+      width: element.props.block ? '100%' : null
+    });
+
+    var buttonStyle = extends_extends(extends_extends({}, omitted), {
+      pointerEvents: 'none'
+    });
+
+    var child = cloneElement(element, {
+      style: buttonStyle,
+      className: null
+    });
+    return /*#__PURE__*/react.createElement("span", {
+      style: spanStyle,
+      className: classnames_default()(element.props.className, "".concat(prefixCls, "-disabled-compatible-wrapper"))
+    }, child);
+  }
+
+  return element;
+}
+
+var tooltip_Tooltip = /*#__PURE__*/react.forwardRef(function (props, ref) {
+  var _classNames2;
+
+  var _React$useContext = react.useContext(ConfigContext),
+      getContextPopupContainer = _React$useContext.getPopupContainer,
+      getPrefixCls = _React$useContext.getPrefixCls,
+      direction = _React$useContext.direction;
+
+  var _useMergedState = useControlledState(false, {
+    value: props.visible,
+    defaultValue: props.defaultVisible
+  }),
+      _useMergedState2 = _slicedToArray(_useMergedState, 2),
+      visible = _useMergedState2[0],
+      setVisible = _useMergedState2[1];
+
+  var isNoTitle = function isNoTitle() {
+    var title = props.title,
+        overlay = props.overlay;
+    return !title && !overlay && title !== 0; // overlay for old version compatibility
+  };
+
+  var onVisibleChange = function onVisibleChange(vis) {
+    var _a;
+
+    setVisible(isNoTitle() ? false : vis);
+
+    if (!isNoTitle()) {
+      (_a = props.onVisibleChange) === null || _a === void 0 ? void 0 : _a.call(props, vis);
+    }
+  };
+
+  var getTooltipPlacements = function getTooltipPlacements() {
+    var builtinPlacements = props.builtinPlacements,
+        arrowPointAtCenter = props.arrowPointAtCenter,
+        autoAdjustOverflow = props.autoAdjustOverflow;
+    return builtinPlacements || getPlacements({
+      arrowPointAtCenter: arrowPointAtCenter,
+      autoAdjustOverflow: autoAdjustOverflow
+    });
+  }; // 动态设置动画点
+
+
+  var onPopupAlign = function onPopupAlign(domNode, align) {
+    var placements = getTooltipPlacements(); // 当前返回的位置
+
+    var placement = Object.keys(placements).filter(function (key) {
+      return placements[key].points[0] === align.points[0] && placements[key].points[1] === align.points[1];
+    })[0];
+
+    if (!placement) {
+      return;
+    } // 根据当前坐标设置动画点
+
+
+    var rect = domNode.getBoundingClientRect();
+    var transformOrigin = {
+      top: '50%',
+      left: '50%'
+    };
+
+    if (placement.indexOf('top') >= 0 || placement.indexOf('Bottom') >= 0) {
+      transformOrigin.top = "".concat(rect.height - align.offset[1], "px");
+    } else if (placement.indexOf('Top') >= 0 || placement.indexOf('bottom') >= 0) {
+      transformOrigin.top = "".concat(-align.offset[1], "px");
+    }
+
+    if (placement.indexOf('left') >= 0 || placement.indexOf('Right') >= 0) {
+      transformOrigin.left = "".concat(rect.width - align.offset[0], "px");
+    } else if (placement.indexOf('right') >= 0 || placement.indexOf('Left') >= 0) {
+      transformOrigin.left = "".concat(-align.offset[0], "px");
+    }
+
+    domNode.style.transformOrigin = "".concat(transformOrigin.left, " ").concat(transformOrigin.top);
+  };
+
+  var getOverlay = function getOverlay() {
+    var title = props.title,
+        overlay = props.overlay;
+
+    if (title === 0) {
+      return title;
+    }
+
+    return overlay || title || '';
+  };
+
+  var getPopupContainer = props.getPopupContainer,
+      otherProps = tooltip_rest(props, ["getPopupContainer"]);
+
+  var customizePrefixCls = props.prefixCls,
+      openClassName = props.openClassName,
+      getTooltipContainer = props.getTooltipContainer,
+      overlayClassName = props.overlayClassName,
+      color = props.color,
+      overlayInnerStyle = props.overlayInnerStyle,
+      children = props.children;
+  var prefixCls = getPrefixCls('tooltip', customizePrefixCls);
+  var rootPrefixCls = getPrefixCls();
+  var tempVisible = visible; // Hide tooltip when there is no title
+
+  if (!('visible' in props) && isNoTitle()) {
+    tempVisible = false;
+  }
+
+  var child = getDisabledCompatibleChildren(isValidElement(children) ? children : /*#__PURE__*/react.createElement("span", null, children), prefixCls);
+  var childProps = child.props;
+  var childCls = classnames_default()(childProps.className, _defineProperty({}, openClassName || "".concat(prefixCls, "-open"), true));
+  var customOverlayClassName = classnames_default()(overlayClassName, (_classNames2 = {}, _defineProperty(_classNames2, "".concat(prefixCls, "-rtl"), direction === 'rtl'), _defineProperty(_classNames2, "".concat(prefixCls, "-").concat(color), color && PresetColorRegex.test(color)), _classNames2));
+  var formattedOverlayInnerStyle = overlayInnerStyle;
+  var arrowContentStyle;
+
+  if (color && !PresetColorRegex.test(color)) {
+    formattedOverlayInnerStyle = extends_extends(extends_extends({}, overlayInnerStyle), {
+      background: color
+    });
+    arrowContentStyle = {
+      background: color
+    };
+  }
+
+  return /*#__PURE__*/react.createElement(rc_tooltip_es, extends_extends({}, otherProps, {
+    prefixCls: prefixCls,
+    overlayClassName: customOverlayClassName,
+    getTooltipContainer: getPopupContainer || getTooltipContainer || getContextPopupContainer,
+    ref: ref,
+    builtinPlacements: getTooltipPlacements(),
+    overlay: getOverlay(),
+    visible: tempVisible,
+    onVisibleChange: onVisibleChange,
+    onPopupAlign: onPopupAlign,
+    overlayInnerStyle: formattedOverlayInnerStyle,
+    arrowContent: /*#__PURE__*/react.createElement("span", {
+      className: "".concat(prefixCls, "-arrow-content"),
+      style: arrowContentStyle
+    }),
+    motion: {
+      motionName: motion_getTransitionName(rootPrefixCls, 'zoom-big-fast', props.transitionName),
+      motionDeadline: 1000
+    }
+  }), tempVisible ? cloneElement(child, {
+    className: childCls
+  }) : child);
+});
+tooltip_Tooltip.displayName = 'Tooltip';
+tooltip_Tooltip.defaultProps = {
+  placement: 'top',
+  mouseEnterDelay: 0.1,
+  mouseLeaveDelay: 0.1,
+  arrowPointAtCenter: false,
+  autoAdjustOverflow: true
+};
+/* harmony default export */ const es_tooltip = (tooltip_Tooltip);
+;// CONCATENATED MODULE: ../node_modules/@ant-design/icons-svg/es/asn/EnterOutlined.js
+// This icon file is generated automatically.
+var EnterOutlined = { "icon": { "tag": "svg", "attrs": { "viewBox": "64 64 896 896", "focusable": "false" }, "children": [{ "tag": "path", "attrs": { "d": "M864 170h-60c-4.4 0-8 3.6-8 8v518H310v-73c0-6.7-7.8-10.5-13-6.3l-141.9 112a8 8 0 000 12.6l141.9 112c5.3 4.2 13 .4 13-6.3v-75h498c35.3 0 64-28.7 64-64V178c0-4.4-3.6-8-8-8z" } }] }, "name": "enter", "theme": "outlined" };
+/* harmony default export */ const asn_EnterOutlined = (EnterOutlined);
+
+;// CONCATENATED MODULE: ../node_modules/@ant-design/icons/es/icons/EnterOutlined.js
+
+// GENERATE BY ./scripts/generate.ts
+// DON NOT EDIT IT MANUALLY
+
+
+
+
+var EnterOutlined_EnterOutlined = function EnterOutlined(props, ref) {
+  return /*#__PURE__*/react.createElement(AntdIcon, _objectSpread2(_objectSpread2({}, props), {}, {
+    ref: ref,
+    icon: asn_EnterOutlined
+  }));
+};
+
+EnterOutlined_EnterOutlined.displayName = 'EnterOutlined';
+/* harmony default export */ const icons_EnterOutlined = (/*#__PURE__*/react.forwardRef(EnterOutlined_EnterOutlined));
+;// CONCATENATED MODULE: ../node_modules/antd/es/typography/Editable.js
+
+
+
+
+
+
+
+
+
+var Editable = function Editable(_ref) {
+  var prefixCls = _ref.prefixCls,
+      ariaLabel = _ref['aria-label'],
+      className = _ref.className,
+      style = _ref.style,
+      direction = _ref.direction,
+      maxLength = _ref.maxLength,
+      _ref$autoSize = _ref.autoSize,
+      autoSize = _ref$autoSize === void 0 ? true : _ref$autoSize,
+      value = _ref.value,
+      onSave = _ref.onSave,
+      onCancel = _ref.onCancel,
+      onEnd = _ref.onEnd,
+      _ref$enterIcon = _ref.enterIcon,
+      enterIcon = _ref$enterIcon === void 0 ? /*#__PURE__*/react.createElement(icons_EnterOutlined, null) : _ref$enterIcon;
+  var ref = react.useRef();
+  var inComposition = react.useRef(false);
+  var lastKeyCode = react.useRef();
+
+  var _React$useState = react.useState(value),
+      _React$useState2 = _slicedToArray(_React$useState, 2),
+      current = _React$useState2[0],
+      setCurrent = _React$useState2[1];
+
+  react.useEffect(function () {
+    setCurrent(value);
+  }, [value]);
+  react.useEffect(function () {
+    if (ref.current && ref.current.resizableTextArea) {
+      var textArea = ref.current.resizableTextArea.textArea;
+      textArea.focus();
+      var length = textArea.value.length;
+      textArea.setSelectionRange(length, length);
+    }
+  }, []);
+
+  var onChange = function onChange(_ref2) {
+    var target = _ref2.target;
+    setCurrent(target.value.replace(/[\n\r]/g, ''));
+  };
+
+  var onCompositionStart = function onCompositionStart() {
+    inComposition.current = true;
+  };
+
+  var onCompositionEnd = function onCompositionEnd() {
+    inComposition.current = false;
+  };
+
+  var onKeyDown = function onKeyDown(_ref3) {
+    var keyCode = _ref3.keyCode;
+    // We don't record keyCode when IME is using
+    if (inComposition.current) return;
+    lastKeyCode.current = keyCode;
+  };
+
+  var confirmChange = function confirmChange() {
+    onSave(current.trim());
+  };
+
+  var onKeyUp = function onKeyUp(_ref4) {
+    var keyCode = _ref4.keyCode,
+        ctrlKey = _ref4.ctrlKey,
+        altKey = _ref4.altKey,
+        metaKey = _ref4.metaKey,
+        shiftKey = _ref4.shiftKey;
+
+    // Check if it's a real key
+    if (lastKeyCode.current === keyCode && !inComposition.current && !ctrlKey && !altKey && !metaKey && !shiftKey) {
+      if (keyCode === es_KeyCode.ENTER) {
+        confirmChange();
+        onEnd === null || onEnd === void 0 ? void 0 : onEnd();
+      } else if (keyCode === es_KeyCode.ESC) {
+        onCancel();
+      }
+    }
+  };
+
+  var onBlur = function onBlur() {
+    confirmChange();
+  };
+
+  var textAreaClassName = classnames_default()(prefixCls, "".concat(prefixCls, "-edit-content"), _defineProperty({}, "".concat(prefixCls, "-rtl"), direction === 'rtl'), className);
+  return /*#__PURE__*/react.createElement("div", {
+    className: textAreaClassName,
+    style: style
+  }, /*#__PURE__*/react.createElement(input_TextArea, {
+    ref: ref,
+    maxLength: maxLength,
+    value: current,
+    onChange: onChange,
+    onKeyDown: onKeyDown,
+    onKeyUp: onKeyUp,
+    onCompositionStart: onCompositionStart,
+    onCompositionEnd: onCompositionEnd,
+    onBlur: onBlur,
+    "aria-label": ariaLabel,
+    autoSize: autoSize
+  }), enterIcon !== null ? cloneElement(enterIcon, {
+    className: "".concat(prefixCls, "-edit-content-confirm")
+  }) : null);
+};
+
+/* harmony default export */ const typography_Editable = (Editable);
+;// CONCATENATED MODULE: ../node_modules/antd/es/typography/util.js
+
+
+ // We only handle element & text node.
+
+var ELEMENT_NODE = 1;
+var TEXT_NODE = 3;
+var COMMENT_NODE = 8;
+var ellipsisContainer;
+var wrapperStyle = {
+  padding: 0,
+  margin: 0,
+  display: 'inline',
+  lineHeight: 'inherit'
+};
+
+function styleToString(style) {
+  // There are some different behavior between Firefox & Chrome.
+  // We have to handle this ourself.
+  var styleNames = Array.prototype.slice.apply(style);
+  return styleNames.map(function (name) {
+    return "".concat(name, ": ").concat(style.getPropertyValue(name), ";");
+  }).join('');
+}
+
+function mergeChildren(children) {
+  var childList = [];
+  children.forEach(function (child) {
+    var prevChild = childList[childList.length - 1];
+
+    if (typeof child === 'string' && typeof prevChild === 'string') {
+      childList[childList.length - 1] += child;
+    } else {
+      childList.push(child);
+    }
+  });
+  return childList;
+}
+
+function resetDomStyles(target, origin) {
+  target.setAttribute('aria-hidden', 'true');
+  var originStyle = window.getComputedStyle(origin);
+  var originCSS = styleToString(originStyle); // Set shadow
+
+  target.setAttribute('style', originCSS);
+  target.style.position = 'fixed';
+  target.style.left = '0';
+  target.style.height = 'auto';
+  target.style.minHeight = 'auto';
+  target.style.maxHeight = 'auto';
+  target.style.paddingTop = '0';
+  target.style.paddingBottom = '0';
+  target.style.borderTopWidth = '0';
+  target.style.borderBottomWidth = '0';
+  target.style.top = '-999999px';
+  target.style.zIndex = '-1000'; // clean up css overflow
+
+  target.style.textOverflow = 'clip';
+  target.style.whiteSpace = 'normal';
+  target.style.webkitLineClamp = 'none';
+}
+
+function getRealLineHeight(originElement) {
+  var heightContainer = document.createElement('div');
+  resetDomStyles(heightContainer, originElement);
+  heightContainer.appendChild(document.createTextNode('text'));
+  document.body.appendChild(heightContainer); // The element real height is always less than multiple of line-height
+  // Use getBoundingClientRect to get actual single row height of the element
+
+  var realHeight = heightContainer.getBoundingClientRect().height;
+  document.body.removeChild(heightContainer);
+  return realHeight;
+}
+
+/* harmony default export */ const util = (function (originElement, option, content, fixedContent, ellipsisStr) {
+  if (!ellipsisContainer) {
+    ellipsisContainer = document.createElement('div');
+    ellipsisContainer.setAttribute('aria-hidden', 'true');
+  } // HMR will remove this from body which should patch back
+
+
+  if (!ellipsisContainer.parentNode) {
+    document.body.appendChild(ellipsisContainer);
+  }
+
+  var rows = option.rows,
+      _option$suffix = option.suffix,
+      suffix = _option$suffix === void 0 ? '' : _option$suffix;
+  var lineHeight = getRealLineHeight(originElement);
+  var maxHeight = Math.round(lineHeight * rows * 100) / 100;
+  resetDomStyles(ellipsisContainer, originElement); // Render in the fake container
+
+  var contentList = mergeChildren(toArray_toArray(content));
+  (0,react_dom.render)( /*#__PURE__*/react.createElement("div", {
+    style: wrapperStyle
+  }, /*#__PURE__*/react.createElement("span", {
+    style: wrapperStyle
+  }, contentList, suffix), /*#__PURE__*/react.createElement("span", {
+    style: wrapperStyle
+  }, fixedContent)), ellipsisContainer); // wrap in an div for old version react
+  // Check if ellipsis in measure div is height enough for content
+
+  function inRange() {
+    var currentHeight = Math.round(ellipsisContainer.getBoundingClientRect().height * 100) / 100;
+    return currentHeight - .1 <= maxHeight; // -.1 for firefox
+  } // Skip ellipsis if already match
+
+
+  if (inRange()) {
+    (0,react_dom.unmountComponentAtNode)(ellipsisContainer);
+    return {
+      content: content,
+      text: ellipsisContainer.innerHTML,
+      ellipsis: false
+    };
+  } // We should clone the childNode since they're controlled by React and we can't reuse it without warning
+
+
+  var childNodes = Array.prototype.slice.apply(ellipsisContainer.childNodes[0].childNodes[0].cloneNode(true).childNodes).filter(function (_ref) {
+    var nodeType = _ref.nodeType;
+    return nodeType !== COMMENT_NODE;
+  });
+  var fixedNodes = Array.prototype.slice.apply(ellipsisContainer.childNodes[0].childNodes[1].cloneNode(true).childNodes);
+  (0,react_dom.unmountComponentAtNode)(ellipsisContainer); // ========================= Find match ellipsis content =========================
+
+  var ellipsisChildren = [];
+  ellipsisContainer.innerHTML = ''; // Create origin content holder
+
+  var ellipsisContentHolder = document.createElement('span');
+  ellipsisContainer.appendChild(ellipsisContentHolder);
+  var ellipsisTextNode = document.createTextNode(ellipsisStr + suffix);
+  ellipsisContentHolder.appendChild(ellipsisTextNode);
+  fixedNodes.forEach(function (childNode) {
+    ellipsisContainer.appendChild(childNode);
+  }); // Append before fixed nodes
+
+  function appendChildNode(node) {
+    ellipsisContentHolder.insertBefore(node, ellipsisTextNode);
+  } // Get maximum text
+
+
+  function measureText(textNode, fullText) {
+    var startLoc = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
+    var endLoc = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : fullText.length;
+    var lastSuccessLoc = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 0;
+    var midLoc = Math.floor((startLoc + endLoc) / 2);
+    var currentText = fullText.slice(0, midLoc);
+    textNode.textContent = currentText;
+
+    if (startLoc >= endLoc - 1) {
+      // Loop when step is small
+      for (var step = endLoc; step >= startLoc; step -= 1) {
+        var currentStepText = fullText.slice(0, step);
+        textNode.textContent = currentStepText;
+
+        if (inRange() || !currentStepText) {
+          return step === fullText.length ? {
+            finished: false,
+            reactNode: fullText
+          } : {
+            finished: true,
+            reactNode: currentStepText
+          };
+        }
+      }
+    }
+
+    if (inRange()) {
+      return measureText(textNode, fullText, midLoc, endLoc, midLoc);
+    }
+
+    return measureText(textNode, fullText, startLoc, midLoc, lastSuccessLoc);
+  }
+
+  function measureNode(childNode, index) {
+    var type = childNode.nodeType;
+
+    if (type === ELEMENT_NODE) {
+      // We don't split element, it will keep if whole element can be displayed.
+      appendChildNode(childNode);
+
+      if (inRange()) {
+        return {
+          finished: false,
+          reactNode: contentList[index]
+        };
+      } // Clean up if can not pull in
+
+
+      ellipsisContentHolder.removeChild(childNode);
+      return {
+        finished: true,
+        reactNode: null
+      };
+    }
+
+    if (type === TEXT_NODE) {
+      var fullText = childNode.textContent || '';
+      var textNode = document.createTextNode(fullText);
+      appendChildNode(textNode);
+      return measureText(textNode, fullText);
+    } // Not handle other type of content
+    // PS: This code should not be attached after react 16
+
+    /* istanbul ignore next */
+
+
+    return {
+      finished: false,
+      reactNode: null
+    };
+  }
+
+  childNodes.some(function (childNode, index) {
+    var _measureNode = measureNode(childNode, index),
+        finished = _measureNode.finished,
+        reactNode = _measureNode.reactNode;
+
+    if (reactNode) {
+      ellipsisChildren.push(reactNode);
+    }
+
+    return finished;
+  });
+  return {
+    content: ellipsisChildren,
+    text: ellipsisContainer.innerHTML,
+    ellipsis: true
+  };
+});
+;// CONCATENATED MODULE: ../node_modules/antd/es/typography/Base.js
+
+
+
+
+
+
+
+
+
+var Base_rest = undefined && undefined.__rest || function (s, e) {
+  var t = {};
+
+  for (var p in s) {
+    if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0) t[p] = s[p];
+  }
+
+  if (s != null && typeof Object.getOwnPropertySymbols === "function") for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+    if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i])) t[p[i]] = s[p[i]];
+  }
+  return t;
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+var isLineClampSupport = isStyleSupport('webkitLineClamp');
+var isTextOverflowSupport = isStyleSupport('textOverflow');
+
+function wrapperDecorations(_ref, content) {
+  var mark = _ref.mark,
+      code = _ref.code,
+      underline = _ref.underline,
+      del = _ref["delete"],
+      strong = _ref.strong,
+      keyboard = _ref.keyboard,
+      italic = _ref.italic;
+  var currentContent = content;
+
+  function wrap(needed, tag) {
+    if (!needed) return;
+    currentContent = /*#__PURE__*/react.createElement(tag, {}, currentContent);
+  }
+
+  wrap(strong, 'strong');
+  wrap(underline, 'u');
+  wrap(del, 'del');
+  wrap(code, 'code');
+  wrap(mark, 'mark');
+  wrap(keyboard, 'kbd');
+  wrap(italic, 'i');
+  return currentContent;
+}
+
+function getNode(dom, defaultNode, needDom) {
+  if (dom === true || dom === undefined) {
+    return defaultNode;
+  }
+
+  return dom || needDom && defaultNode;
+}
+
+var ELLIPSIS_STR = '...';
+
+var Base = /*#__PURE__*/function (_React$Component) {
+  _inherits(Base, _React$Component);
+
+  var _super = _createSuper(Base);
+
+  function Base() {
+    var _this;
+
+    _classCallCheck(this, Base);
+
+    _this = _super.apply(this, arguments);
+    _this.contentRef = /*#__PURE__*/react.createRef();
+    _this.state = {
+      edit: false,
+      copied: false,
+      ellipsisText: '',
+      ellipsisContent: null,
+      isEllipsis: false,
+      expanded: false,
+      clientRendered: false
+    };
+
+    _this.getPrefixCls = function () {
+      var customizePrefixCls = _this.props.prefixCls;
+      var getPrefixCls = _this.context.getPrefixCls;
+      return getPrefixCls('typography', customizePrefixCls);
+    }; // =============== Expand ===============
+
+
+    _this.onExpandClick = function (e) {
+      var _a;
+
+      var _this$getEllipsis = _this.getEllipsis(),
+          onExpand = _this$getEllipsis.onExpand;
+
+      _this.setState({
+        expanded: true
+      });
+
+      (_a = onExpand) === null || _a === void 0 ? void 0 : _a(e);
+    }; // ================ Edit ================
+
+
+    _this.onEditClick = function (e) {
+      e.preventDefault();
+
+      _this.triggerEdit(true);
+    };
+
+    _this.onEditChange = function (value) {
+      var _this$getEditable = _this.getEditable(),
+          onChange = _this$getEditable.onChange;
+
+      onChange === null || onChange === void 0 ? void 0 : onChange(value);
+
+      _this.triggerEdit(false);
+    };
+
+    _this.onEditCancel = function () {
+      var _a, _b;
+
+      (_b = (_a = _this.getEditable()).onCancel) === null || _b === void 0 ? void 0 : _b.call(_a);
+
+      _this.triggerEdit(false);
+    }; // ================ Copy ================
+
+
+    _this.onCopyClick = function (e) {
+      e.preventDefault();
+      var _this$props = _this.props,
+          children = _this$props.children,
+          copyable = _this$props.copyable;
+
+      var copyConfig = extends_extends({}, typeof_typeof(copyable) === 'object' ? copyable : null);
+
+      if (copyConfig.text === undefined) {
+        copyConfig.text = String(children);
+      }
+
+      copy_to_clipboard_default()(copyConfig.text || '');
+
+      _this.setState({
+        copied: true
+      }, function () {
+        if (copyConfig.onCopy) {
+          copyConfig.onCopy();
+        }
+
+        _this.copyId = window.setTimeout(function () {
+          _this.setState({
+            copied: false
+          });
+        }, 3000);
+      });
+    };
+
+    _this.setEditRef = function (node) {
+      _this.editIcon = node;
+    };
+
+    _this.triggerEdit = function (edit) {
+      var _this$getEditable2 = _this.getEditable(),
+          onStart = _this$getEditable2.onStart;
+
+      if (edit && onStart) {
+        onStart();
+      }
+
+      _this.setState({
+        edit: edit
+      }, function () {
+        if (!edit && _this.editIcon) {
+          _this.editIcon.focus();
+        }
+      });
+    }; // ============== Ellipsis ==============
+
+
+    _this.resizeOnNextFrame = function () {
+      raf_wrapperRaf.cancel(_this.rafId);
+      _this.rafId = raf_wrapperRaf(function () {
+        // Do not bind `syncEllipsis`. It need for test usage on prototype
+        _this.syncEllipsis();
+      });
+    };
+
+    return _this;
+  }
+
+  _createClass(Base, [{
+    key: "componentDidMount",
+    value: function componentDidMount() {
+      this.setState({
+        clientRendered: true
+      });
+      this.resizeOnNextFrame();
+    }
+  }, {
+    key: "componentDidUpdate",
+    value: function componentDidUpdate(prevProps) {
+      var children = this.props.children;
+      var ellipsis = this.getEllipsis();
+      var prevEllipsis = this.getEllipsis(prevProps);
+
+      if (children !== prevProps.children || ellipsis.rows !== prevEllipsis.rows) {
+        this.resizeOnNextFrame();
+      }
+    }
+  }, {
+    key: "componentWillUnmount",
+    value: function componentWillUnmount() {
+      window.clearTimeout(this.copyId);
+      raf_wrapperRaf.cancel(this.rafId);
+    }
+  }, {
+    key: "getEditable",
+    value: function getEditable(props) {
+      var edit = this.state.edit;
+
+      var _ref2 = props || this.props,
+          editable = _ref2.editable;
+
+      if (!editable) return {
+        editing: edit
+      };
+      return extends_extends({
+        editing: edit
+      }, typeof_typeof(editable) === 'object' ? editable : null);
+    }
+  }, {
+    key: "getEllipsis",
+    value: function getEllipsis(props) {
+      var _ref3 = props || this.props,
+          ellipsis = _ref3.ellipsis;
+
+      if (!ellipsis) return {};
+      return extends_extends({
+        rows: 1,
+        expandable: false
+      }, typeof_typeof(ellipsis) === 'object' ? ellipsis : null);
+    }
+  }, {
+    key: "canUseCSSEllipsis",
+    value: function canUseCSSEllipsis() {
+      var clientRendered = this.state.clientRendered;
+      var _this$props2 = this.props,
+          editable = _this$props2.editable,
+          copyable = _this$props2.copyable;
+
+      var _this$getEllipsis2 = this.getEllipsis(),
+          rows = _this$getEllipsis2.rows,
+          expandable = _this$getEllipsis2.expandable,
+          suffix = _this$getEllipsis2.suffix,
+          onEllipsis = _this$getEllipsis2.onEllipsis,
+          tooltip = _this$getEllipsis2.tooltip;
+
+      if (suffix || tooltip) return false; // Can't use css ellipsis since we need to provide the place for button
+
+      if (editable || copyable || expandable || !clientRendered || onEllipsis) {
+        return false;
+      }
+
+      if (rows === 1) {
+        return isTextOverflowSupport;
+      }
+
+      return isLineClampSupport;
+    }
+  }, {
+    key: "syncEllipsis",
+    value: function syncEllipsis() {
+      var _this$state = this.state,
+          ellipsisText = _this$state.ellipsisText,
+          isEllipsis = _this$state.isEllipsis,
+          expanded = _this$state.expanded;
+
+      var _this$getEllipsis3 = this.getEllipsis(),
+          rows = _this$getEllipsis3.rows,
+          suffix = _this$getEllipsis3.suffix,
+          onEllipsis = _this$getEllipsis3.onEllipsis;
+
+      var children = this.props.children;
+
+      if (!rows || rows < 0 || !this.contentRef.current || expanded) {
+        return;
+      } // Do not measure if css already support ellipsis
+
+
+      if (this.canUseCSSEllipsis()) {
+        return;
+      }
+
+      devWarning(toArray_toArray(children).every(function (child) {
+        return typeof child === 'string';
+      }), 'Typography', '`ellipsis` should use string as children only.');
+
+      var _measure = util(this.contentRef.current, {
+        rows: rows,
+        suffix: suffix
+      }, children, this.renderOperations(true), ELLIPSIS_STR),
+          content = _measure.content,
+          text = _measure.text,
+          ellipsis = _measure.ellipsis;
+
+      if (ellipsisText !== text || isEllipsis !== ellipsis) {
+        this.setState({
+          ellipsisText: text,
+          ellipsisContent: content,
+          isEllipsis: ellipsis
+        });
+
+        if (isEllipsis !== ellipsis && onEllipsis) {
+          onEllipsis(ellipsis);
+        }
+      }
+    }
+  }, {
+    key: "renderExpand",
+    value: function renderExpand(forceRender) {
+      var _this$getEllipsis4 = this.getEllipsis(),
+          expandable = _this$getEllipsis4.expandable,
+          symbol = _this$getEllipsis4.symbol;
+
+      var _this$state2 = this.state,
+          expanded = _this$state2.expanded,
+          isEllipsis = _this$state2.isEllipsis;
+      if (!expandable) return null; // force render expand icon for measure usage or it will cause dead loop
+
+      if (!forceRender && (expanded || !isEllipsis)) return null;
+      var expandContent;
+
+      if (symbol) {
+        expandContent = symbol;
+      } else {
+        expandContent = this.expandStr;
+      }
+
+      return /*#__PURE__*/react.createElement("a", {
+        key: "expand",
+        className: "".concat(this.getPrefixCls(), "-expand"),
+        onClick: this.onExpandClick,
+        "aria-label": this.expandStr
+      }, expandContent);
+    }
+  }, {
+    key: "renderEdit",
+    value: function renderEdit() {
+      var editable = this.props.editable;
+      if (!editable) return;
+      var icon = editable.icon,
+          tooltip = editable.tooltip,
+          _editable$triggerType = editable.triggerType,
+          triggerType = _editable$triggerType === void 0 ? ['icon'] : _editable$triggerType;
+      var title = toArray_toArray(tooltip)[0] || this.editStr;
+      var ariaLabel = typeof title === 'string' ? title : '';
+      return triggerType.indexOf('icon') !== -1 ? /*#__PURE__*/react.createElement(es_tooltip, {
+        key: "edit",
+        title: tooltip === false ? '' : title
+      }, /*#__PURE__*/react.createElement(transButton, {
+        ref: this.setEditRef,
+        className: "".concat(this.getPrefixCls(), "-edit"),
+        onClick: this.onEditClick,
+        "aria-label": ariaLabel
+      }, icon || /*#__PURE__*/react.createElement(icons_EditOutlined, {
+        role: "button"
+      }))) : null;
+    }
+  }, {
+    key: "renderCopy",
+    value: function renderCopy() {
+      var copied = this.state.copied;
+      var copyable = this.props.copyable;
+      if (!copyable) return;
+      var prefixCls = this.getPrefixCls();
+      var tooltips = copyable.tooltips,
+          icon = copyable.icon;
+      var tooltipNodes = Array.isArray(tooltips) ? tooltips : [tooltips];
+      var iconNodes = Array.isArray(icon) ? icon : [icon];
+      var title = copied ? getNode(tooltipNodes[1], this.copiedStr) : getNode(tooltipNodes[0], this.copyStr);
+      var systemStr = copied ? this.copiedStr : this.copyStr;
+      var ariaLabel = typeof title === 'string' ? title : systemStr;
+      return /*#__PURE__*/react.createElement(es_tooltip, {
+        key: "copy",
+        title: title
+      }, /*#__PURE__*/react.createElement(transButton, {
+        className: classnames_default()("".concat(prefixCls, "-copy"), copied && "".concat(prefixCls, "-copy-success")),
+        onClick: this.onCopyClick,
+        "aria-label": ariaLabel
+      }, copied ? getNode(iconNodes[1], /*#__PURE__*/react.createElement(icons_CheckOutlined, null), true) : getNode(iconNodes[0], /*#__PURE__*/react.createElement(icons_CopyOutlined, null), true)));
+    }
+  }, {
+    key: "renderEditInput",
+    value: function renderEditInput() {
+      var _this$props3 = this.props,
+          children = _this$props3.children,
+          className = _this$props3.className,
+          style = _this$props3.style;
+      var direction = this.context.direction;
+
+      var _this$getEditable3 = this.getEditable(),
+          maxLength = _this$getEditable3.maxLength,
+          autoSize = _this$getEditable3.autoSize,
+          onEnd = _this$getEditable3.onEnd,
+          enterIcon = _this$getEditable3.enterIcon;
+
+      return /*#__PURE__*/react.createElement(typography_Editable, {
+        value: typeof children === 'string' ? children : '',
+        onSave: this.onEditChange,
+        onCancel: this.onEditCancel,
+        onEnd: onEnd,
+        prefixCls: this.getPrefixCls(),
+        className: className,
+        style: style,
+        direction: direction,
+        maxLength: maxLength,
+        autoSize: autoSize,
+        enterIcon: enterIcon
+      });
+    }
+  }, {
+    key: "renderOperations",
+    value: function renderOperations(forceRenderExpanded) {
+      return [this.renderExpand(forceRenderExpanded), this.renderEdit(), this.renderCopy()].filter(function (node) {
+        return node;
+      });
+    }
+  }, {
+    key: "renderContent",
+    value: function renderContent() {
+      var _this2 = this;
+
+      var _this$state3 = this.state,
+          ellipsisContent = _this$state3.ellipsisContent,
+          isEllipsis = _this$state3.isEllipsis,
+          expanded = _this$state3.expanded;
+
+      var _a = this.props,
+          component = _a.component,
+          children = _a.children,
+          className = _a.className,
+          type = _a.type,
+          disabled = _a.disabled,
+          style = _a.style,
+          restProps = Base_rest(_a, ["component", "children", "className", "type", "disabled", "style"]);
+
+      var direction = this.context.direction;
+
+      var _this$getEllipsis5 = this.getEllipsis(),
+          rows = _this$getEllipsis5.rows,
+          suffix = _this$getEllipsis5.suffix,
+          tooltip = _this$getEllipsis5.tooltip;
+
+      var _this$getEditable4 = this.getEditable(),
+          _this$getEditable4$tr = _this$getEditable4.triggerType,
+          triggerType = _this$getEditable4$tr === void 0 ? ['icon'] : _this$getEditable4$tr;
+
+      var prefixCls = this.getPrefixCls();
+      var textProps = omit(restProps, ['prefixCls', 'editable', 'copyable', 'ellipsis', 'mark', 'code', 'delete', 'underline', 'strong', 'keyboard', 'italic'].concat(_toConsumableArray(configConsumerProps)));
+      var cssEllipsis = this.canUseCSSEllipsis();
+      var cssTextOverflow = rows === 1 && cssEllipsis;
+      var cssLineClamp = rows && rows > 1 && cssEllipsis;
+      var textNode = children; // Only use js ellipsis when css ellipsis not support
+
+      if (rows && isEllipsis && !expanded && !cssEllipsis) {
+        var title = restProps.title;
+        var restContent = title || '';
+
+        if (!title && (typeof children === 'string' || typeof children === 'number')) {
+          restContent = String(children);
+        } // show rest content as title on symbol
+
+
+        restContent = restContent.slice(String(ellipsisContent || '').length); // We move full content to outer element to avoid repeat read the content by accessibility
+
+        textNode = /*#__PURE__*/react.createElement(react.Fragment, null, ellipsisContent, /*#__PURE__*/react.createElement("span", {
+          title: restContent,
+          "aria-hidden": "true"
+        }, ELLIPSIS_STR), suffix); // If provided tooltip, we need wrap with span to let Tooltip inject events
+
+        if (tooltip) {
+          textNode = /*#__PURE__*/react.createElement(es_tooltip, {
+            title: tooltip === true ? children : tooltip
+          }, /*#__PURE__*/react.createElement("span", null, textNode));
+        }
+      } else {
+        textNode = /*#__PURE__*/react.createElement(react.Fragment, null, children, suffix);
+      }
+
+      textNode = wrapperDecorations(this.props, textNode);
+      return /*#__PURE__*/react.createElement(LocaleReceiver, {
+        componentName: "Text"
+      }, function (_ref4) {
+        var _classNames;
+
+        var edit = _ref4.edit,
+            copyStr = _ref4.copy,
+            copied = _ref4.copied,
+            expand = _ref4.expand;
+        _this2.editStr = edit;
+        _this2.copyStr = copyStr;
+        _this2.copiedStr = copied;
+        _this2.expandStr = expand;
+        return /*#__PURE__*/react.createElement(rc_resize_observer_es, {
+          onResize: _this2.resizeOnNextFrame,
+          disabled: cssEllipsis
+        }, /*#__PURE__*/react.createElement(typography_Typography, extends_extends({
+          className: classnames_default()((_classNames = {}, _defineProperty(_classNames, "".concat(prefixCls, "-").concat(type), type), _defineProperty(_classNames, "".concat(prefixCls, "-disabled"), disabled), _defineProperty(_classNames, "".concat(prefixCls, "-ellipsis"), rows), _defineProperty(_classNames, "".concat(prefixCls, "-single-line"), rows === 1 && !isEllipsis), _defineProperty(_classNames, "".concat(prefixCls, "-ellipsis-single-line"), cssTextOverflow), _defineProperty(_classNames, "".concat(prefixCls, "-ellipsis-multiple-line"), cssLineClamp), _classNames), className),
+          style: extends_extends(extends_extends({}, style), {
+            WebkitLineClamp: cssLineClamp ? rows : undefined
+          }),
+          component: component,
+          ref: _this2.contentRef,
+          direction: direction,
+          onClick: triggerType.indexOf('text') !== -1 ? _this2.onEditClick : function () {}
+        }, textProps), textNode, _this2.renderOperations()));
+      });
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      var _this$getEditable5 = this.getEditable(),
+          editing = _this$getEditable5.editing;
+
+      if (editing) {
+        return this.renderEditInput();
+      }
+
+      return this.renderContent();
+    }
+  }], [{
+    key: "getDerivedStateFromProps",
+    value: function getDerivedStateFromProps(nextProps) {
+      var children = nextProps.children,
+          editable = nextProps.editable;
+      devWarning(!editable || typeof children === 'string', 'Typography', 'When `editable` is enabled, the `children` should use string.');
+      return {};
+    }
+  }]);
+
+  return Base;
+}(react.Component);
+
+Base.contextType = ConfigContext;
+Base.defaultProps = {
+  children: ''
+};
+/* harmony default export */ const typography_Base = (Base);
+;// CONCATENATED MODULE: ../node_modules/antd/es/typography/Text.js
+
+
+
+var Text_rest = undefined && undefined.__rest || function (s, e) {
+  var t = {};
+
+  for (var p in s) {
+    if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0) t[p] = s[p];
+  }
+
+  if (s != null && typeof Object.getOwnPropertySymbols === "function") for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+    if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i])) t[p[i]] = s[p[i]];
+  }
+  return t;
+};
+
+
+
+
+
+
+var Text = function Text(_a) {
+  var ellipsis = _a.ellipsis,
+      restProps = Text_rest(_a, ["ellipsis"]);
+
+  var mergedEllipsis = react.useMemo(function () {
+    if (ellipsis && typeof_typeof(ellipsis) === 'object') {
+      return omit(ellipsis, ['expandable', 'rows']);
+    }
+
+    return ellipsis;
+  }, [ellipsis]);
+  devWarning(typeof_typeof(ellipsis) !== 'object' || !ellipsis || !('expandable' in ellipsis) && !('rows' in ellipsis), 'Typography.Text', '`ellipsis` do not support `expandable` or `rows` props.');
+  return /*#__PURE__*/react.createElement(typography_Base, extends_extends({}, restProps, {
+    ellipsis: mergedEllipsis,
+    component: "span"
+  }));
+};
+
+/* harmony default export */ const typography_Text = (Text);
+;// CONCATENATED MODULE: ../node_modules/antd/es/typography/Link.js
+
+
+
+var Link_rest = undefined && undefined.__rest || function (s, e) {
+  var t = {};
+
+  for (var p in s) {
+    if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0) t[p] = s[p];
+  }
+
+  if (s != null && typeof Object.getOwnPropertySymbols === "function") for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+    if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i])) t[p[i]] = s[p[i]];
+  }
+  return t;
+};
+
+
+
+
+
+var Link_Link = function Link(_a, ref) {
+  var ellipsis = _a.ellipsis,
+      rel = _a.rel,
+      restProps = Link_rest(_a, ["ellipsis", "rel"]);
+
+  devWarning(typeof_typeof(ellipsis) !== 'object', 'Typography.Link', '`ellipsis` only supports boolean value.');
+  var baseRef = react.useRef(null);
+  react.useImperativeHandle(ref, function () {
+    var _a;
+
+    return (_a = baseRef.current) === null || _a === void 0 ? void 0 : _a.contentRef.current;
+  });
+
+  var mergedProps = extends_extends(extends_extends({}, restProps), {
+    rel: rel === undefined && restProps.target === '_blank' ? 'noopener noreferrer' : rel
+  }); // https://github.com/ant-design/ant-design/issues/26622
+  // @ts-ignore
+
+
+  delete mergedProps.navigate;
+  return /*#__PURE__*/react.createElement(typography_Base, extends_extends({}, mergedProps, {
+    ref: baseRef,
+    ellipsis: !!ellipsis,
+    component: "a"
+  }));
+};
+
+/* harmony default export */ const typography_Link = (/*#__PURE__*/react.forwardRef(Link_Link));
+;// CONCATENATED MODULE: ../node_modules/antd/es/typography/Title.js
+
+
+var Title_rest = undefined && undefined.__rest || function (s, e) {
+  var t = {};
+
+  for (var p in s) {
+    if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0) t[p] = s[p];
+  }
+
+  if (s != null && typeof Object.getOwnPropertySymbols === "function") for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+    if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i])) t[p[i]] = s[p[i]];
+  }
+  return t;
+};
+
+
+
+
+
+var TITLE_ELE_LIST = tupleNum(1, 2, 3, 4, 5);
+
+var Title = function Title(props) {
+  var _props$level = props.level,
+      level = _props$level === void 0 ? 1 : _props$level,
+      restProps = Title_rest(props, ["level"]);
+
+  var component;
+
+  if (TITLE_ELE_LIST.indexOf(level) !== -1) {
+    component = "h".concat(level);
+  } else {
+    devWarning(false, 'Typography.Title', 'Title only accept `1 | 2 | 3 | 4 | 5` as `level` value. And `5` need 4.6.0+ version.');
+    component = 'h1';
+  }
+
+  return /*#__PURE__*/react.createElement(typography_Base, extends_extends({}, restProps, {
+    component: component
+  }));
+};
+
+/* harmony default export */ const typography_Title = (Title);
+;// CONCATENATED MODULE: ../node_modules/antd/es/typography/Paragraph.js
+
+
+
+
+var Paragraph = function Paragraph(props) {
+  return /*#__PURE__*/react.createElement(typography_Base, extends_extends({}, props, {
+    component: "div"
+  }));
+};
+
+/* harmony default export */ const typography_Paragraph = (Paragraph);
+;// CONCATENATED MODULE: ../node_modules/antd/es/typography/index.js
+
+
+
+
+
+var es_typography_Typography = typography_Typography;
+es_typography_Typography.Text = typography_Text;
+es_typography_Typography.Link = typography_Link;
+es_typography_Typography.Title = typography_Title;
+es_typography_Typography.Paragraph = typography_Paragraph;
+/* harmony default export */ const typography = (es_typography_Typography);
+;// CONCATENATED MODULE: ../node_modules/rc-util/es/getScrollBarSize.js
+/* eslint-disable no-param-reassign */
+var cached;
+function getScrollBarSize(fresh) {
+  if (typeof document === 'undefined') {
+    return 0;
+  }
+
+  if (fresh || cached === undefined) {
+    var inner = document.createElement('div');
+    inner.style.width = '100%';
+    inner.style.height = '200px';
+    var outer = document.createElement('div');
+    var outerStyle = outer.style;
+    outerStyle.position = 'absolute';
+    outerStyle.top = '0';
+    outerStyle.left = '0';
+    outerStyle.pointerEvents = 'none';
+    outerStyle.visibility = 'hidden';
+    outerStyle.width = '200px';
+    outerStyle.height = '150px';
+    outerStyle.overflow = 'hidden';
+    outer.appendChild(inner);
+    document.body.appendChild(outer);
+    var widthContained = inner.offsetWidth;
+    outer.style.overflow = 'scroll';
+    var widthScroll = inner.offsetWidth;
+
+    if (widthContained === widthScroll) {
+      widthScroll = outer.clientWidth;
+    }
+
+    document.body.removeChild(outer);
+    cached = widthContained - widthScroll;
+  }
+
+  return cached;
+}
+
+function ensureSize(str) {
+  var match = str.match(/^(.*)px$/);
+  var value = Number(match === null || match === void 0 ? void 0 : match[1]);
+  return Number.isNaN(value) ? getScrollBarSize() : value;
+}
+
+function getTargetScrollBarSize(target) {
+  if (typeof document === 'undefined' || !target || !(target instanceof Element)) {
+    return {
+      width: 0,
+      height: 0
+    };
+  }
+
+  var _getComputedStyle = getComputedStyle(target, '::-webkit-scrollbar'),
+      width = _getComputedStyle.width,
+      height = _getComputedStyle.height;
+
+  return {
+    width: ensureSize(width),
+    height: ensureSize(height)
+  };
+}
+;// CONCATENATED MODULE: ../node_modules/rc-util/es/setStyle.js
+/**
+ * Easy to set element style, return previous style
+ * IE browser compatible(IE browser doesn't merge overflow style, need to set it separately)
+ * https://github.com/ant-design/ant-design/issues/19393
+ *
+ */
+function setStyle(style) {
+  var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+  if (!style) {
+    return {};
+  }
+
+  var _options$element = options.element,
+      element = _options$element === void 0 ? document.body : _options$element;
+  var oldStyle = {};
+  var styleKeys = Object.keys(style); // IE browser compatible
+
+  styleKeys.forEach(function (key) {
+    oldStyle[key] = element.style[key];
+  });
+  styleKeys.forEach(function (key) {
+    element.style[key] = style[key];
+  });
+  return oldStyle;
+}
+
+/* harmony default export */ const es_setStyle = (setStyle);
+;// CONCATENATED MODULE: ../node_modules/rc-util/es/switchScrollingEffect.js
+
+
+
+function isBodyOverflowing() {
+  return document.body.scrollHeight > (window.innerHeight || document.documentElement.clientHeight) && window.innerWidth > document.body.offsetWidth;
+}
+
+var cacheStyle = {};
+/* harmony default export */ const switchScrollingEffect = (function (close) {
+  if (!isBodyOverflowing() && !close) {
+    return;
+  } // https://github.com/ant-design/ant-design/issues/19729
+
+
+  var scrollingEffectClassName = 'ant-scrolling-effect';
+  var scrollingEffectClassNameReg = new RegExp("".concat(scrollingEffectClassName), 'g');
+  var bodyClassName = document.body.className;
+
+  if (close) {
+    if (!scrollingEffectClassNameReg.test(bodyClassName)) return;
+    es_setStyle(cacheStyle);
+    cacheStyle = {};
+    document.body.className = bodyClassName.replace(scrollingEffectClassNameReg, '').trim();
+    return;
+  }
+
+  var scrollBarSize = getScrollBarSize();
+
+  if (scrollBarSize) {
+    cacheStyle = es_setStyle({
+      position: 'relative',
+      width: "calc(100% - ".concat(scrollBarSize, "px)")
+    });
+
+    if (!scrollingEffectClassNameReg.test(bodyClassName)) {
+      var addClassName = "".concat(bodyClassName, " ").concat(scrollingEffectClassName);
+      document.body.className = addClassName.trim();
+    }
+  }
+});
+;// CONCATENATED MODULE: ../node_modules/rc-util/es/Dom/scrollLocker.js
+
+
+
+
+var locks = [];
+var scrollingEffectClassName = 'ant-scrolling-effect';
+var scrollingEffectClassNameReg = new RegExp("".concat(scrollingEffectClassName), 'g');
+var scrollLocker_uuid = 0; // https://github.com/ant-design/ant-design/issues/19340
+// https://github.com/ant-design/ant-design/issues/19332
+
+var scrollLocker_cacheStyle = new Map();
+
+var ScrollLocker = function ScrollLocker(_options) {
+  var _this = this;
+
+  _classCallCheck(this, ScrollLocker);
+
+  this.lockTarget = void 0;
+  this.options = void 0;
+
+  this.getContainer = function () {
+    var _this$options;
+
+    return (_this$options = _this.options) === null || _this$options === void 0 ? void 0 : _this$options.container;
+  };
+
+  this.reLock = function (options) {
+    var findLock = locks.find(function (_ref) {
+      var target = _ref.target;
+      return target === _this.lockTarget;
+    });
+
+    if (findLock) {
+      _this.unLock();
+    }
+
+    _this.options = options;
+
+    if (findLock) {
+      findLock.options = options;
+
+      _this.lock();
+    }
+  };
+
+  this.lock = function () {
+    var _this$options3;
+
+    // If lockTarget exist return
+    if (locks.some(function (_ref2) {
+      var target = _ref2.target;
+      return target === _this.lockTarget;
+    })) {
+      return;
+    } // If same container effect, return
+
+
+    if (locks.some(function (_ref3) {
+      var _this$options2;
+
+      var options = _ref3.options;
+      return (options === null || options === void 0 ? void 0 : options.container) === ((_this$options2 = _this.options) === null || _this$options2 === void 0 ? void 0 : _this$options2.container);
+    })) {
+      locks = [].concat(_toConsumableArray(locks), [{
+        target: _this.lockTarget,
+        options: _this.options
+      }]);
+      return;
+    }
+
+    var scrollBarSize = 0;
+    var container = ((_this$options3 = _this.options) === null || _this$options3 === void 0 ? void 0 : _this$options3.container) || document.body;
+
+    if (container === document.body && window.innerWidth - document.documentElement.clientWidth > 0 || container.scrollHeight > container.clientHeight) {
+      scrollBarSize = getScrollBarSize();
+    }
+
+    var containerClassName = container.className;
+
+    if (locks.filter(function (_ref4) {
+      var _this$options4;
+
+      var options = _ref4.options;
+      return (options === null || options === void 0 ? void 0 : options.container) === ((_this$options4 = _this.options) === null || _this$options4 === void 0 ? void 0 : _this$options4.container);
+    }).length === 0) {
+      scrollLocker_cacheStyle.set(container, es_setStyle({
+        width: scrollBarSize !== 0 ? "calc(100% - ".concat(scrollBarSize, "px)") : undefined,
+        overflow: 'hidden',
+        overflowX: 'hidden',
+        overflowY: 'hidden'
+      }, {
+        element: container
+      }));
+    } // https://github.com/ant-design/ant-design/issues/19729
+
+
+    if (!scrollingEffectClassNameReg.test(containerClassName)) {
+      var addClassName = "".concat(containerClassName, " ").concat(scrollingEffectClassName);
+      container.className = addClassName.trim();
+    }
+
+    locks = [].concat(_toConsumableArray(locks), [{
+      target: _this.lockTarget,
+      options: _this.options
+    }]);
+  };
+
+  this.unLock = function () {
+    var _this$options5;
+
+    var findLock = locks.find(function (_ref5) {
+      var target = _ref5.target;
+      return target === _this.lockTarget;
+    });
+    locks = locks.filter(function (_ref6) {
+      var target = _ref6.target;
+      return target !== _this.lockTarget;
+    });
+
+    if (!findLock || locks.some(function (_ref7) {
+      var _findLock$options;
+
+      var options = _ref7.options;
+      return (options === null || options === void 0 ? void 0 : options.container) === ((_findLock$options = findLock.options) === null || _findLock$options === void 0 ? void 0 : _findLock$options.container);
+    })) {
+      return;
+    } // Remove Effect
+
+
+    var container = ((_this$options5 = _this.options) === null || _this$options5 === void 0 ? void 0 : _this$options5.container) || document.body;
+    var containerClassName = container.className;
+    if (!scrollingEffectClassNameReg.test(containerClassName)) return;
+    es_setStyle(scrollLocker_cacheStyle.get(container), {
+      element: container
+    });
+    scrollLocker_cacheStyle.delete(container);
+    container.className = container.className.replace(scrollingEffectClassNameReg, '').trim();
+  };
+
+  // eslint-disable-next-line no-plusplus
+  this.lockTarget = scrollLocker_uuid++;
+  this.options = _options;
+};
+
+
+;// CONCATENATED MODULE: ../node_modules/rc-util/es/PortalWrapper.js
+
+
+
+
+
+
+/* eslint-disable no-underscore-dangle,react/require-default-props */
+
+
+
+
+
+
+
+var openCount = 0;
+var supportDom = canUseDom();
+/** @private Test usage only */
+
+function getOpenCount() {
+  return  false ? 0 : 0;
+} // https://github.com/ant-design/ant-design/issues/19340
+// https://github.com/ant-design/ant-design/issues/19332
+
+var cacheOverflow = {};
+
+var PortalWrapper_getParent = function getParent(getContainer) {
+  if (!supportDom) {
+    return null;
+  }
+
+  if (getContainer) {
+    if (typeof getContainer === 'string') {
+      return document.querySelectorAll(getContainer)[0];
+    }
+
+    if (typeof getContainer === 'function') {
+      return getContainer();
+    }
+
+    if (typeof_typeof(getContainer) === 'object' && getContainer instanceof window.HTMLElement) {
+      return getContainer;
+    }
+  }
+
+  return document.body;
+};
+
+var PortalWrapper = /*#__PURE__*/function (_React$Component) {
+  _inherits(PortalWrapper, _React$Component);
+
+  var _super = _createSuper(PortalWrapper);
+
+  function PortalWrapper(props) {
+    var _this;
+
+    _classCallCheck(this, PortalWrapper);
+
+    _this = _super.call(this, props);
+    _this.container = void 0;
+    _this.componentRef = /*#__PURE__*/react.createRef();
+    _this.rafId = void 0;
+    _this.scrollLocker = void 0;
+    _this.renderComponent = void 0;
+
+    _this.updateScrollLocker = function (prevProps) {
+      var _ref = prevProps || {},
+          prevVisible = _ref.visible;
+
+      var _this$props = _this.props,
+          getContainer = _this$props.getContainer,
+          visible = _this$props.visible;
+
+      if (visible && visible !== prevVisible && supportDom && PortalWrapper_getParent(getContainer) !== _this.scrollLocker.getContainer()) {
+        _this.scrollLocker.reLock({
+          container: PortalWrapper_getParent(getContainer)
+        });
+      }
+    };
+
+    _this.updateOpenCount = function (prevProps) {
+      var _ref2 = prevProps || {},
+          prevVisible = _ref2.visible,
+          prevGetContainer = _ref2.getContainer;
+
+      var _this$props2 = _this.props,
+          visible = _this$props2.visible,
+          getContainer = _this$props2.getContainer; // Update count
+
+      if (visible !== prevVisible && supportDom && PortalWrapper_getParent(getContainer) === document.body) {
+        if (visible && !prevVisible) {
+          openCount += 1;
+        } else if (prevProps) {
+          openCount -= 1;
+        }
+      } // Clean up container if needed
+
+
+      var getContainerIsFunc = typeof getContainer === 'function' && typeof prevGetContainer === 'function';
+
+      if (getContainerIsFunc ? getContainer.toString() !== prevGetContainer.toString() : getContainer !== prevGetContainer) {
+        _this.removeCurrentContainer();
+      }
+    };
+
+    _this.attachToParent = function () {
+      var force = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+
+      if (force || _this.container && !_this.container.parentNode) {
+        var parent = PortalWrapper_getParent(_this.props.getContainer);
+
+        if (parent) {
+          parent.appendChild(_this.container);
+          return true;
+        }
+
+        return false;
+      }
+
+      return true;
+    };
+
+    _this.getContainer = function () {
+      if (!supportDom) {
+        return null;
+      }
+
+      if (!_this.container) {
+        _this.container = document.createElement('div');
+
+        _this.attachToParent(true);
+      }
+
+      _this.setWrapperClassName();
+
+      return _this.container;
+    };
+
+    _this.setWrapperClassName = function () {
+      var wrapperClassName = _this.props.wrapperClassName;
+
+      if (_this.container && wrapperClassName && wrapperClassName !== _this.container.className) {
+        _this.container.className = wrapperClassName;
+      }
+    };
+
+    _this.removeCurrentContainer = function () {
+      var _this$container, _this$container$paren;
+
+      // Portal will remove from `parentNode`.
+      // Let's handle this again to avoid refactor issue.
+      (_this$container = _this.container) === null || _this$container === void 0 ? void 0 : (_this$container$paren = _this$container.parentNode) === null || _this$container$paren === void 0 ? void 0 : _this$container$paren.removeChild(_this.container);
+    };
+
+    _this.switchScrollingEffect = function () {
+      if (openCount === 1 && !Object.keys(cacheOverflow).length) {
+        switchScrollingEffect(); // Must be set after switchScrollingEffect
+
+        cacheOverflow = es_setStyle({
+          overflow: 'hidden',
+          overflowX: 'hidden',
+          overflowY: 'hidden'
+        });
+      } else if (!openCount) {
+        es_setStyle(cacheOverflow);
+        cacheOverflow = {};
+        switchScrollingEffect(true);
+      }
+    };
+
+    _this.scrollLocker = new ScrollLocker({
+      container: PortalWrapper_getParent(props.getContainer)
+    });
+    return _this;
+  }
+
+  _createClass(PortalWrapper, [{
+    key: "componentDidMount",
+    value: function componentDidMount() {
+      var _this2 = this;
+
+      this.updateOpenCount();
+
+      if (!this.attachToParent()) {
+        this.rafId = wrapperRaf(function () {
+          _this2.forceUpdate();
+        });
+      }
+    }
+  }, {
+    key: "componentDidUpdate",
+    value: function componentDidUpdate(prevProps) {
+      this.updateOpenCount(prevProps);
+      this.updateScrollLocker(prevProps);
+      this.setWrapperClassName();
+      this.attachToParent();
+    }
+  }, {
+    key: "componentWillUnmount",
+    value: function componentWillUnmount() {
+      var _this$props3 = this.props,
+          visible = _this$props3.visible,
+          getContainer = _this$props3.getContainer;
+
+      if (supportDom && PortalWrapper_getParent(getContainer) === document.body) {
+        // 离开时不会 render， 导到离开时数值不变，改用 func 。。
+        openCount = visible && openCount ? openCount - 1 : openCount;
+      }
+
+      this.removeCurrentContainer();
+      wrapperRaf.cancel(this.rafId);
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      var _this$props4 = this.props,
+          children = _this$props4.children,
+          forceRender = _this$props4.forceRender,
+          visible = _this$props4.visible;
+      var portal = null;
+      var childProps = {
+        getOpenCount: function getOpenCount() {
+          return openCount;
+        },
+        getContainer: this.getContainer,
+        switchScrollingEffect: this.switchScrollingEffect,
+        scrollLocker: this.scrollLocker
+      };
+
+      if (forceRender || visible || this.componentRef.current) {
+        portal = /*#__PURE__*/react.createElement(es_Portal, {
+          getContainer: this.getContainer,
+          ref: this.componentRef
+        }, children(childProps));
+      }
+
+      return portal;
+    }
+  }]);
+
+  return PortalWrapper;
+}(react.Component);
+
+/* harmony default export */ const es_PortalWrapper = (PortalWrapper);
+;// CONCATENATED MODULE: ../node_modules/rc-dialog/es/Dialog/Mask.js
+
+
+
+
+
+function Mask_Mask(props) {
+  var prefixCls = props.prefixCls,
+      style = props.style,
+      visible = props.visible,
+      maskProps = props.maskProps,
+      motionName = props.motionName;
+  return /*#__PURE__*/react.createElement(es, {
+    key: "mask",
+    visible: visible,
+    motionName: motionName,
+    leavedClassName: "".concat(prefixCls, "-mask-hidden")
+  }, function (_ref) {
+    var motionClassName = _ref.className,
+        motionStyle = _ref.style;
+    return /*#__PURE__*/react.createElement("div", extends_extends({
+      style: _objectSpread2(_objectSpread2({}, motionStyle), style),
+      className: classnames_default()("".concat(prefixCls, "-mask"), motionClassName)
+    }, maskProps));
+  });
+}
+;// CONCATENATED MODULE: ../node_modules/rc-dialog/es/util.js
+// =============================== Motion ===============================
+function getMotionName(prefixCls, transitionName, animationName) {
+  var motionName = transitionName;
+
+  if (!motionName && animationName) {
+    motionName = "".concat(prefixCls, "-").concat(animationName);
+  }
+
+  return motionName;
+} // ================================ UUID ================================
+
+var util_uuid = -1;
+function util_getUUID() {
+  util_uuid += 1;
+  return util_uuid;
+} // =============================== Offset ===============================
+
+function util_getScroll(w, top) {
+  var ret = w["page".concat(top ? 'Y' : 'X', "Offset")];
+  var method = "scroll".concat(top ? 'Top' : 'Left');
+
+  if (typeof ret !== 'number') {
+    var d = w.document;
+    ret = d.documentElement[method];
+
+    if (typeof ret !== 'number') {
+      ret = d.body[method];
+    }
+  }
+
+  return ret;
+}
+
+function offset(el) {
+  var rect = el.getBoundingClientRect();
+  var pos = {
+    left: rect.left,
+    top: rect.top
+  };
+  var doc = el.ownerDocument;
+  var w = doc.defaultView || doc.parentWindow;
+  pos.left += util_getScroll(w);
+  pos.top += util_getScroll(w, true);
+  return pos;
+}
+;// CONCATENATED MODULE: ../node_modules/rc-dialog/es/Dialog/Content/MemoChildren.js
+
+/* harmony default export */ const MemoChildren = (/*#__PURE__*/react.memo(function (_ref) {
+  var children = _ref.children;
+  return children;
+}, function (_, _ref2) {
+  var shouldUpdate = _ref2.shouldUpdate;
+  return !shouldUpdate;
+}));
+;// CONCATENATED MODULE: ../node_modules/rc-dialog/es/Dialog/Content/index.js
+
+
+
+
+
+
+
+
+
+var sentinelStyle = {
+  width: 0,
+  height: 0,
+  overflow: 'hidden',
+  outline: 'none'
+};
+var Content_Content = /*#__PURE__*/react.forwardRef(function (props, ref) {
+  var closable = props.closable,
+      prefixCls = props.prefixCls,
+      width = props.width,
+      height = props.height,
+      footer = props.footer,
+      title = props.title,
+      closeIcon = props.closeIcon,
+      style = props.style,
+      className = props.className,
+      visible = props.visible,
+      forceRender = props.forceRender,
+      bodyStyle = props.bodyStyle,
+      bodyProps = props.bodyProps,
+      children = props.children,
+      destroyOnClose = props.destroyOnClose,
+      modalRender = props.modalRender,
+      motionName = props.motionName,
+      ariaId = props.ariaId,
+      onClose = props.onClose,
+      onVisibleChanged = props.onVisibleChanged,
+      onMouseDown = props.onMouseDown,
+      onMouseUp = props.onMouseUp,
+      mousePosition = props.mousePosition;
+  var sentinelStartRef = (0,react.useRef)();
+  var sentinelEndRef = (0,react.useRef)();
+  var dialogRef = (0,react.useRef)(); // ============================== Ref ===============================
+
+  react.useImperativeHandle(ref, function () {
+    return {
+      focus: function focus() {
+        var _sentinelStartRef$cur;
+
+        (_sentinelStartRef$cur = sentinelStartRef.current) === null || _sentinelStartRef$cur === void 0 ? void 0 : _sentinelStartRef$cur.focus();
+      },
+      changeActive: function changeActive(next) {
+        var _document = document,
+            activeElement = _document.activeElement;
+
+        if (next && activeElement === sentinelEndRef.current) {
+          sentinelStartRef.current.focus();
+        } else if (!next && activeElement === sentinelStartRef.current) {
+          sentinelEndRef.current.focus();
+        }
+      }
+    };
+  }); // ============================= Style ==============================
+
+  var _React$useState = react.useState(),
+      _React$useState2 = _slicedToArray(_React$useState, 2),
+      transformOrigin = _React$useState2[0],
+      setTransformOrigin = _React$useState2[1];
+
+  var contentStyle = {};
+
+  if (width !== undefined) {
+    contentStyle.width = width;
+  }
+
+  if (height !== undefined) {
+    contentStyle.height = height;
+  }
+
+  if (transformOrigin) {
+    contentStyle.transformOrigin = transformOrigin;
+  }
+
+  function onPrepare() {
+    var elementOffset = offset(dialogRef.current);
+    setTransformOrigin(mousePosition ? "".concat(mousePosition.x - elementOffset.left, "px ").concat(mousePosition.y - elementOffset.top, "px") : '');
+  } // ============================= Render =============================
+
+
+  var footerNode;
+
+  if (footer) {
+    footerNode = /*#__PURE__*/react.createElement("div", {
+      className: "".concat(prefixCls, "-footer")
+    }, footer);
+  }
+
+  var headerNode;
+
+  if (title) {
+    headerNode = /*#__PURE__*/react.createElement("div", {
+      className: "".concat(prefixCls, "-header")
+    }, /*#__PURE__*/react.createElement("div", {
+      className: "".concat(prefixCls, "-title"),
+      id: ariaId
+    }, title));
+  }
+
+  var closer;
+
+  if (closable) {
+    closer = /*#__PURE__*/react.createElement("button", {
+      type: "button",
+      onClick: onClose,
+      "aria-label": "Close",
+      className: "".concat(prefixCls, "-close")
+    }, closeIcon || /*#__PURE__*/react.createElement("span", {
+      className: "".concat(prefixCls, "-close-x")
+    }));
+  }
+
+  var content = /*#__PURE__*/react.createElement("div", {
+    className: "".concat(prefixCls, "-content")
+  }, closer, headerNode, /*#__PURE__*/react.createElement("div", extends_extends({
+    className: "".concat(prefixCls, "-body"),
+    style: bodyStyle
+  }, bodyProps), children), footerNode);
+  return /*#__PURE__*/react.createElement(es, {
+    visible: visible,
+    onVisibleChanged: onVisibleChanged,
+    onAppearPrepare: onPrepare,
+    onEnterPrepare: onPrepare,
+    forceRender: forceRender,
+    motionName: motionName,
+    removeOnLeave: destroyOnClose,
+    ref: dialogRef
+  }, function (_ref, motionRef) {
+    var motionClassName = _ref.className,
+        motionStyle = _ref.style;
+    return /*#__PURE__*/react.createElement("div", {
+      key: "dialog-element",
+      role: "document",
+      ref: motionRef,
+      style: _objectSpread2(_objectSpread2(_objectSpread2({}, motionStyle), style), contentStyle),
+      className: classnames_default()(prefixCls, className, motionClassName),
+      onMouseDown: onMouseDown,
+      onMouseUp: onMouseUp
+    }, /*#__PURE__*/react.createElement("div", {
+      tabIndex: 0,
+      ref: sentinelStartRef,
+      style: sentinelStyle,
+      "aria-hidden": "true"
+    }), /*#__PURE__*/react.createElement(MemoChildren, {
+      shouldUpdate: visible || forceRender
+    }, modalRender ? modalRender(content) : content), /*#__PURE__*/react.createElement("div", {
+      tabIndex: 0,
+      ref: sentinelEndRef,
+      style: sentinelStyle,
+      "aria-hidden": "true"
+    }));
+  });
+});
+Content_Content.displayName = 'Content';
+/* harmony default export */ const Dialog_Content = (Content_Content);
+;// CONCATENATED MODULE: ../node_modules/rc-dialog/es/Dialog/index.js
+
+
+
+
+
+
+
+
+
+
+
+
+function Dialog(props) {
+  var _props$prefixCls = props.prefixCls,
+      prefixCls = _props$prefixCls === void 0 ? 'rc-dialog' : _props$prefixCls,
+      zIndex = props.zIndex,
+      _props$visible = props.visible,
+      visible = _props$visible === void 0 ? false : _props$visible,
+      _props$keyboard = props.keyboard,
+      keyboard = _props$keyboard === void 0 ? true : _props$keyboard,
+      _props$focusTriggerAf = props.focusTriggerAfterClose,
+      focusTriggerAfterClose = _props$focusTriggerAf === void 0 ? true : _props$focusTriggerAf,
+      scrollLocker = props.scrollLocker,
+      title = props.title,
+      wrapStyle = props.wrapStyle,
+      wrapClassName = props.wrapClassName,
+      wrapProps = props.wrapProps,
+      onClose = props.onClose,
+      afterClose = props.afterClose,
+      transitionName = props.transitionName,
+      animation = props.animation,
+      _props$closable = props.closable,
+      closable = _props$closable === void 0 ? true : _props$closable,
+      _props$mask = props.mask,
+      mask = _props$mask === void 0 ? true : _props$mask,
+      maskTransitionName = props.maskTransitionName,
+      maskAnimation = props.maskAnimation,
+      _props$maskClosable = props.maskClosable,
+      maskClosable = _props$maskClosable === void 0 ? true : _props$maskClosable,
+      maskStyle = props.maskStyle,
+      maskProps = props.maskProps;
+  var lastOutSideActiveElementRef = (0,react.useRef)();
+  var wrapperRef = (0,react.useRef)();
+  var contentRef = (0,react.useRef)();
+
+  var _React$useState = react.useState(visible),
+      _React$useState2 = _slicedToArray(_React$useState, 2),
+      animatedVisible = _React$useState2[0],
+      setAnimatedVisible = _React$useState2[1]; // ========================== Init ==========================
+
+
+  var ariaIdRef = (0,react.useRef)();
+
+  if (!ariaIdRef.current) {
+    ariaIdRef.current = "rcDialogTitle".concat(util_getUUID());
+  } // ========================= Events =========================
+
+
+  function onDialogVisibleChanged(newVisible) {
+    if (newVisible) {
+      // Try to focus
+      if (!contains(wrapperRef.current, document.activeElement)) {
+        var _contentRef$current;
+
+        lastOutSideActiveElementRef.current = document.activeElement;
+        (_contentRef$current = contentRef.current) === null || _contentRef$current === void 0 ? void 0 : _contentRef$current.focus();
+      }
+    } else {
+      // Clean up scroll bar & focus back
+      setAnimatedVisible(false);
+
+      if (mask && lastOutSideActiveElementRef.current && focusTriggerAfterClose) {
+        try {
+          lastOutSideActiveElementRef.current.focus({
+            preventScroll: true
+          });
+        } catch (e) {// Do nothing
+        }
+
+        lastOutSideActiveElementRef.current = null;
+      } // Trigger afterClose only when change visible from true to false
+
+
+      if (animatedVisible) {
+        afterClose === null || afterClose === void 0 ? void 0 : afterClose();
+      }
+    }
+  }
+
+  function onInternalClose(e) {
+    onClose === null || onClose === void 0 ? void 0 : onClose(e);
+  } // >>> Content
+
+
+  var contentClickRef = (0,react.useRef)(false);
+  var contentTimeoutRef = (0,react.useRef)(); // We need record content click incase content popup out of dialog
+
+  var onContentMouseDown = function onContentMouseDown() {
+    clearTimeout(contentTimeoutRef.current);
+    contentClickRef.current = true;
+  };
+
+  var onContentMouseUp = function onContentMouseUp() {
+    contentTimeoutRef.current = setTimeout(function () {
+      contentClickRef.current = false;
+    });
+  }; // >>> Wrapper
+  // Close only when element not on dialog
+
+
+  var onWrapperClick = null;
+
+  if (maskClosable) {
+    onWrapperClick = function onWrapperClick(e) {
+      if (contentClickRef.current) {
+        contentClickRef.current = false;
+      } else if (wrapperRef.current === e.target) {
+        onInternalClose(e);
+      }
+    };
+  }
+
+  function onWrapperKeyDown(e) {
+    if (keyboard && e.keyCode === es_KeyCode.ESC) {
+      e.stopPropagation();
+      onInternalClose(e);
+      return;
+    } // keep focus inside dialog
+
+
+    if (visible) {
+      if (e.keyCode === es_KeyCode.TAB) {
+        contentRef.current.changeActive(!e.shiftKey);
+      }
+    }
+  } // ========================= Effect =========================
+
+
+  (0,react.useEffect)(function () {
+    if (visible) {
+      setAnimatedVisible(true);
+    }
+
+    return function () {};
+  }, [visible]); // Remove direct should also check the scroll bar update
+
+  (0,react.useEffect)(function () {
+    return function () {
+      clearTimeout(contentTimeoutRef.current);
+    };
+  }, []);
+  (0,react.useEffect)(function () {
+    if (animatedVisible) {
+      scrollLocker === null || scrollLocker === void 0 ? void 0 : scrollLocker.lock();
+      return scrollLocker === null || scrollLocker === void 0 ? void 0 : scrollLocker.unLock;
+    }
+
+    return function () {};
+  }, [animatedVisible, scrollLocker]); // ========================= Render =========================
+
+  return /*#__PURE__*/react.createElement("div", extends_extends({
+    className: "".concat(prefixCls, "-root")
+  }, pickAttrs(props, {
+    data: true
+  })), /*#__PURE__*/react.createElement(Mask_Mask, {
+    prefixCls: prefixCls,
+    visible: mask && visible,
+    motionName: getMotionName(prefixCls, maskTransitionName, maskAnimation),
+    style: _objectSpread2({
+      zIndex: zIndex
+    }, maskStyle),
+    maskProps: maskProps
+  }), /*#__PURE__*/react.createElement("div", extends_extends({
+    tabIndex: -1,
+    onKeyDown: onWrapperKeyDown,
+    className: classnames_default()("".concat(prefixCls, "-wrap"), wrapClassName),
+    ref: wrapperRef,
+    onClick: onWrapperClick,
+    role: "dialog",
+    "aria-labelledby": title ? ariaIdRef.current : null,
+    style: _objectSpread2(_objectSpread2({
+      zIndex: zIndex
+    }, wrapStyle), {}, {
+      display: !animatedVisible ? 'none' : null
+    })
+  }, wrapProps), /*#__PURE__*/react.createElement(Dialog_Content, extends_extends({}, props, {
+    onMouseDown: onContentMouseDown,
+    onMouseUp: onContentMouseUp,
+    ref: contentRef,
+    closable: closable,
+    ariaId: ariaIdRef.current,
+    prefixCls: prefixCls,
+    visible: visible,
+    onClose: onInternalClose,
+    onVisibleChanged: onDialogVisibleChanged,
+    motionName: getMotionName(prefixCls, transitionName, animation)
+  }))));
+}
+;// CONCATENATED MODULE: ../node_modules/rc-dialog/es/DialogWrap.js
+
+
+
+
+ // fix issue #10656
+
+/*
+ * getContainer remarks
+ * Custom container should not be return, because in the Portal component, it will remove the
+ * return container element here, if the custom container is the only child of it's component,
+ * like issue #10656, It will has a conflict with removeChild method in react-dom.
+ * So here should add a child (div element) to custom container.
+ * */
+
+var DialogWrap = function DialogWrap(props) {
+  var visible = props.visible,
+      getContainer = props.getContainer,
+      forceRender = props.forceRender,
+      _props$destroyOnClose = props.destroyOnClose,
+      destroyOnClose = _props$destroyOnClose === void 0 ? false : _props$destroyOnClose,
+      _afterClose = props.afterClose;
+
+  var _React$useState = react.useState(visible),
+      _React$useState2 = _slicedToArray(_React$useState, 2),
+      animatedVisible = _React$useState2[0],
+      setAnimatedVisible = _React$useState2[1];
+
+  react.useEffect(function () {
+    if (visible) {
+      setAnimatedVisible(true);
+    }
+  }, [visible]); // 渲染在当前 dom 里；
+
+  if (getContainer === false) {
+    return /*#__PURE__*/react.createElement(Dialog, extends_extends({}, props, {
+      getOpenCount: function getOpenCount() {
+        return 2;
+      } // 不对 body 做任何操作。。
+
+    }));
+  } // Destroy on close will remove wrapped div
+
+
+  if (!forceRender && destroyOnClose && !animatedVisible) {
+    return null;
+  }
+
+  return /*#__PURE__*/react.createElement(es_PortalWrapper, {
+    visible: visible,
+    forceRender: forceRender,
+    getContainer: getContainer
+  }, function (childProps) {
+    return /*#__PURE__*/react.createElement(Dialog, extends_extends({}, props, {
+      destroyOnClose: destroyOnClose,
+      afterClose: function afterClose() {
+        _afterClose === null || _afterClose === void 0 ? void 0 : _afterClose();
+        setAnimatedVisible(false);
+      }
+    }, childProps));
+  });
+};
+
+DialogWrap.displayName = 'Dialog';
+/* harmony default export */ const es_DialogWrap = (DialogWrap);
+;// CONCATENATED MODULE: ../node_modules/rc-dialog/es/index.js
+
+/* harmony default export */ const rc_dialog_es = (es_DialogWrap);
+;// CONCATENATED MODULE: ../node_modules/antd/es/_util/styleChecker.js
+
+
+var canUseDocElement = function canUseDocElement() {
+  return canUseDom() && window.document.documentElement;
+};
+
+var flexGapSupported;
+var detectFlexGapSupported = function detectFlexGapSupported() {
+  if (!canUseDocElement()) {
+    return false;
+  }
+
+  if (flexGapSupported !== undefined) {
+    return flexGapSupported;
+  } // create flex container with row-gap set
+
+
+  var flex = document.createElement('div');
+  flex.style.display = 'flex';
+  flex.style.flexDirection = 'column';
+  flex.style.rowGap = '1px'; // create two, elements inside it
+
+  flex.appendChild(document.createElement('div'));
+  flex.appendChild(document.createElement('div')); // append to the DOM (needed to obtain scrollHeight)
+
+  document.body.appendChild(flex);
+  flexGapSupported = flex.scrollHeight === 1; // flex container should be 1px high from the row-gap
+
+  document.body.removeChild(flex);
+  return flexGapSupported;
+};
+;// CONCATENATED MODULE: ../node_modules/antd/es/modal/Modal.js
+
+
+
+var Modal_rest = undefined && undefined.__rest || function (s, e) {
+  var t = {};
+
+  for (var p in s) {
+    if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0) t[p] = s[p];
+  }
+
+  if (s != null && typeof Object.getOwnPropertySymbols === "function") for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+    if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i])) t[p[i]] = s[p[i]];
+  }
+  return t;
+};
+
+
+
+
+
+
+
+
+
+
+
+
+var mousePosition; // ref: https://github.com/ant-design/ant-design/issues/15795
+
+var getClickPosition = function getClickPosition(e) {
+  mousePosition = {
+    x: e.pageX,
+    y: e.pageY
+  }; // 100ms 内发生过点击事件，则从点击位置动画展示
+  // 否则直接 zoom 展示
+  // 这样可以兼容非点击方式展开
+
+  setTimeout(function () {
+    mousePosition = null;
+  }, 100);
+}; // 只有点击事件支持从鼠标位置动画展开
+
+
+if (canUseDocElement()) {
+  document.documentElement.addEventListener('click', getClickPosition, true);
+}
+
+var Modal = function Modal(props) {
+  var _classNames;
+
+  var _React$useContext = react.useContext(ConfigContext),
+      getContextPopupContainer = _React$useContext.getPopupContainer,
+      getPrefixCls = _React$useContext.getPrefixCls,
+      direction = _React$useContext.direction;
+
+  var handleCancel = function handleCancel(e) {
+    var onCancel = props.onCancel;
+    onCancel === null || onCancel === void 0 ? void 0 : onCancel(e);
+  };
+
+  var handleOk = function handleOk(e) {
+    var onOk = props.onOk;
+    onOk === null || onOk === void 0 ? void 0 : onOk(e);
+  };
+
+  var renderFooter = function renderFooter(locale) {
+    var okText = props.okText,
+        okType = props.okType,
+        cancelText = props.cancelText,
+        confirmLoading = props.confirmLoading;
+    return /*#__PURE__*/react.createElement(react.Fragment, null, /*#__PURE__*/react.createElement(es_button, extends_extends({
+      onClick: handleCancel
+    }, props.cancelButtonProps), cancelText || locale.cancelText), /*#__PURE__*/react.createElement(es_button, extends_extends({}, convertLegacyProps(okType), {
+      loading: confirmLoading,
+      onClick: handleOk
+    }, props.okButtonProps), okText || locale.okText));
+  };
+
+  var customizePrefixCls = props.prefixCls,
+      footer = props.footer,
+      visible = props.visible,
+      wrapClassName = props.wrapClassName,
+      centered = props.centered,
+      getContainer = props.getContainer,
+      closeIcon = props.closeIcon,
+      _props$focusTriggerAf = props.focusTriggerAfterClose,
+      focusTriggerAfterClose = _props$focusTriggerAf === void 0 ? true : _props$focusTriggerAf,
+      restProps = Modal_rest(props, ["prefixCls", "footer", "visible", "wrapClassName", "centered", "getContainer", "closeIcon", "focusTriggerAfterClose"]);
+
+  var prefixCls = getPrefixCls('modal', customizePrefixCls);
+  var rootPrefixCls = getPrefixCls();
+  var defaultFooter = /*#__PURE__*/react.createElement(LocaleReceiver, {
+    componentName: "Modal",
+    defaultLocale: getConfirmLocale()
+  }, renderFooter);
+  var closeIconToRender = /*#__PURE__*/react.createElement("span", {
+    className: "".concat(prefixCls, "-close-x")
+  }, closeIcon || /*#__PURE__*/react.createElement(icons_CloseOutlined, {
+    className: "".concat(prefixCls, "-close-icon")
+  }));
+  var wrapClassNameExtended = classnames_default()(wrapClassName, (_classNames = {}, _defineProperty(_classNames, "".concat(prefixCls, "-centered"), !!centered), _defineProperty(_classNames, "".concat(prefixCls, "-wrap-rtl"), direction === 'rtl'), _classNames));
+  return /*#__PURE__*/react.createElement(rc_dialog_es, extends_extends({}, restProps, {
+    getContainer: getContainer === undefined ? getContextPopupContainer : getContainer,
+    prefixCls: prefixCls,
+    wrapClassName: wrapClassNameExtended,
+    footer: footer === undefined ? defaultFooter : footer,
+    visible: visible,
+    mousePosition: mousePosition,
+    onClose: handleCancel,
+    closeIcon: closeIconToRender,
+    focusTriggerAfterClose: focusTriggerAfterClose,
+    transitionName: motion_getTransitionName(rootPrefixCls, 'zoom', props.transitionName),
+    maskTransitionName: motion_getTransitionName(rootPrefixCls, 'fade', props.maskTransitionName)
+  }));
+};
+
+Modal.defaultProps = {
+  width: 520,
+  confirmLoading: false,
+  visible: false,
+  okType: 'primary'
+};
+/* harmony default export */ const modal_Modal = (Modal);
+;// CONCATENATED MODULE: ../node_modules/antd/es/_util/hooks/useDestroyed.js
+
+function useDestroyed() {
+  var mountedRef = react.useRef(true);
+  react.useEffect(function () {
+    return function () {
+      mountedRef.current = false;
+    };
+  }, []);
+  return function () {
+    return !mountedRef.current;
+  };
+}
+;// CONCATENATED MODULE: ../node_modules/antd/es/_util/ActionButton.js
+
+
+
+
+
+
+
+function isThenable(thing) {
+  return !!(thing && !!thing.then);
+}
+
+var ActionButton = function ActionButton(props) {
+  var clickedRef = react.useRef(false);
+  var ref = react.useRef();
+  var isDestroyed = useDestroyed();
+
+  var _React$useState = react.useState(false),
+      _React$useState2 = _slicedToArray(_React$useState, 2),
+      loading = _React$useState2[0],
+      setLoading = _React$useState2[1];
+
+  react.useEffect(function () {
+    var timeoutId;
+
+    if (props.autoFocus) {
+      var $this = ref.current;
+      timeoutId = setTimeout(function () {
+        return $this.focus();
+      });
+    }
+
+    return function () {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, []);
+
+  var handlePromiseOnOk = function handlePromiseOnOk(returnValueOfOnOk) {
+    var close = props.close;
+
+    if (!isThenable(returnValueOfOnOk)) {
+      return;
+    }
+
+    setLoading(true);
+    returnValueOfOnOk.then(function () {
+      if (!isDestroyed()) {
+        setLoading(false);
+      }
+
+      close.apply(void 0, arguments);
+      clickedRef.current = false;
+    }, function (e) {
+      // Emit error when catch promise reject
+      // eslint-disable-next-line no-console
+      console.error(e); // See: https://github.com/ant-design/ant-design/issues/6183
+
+      if (!isDestroyed()) {
+        setLoading(false);
+      }
+
+      clickedRef.current = false;
+    });
+  };
+
+  var onClick = function onClick(e) {
+    var actionFn = props.actionFn,
+        close = props.close;
+
+    if (clickedRef.current) {
+      return;
+    }
+
+    clickedRef.current = true;
+
+    if (!actionFn) {
+      close();
+      return;
+    }
+
+    var returnValueOfOnOk;
+
+    if (props.emitEvent) {
+      returnValueOfOnOk = actionFn(e);
+
+      if (props.quitOnNullishReturnValue && !isThenable(returnValueOfOnOk)) {
+        clickedRef.current = false;
+        close(e);
+        return;
+      }
+    } else if (actionFn.length) {
+      returnValueOfOnOk = actionFn(close); // https://github.com/ant-design/ant-design/issues/23358
+
+      clickedRef.current = false;
+    } else {
+      returnValueOfOnOk = actionFn();
+
+      if (!returnValueOfOnOk) {
+        close();
+        return;
+      }
+    }
+
+    handlePromiseOnOk(returnValueOfOnOk);
+  };
+
+  var type = props.type,
+      children = props.children,
+      prefixCls = props.prefixCls,
+      buttonProps = props.buttonProps;
+  return /*#__PURE__*/react.createElement(es_button, extends_extends({}, convertLegacyProps(type), {
+    onClick: onClick,
+    loading: loading,
+    prefixCls: prefixCls
+  }, buttonProps, {
+    ref: ref
+  }), children);
+};
+
+/* harmony default export */ const _util_ActionButton = (ActionButton);
 ;// CONCATENATED MODULE: ../node_modules/antd/es/modal/ConfirmDialog.js
 
 
@@ -49872,55 +51876,55 @@ var SubMenuList = /*#__PURE__*/react.forwardRef(InternalSubMenuList);
 SubMenuList.displayName = 'SubMenuList';
 /* harmony default export */ const SubMenu_SubMenuList = (SubMenuList);
 ;// CONCATENATED MODULE: ../node_modules/rc-menu/es/placements.js
-var autoAdjustOverflow = {
+var placements_autoAdjustOverflow = {
   adjustX: 1,
   adjustY: 1
 };
-var placements = {
+var placements_placements = {
   topLeft: {
     points: ['bl', 'tl'],
-    overflow: autoAdjustOverflow,
+    overflow: placements_autoAdjustOverflow,
     offset: [0, -7]
   },
   bottomLeft: {
     points: ['tl', 'bl'],
-    overflow: autoAdjustOverflow,
+    overflow: placements_autoAdjustOverflow,
     offset: [0, 7]
   },
   leftTop: {
     points: ['tr', 'tl'],
-    overflow: autoAdjustOverflow,
+    overflow: placements_autoAdjustOverflow,
     offset: [-4, 0]
   },
   rightTop: {
     points: ['tl', 'tr'],
-    overflow: autoAdjustOverflow,
+    overflow: placements_autoAdjustOverflow,
     offset: [4, 0]
   }
 };
 var placementsRtl = {
   topLeft: {
     points: ['bl', 'tl'],
-    overflow: autoAdjustOverflow,
+    overflow: placements_autoAdjustOverflow,
     offset: [0, -7]
   },
   bottomLeft: {
     points: ['tl', 'bl'],
-    overflow: autoAdjustOverflow,
+    overflow: placements_autoAdjustOverflow,
     offset: [0, 7]
   },
   rightTop: {
     points: ['tr', 'tl'],
-    overflow: autoAdjustOverflow,
+    overflow: placements_autoAdjustOverflow,
     offset: [-4, 0]
   },
   leftTop: {
     points: ['tl', 'tr'],
-    overflow: autoAdjustOverflow,
+    overflow: placements_autoAdjustOverflow,
     offset: [4, 0]
   }
 };
-/* harmony default export */ const es_placements = ((/* unused pure expression or super */ null && (placements)));
+/* harmony default export */ const rc_menu_es_placements = ((/* unused pure expression or super */ null && (placements_placements)));
 ;// CONCATENATED MODULE: ../node_modules/rc-menu/es/utils/motionUtil.js
 function motionUtil_getMotion(mode, motion, defaultMotions) {
   if (motion) {
@@ -49977,7 +51981,7 @@ function PopupTrigger(_ref) {
       innerVisible = _React$useState2[0],
       setInnerVisible = _React$useState2[1];
 
-  var placement = rtl ? _objectSpread2(_objectSpread2({}, placementsRtl), builtinPlacements) : _objectSpread2(_objectSpread2({}, placements), builtinPlacements);
+  var placement = rtl ? _objectSpread2(_objectSpread2({}, placementsRtl), builtinPlacements) : _objectSpread2(_objectSpread2({}, placements_placements), builtinPlacements);
   var popupPlacement = popupPlacementMap[mode];
   var targetMotion = motionUtil_getMotion(mode, motion, defaultMotions);
 
@@ -51408,50 +53412,50 @@ ExportMenu.ItemGroup = MenuItemGroup;
 ExportMenu.Divider = Divider;
 /* harmony default export */ const rc_menu_es = (ExportMenu);
 ;// CONCATENATED MODULE: ../node_modules/rc-dropdown/es/placements.js
-var placements_autoAdjustOverflow = {
+var es_placements_autoAdjustOverflow = {
   adjustX: 1,
   adjustY: 1
 };
-var targetOffset = [0, 0];
-var placements_placements = {
+var es_placements_targetOffset = [0, 0];
+var es_placements_placements = {
   topLeft: {
     points: ['bl', 'tl'],
-    overflow: placements_autoAdjustOverflow,
+    overflow: es_placements_autoAdjustOverflow,
     offset: [0, -4],
-    targetOffset: targetOffset
+    targetOffset: es_placements_targetOffset
   },
   topCenter: {
     points: ['bc', 'tc'],
-    overflow: placements_autoAdjustOverflow,
+    overflow: es_placements_autoAdjustOverflow,
     offset: [0, -4],
-    targetOffset: targetOffset
+    targetOffset: es_placements_targetOffset
   },
   topRight: {
     points: ['br', 'tr'],
-    overflow: placements_autoAdjustOverflow,
+    overflow: es_placements_autoAdjustOverflow,
     offset: [0, -4],
-    targetOffset: targetOffset
+    targetOffset: es_placements_targetOffset
   },
   bottomLeft: {
     points: ['tl', 'bl'],
-    overflow: placements_autoAdjustOverflow,
+    overflow: es_placements_autoAdjustOverflow,
     offset: [0, 4],
-    targetOffset: targetOffset
+    targetOffset: es_placements_targetOffset
   },
   bottomCenter: {
     points: ['tc', 'bc'],
-    overflow: placements_autoAdjustOverflow,
+    overflow: es_placements_autoAdjustOverflow,
     offset: [0, 4],
-    targetOffset: targetOffset
+    targetOffset: es_placements_targetOffset
   },
   bottomRight: {
     points: ['tr', 'br'],
-    overflow: placements_autoAdjustOverflow,
+    overflow: es_placements_autoAdjustOverflow,
     offset: [0, 4],
-    targetOffset: targetOffset
+    targetOffset: es_placements_targetOffset
   }
 };
-/* harmony default export */ const rc_dropdown_es_placements = (placements_placements);
+/* harmony default export */ const rc_dropdown_es_placements = (es_placements_placements);
 ;// CONCATENATED MODULE: ../node_modules/rc-dropdown/es/Dropdown.js
 
 
@@ -53797,7 +55801,8 @@ function uniqueArr(arr) {
 
 
 var Home_Option = es_select.Option;
-var Home_Search = input.Search; // for electron
+var Home_Search = input.Search;
+var Home_Text = typography.Text; // for electron
 
 var Home_window$require = window.require('electron'),
     Home_ipcRenderer = Home_window$require.ipcRenderer;
@@ -53848,7 +55853,8 @@ function Home() {
     Home_ipcRenderer.removeAllListeners('INITIALIZE_DATA');
     Home_ipcRenderer.removeAllListeners('APP_INFO');
     Home_ipcRenderer.removeAllListeners('EXPORT_INFO');
-    Home_ipcRenderer.removeAllListeners('IMPORT_INFO'); // Receiving on main process
+    Home_ipcRenderer.removeAllListeners('IMPORT_INFO');
+    Home_ipcRenderer.removeAllListeners('NOTIFY_UPDATE'); // Receiving on main process
 
     Home_ipcRenderer.on('INITIALIZE_DATA', function (event, curData) {
       // Modal action
@@ -53891,7 +55897,8 @@ function Home() {
       setAppInfo({
         "version": curData.version,
         "description": curData.description,
-        "name": curData.name
+        "name": curData.name,
+        "website": curData.website
       });
     });
     Home_ipcRenderer.on('EXPORT_INFO', function (event, curData) {
@@ -53910,6 +55917,13 @@ function Home() {
       Array.prototype.slice.call(document.querySelectorAll('.app-import-modalbtn')).forEach(function (node) {
         node.style.display = 'none';
       });
+    });
+    Home_ipcRenderer.on('NOTIFY_UPDATE', function (event, curData) {
+      setUpdateInfo({
+        "version": curData.version,
+        "website": curData.website
+      });
+      setVisibleUpdateApp(true);
     });
   }
 
@@ -54085,7 +56099,19 @@ function Home() {
 
   function hideModalImportHTMLFile() {
     setVisibleImportHTMLFile(false);
-  } // Button action of Windows (DOM element associated with preload.js)
+  } // Modal 5 (Update App)
+  //------------------------------------------
+
+
+  var _useState31 = (0,react.useState)(null),
+      _useState32 = _slicedToArray(_useState31, 2),
+      updateInfo = _useState32[0],
+      setUpdateInfo = _useState32[1];
+
+  var _useState33 = (0,react.useState)(false),
+      _useState34 = _slicedToArray(_useState33, 2),
+      visibleUpdateApp = _useState34[0],
+      setVisibleUpdateApp = _useState34[1]; // Button action of Windows (DOM element associated with preload.js)
   //------------------------------------------
 
 
@@ -54332,7 +56358,41 @@ function Home() {
       okButtonProps: {
         shape: "round"
       }
-    }, /*#__PURE__*/react.createElement("p", null, appInfo ? appInfo.description : null), /*#__PURE__*/react.createElement("p", null, "Current Version: ", "".concat(appInfo ? appInfo.version : null))), /*#__PURE__*/react.createElement(modal, {
+    }, /*#__PURE__*/react.createElement("p", null, appInfo ? appInfo.description : null), /*#__PURE__*/react.createElement("p", null, "Official Website: ", appInfo ? /*#__PURE__*/react.createElement(react.Fragment, null, /*#__PURE__*/react.createElement("a", {
+      href: appInfo.website,
+      target: "_blank"
+    }, "Visit")) : null), /*#__PURE__*/react.createElement("p", null, "Current Version: ", "".concat(appInfo ? appInfo.version : null))), /*#__PURE__*/react.createElement(modal, {
+      title: "Update Available",
+      centered: true,
+      closable: false,
+      visible: visibleUpdateApp,
+      okText: "OK",
+      cancelText: "Cancel",
+      onOk: function onOk() {
+        return setVisibleUpdateApp(false);
+      },
+      onCancel: function onCancel() {
+        return setVisibleUpdateApp(false);
+      },
+      cancelButtonProps: {
+        shape: "round",
+        style: {
+          display: "none"
+        }
+      },
+      okButtonProps: {
+        shape: "round"
+      }
+    }, /*#__PURE__*/react.createElement("p", null, updateInfo ? /*#__PURE__*/react.createElement(react.Fragment, null, "A newer version (", updateInfo.version, ") of this app is available for download. Please update it from the ", /*#__PURE__*/react.createElement("a", {
+      href: updateInfo.website,
+      target: "_blank"
+    }, "official website"), ".", /*#__PURE__*/react.createElement("br", null), /*#__PURE__*/react.createElement(Home_Text, {
+      type: "warning"
+    }, /*#__PURE__*/react.createElement("strong", null, "Important:"), " Please export the ", /*#__PURE__*/react.createElement("code", {
+      style: {
+        color: "orange"
+      }
+    }, ".zip"), " data package, and restore the data after installing the new version.")) : null)), /*#__PURE__*/react.createElement(modal, {
       title: "Export HTML",
       visible: visibleExportHTMLFile,
       onOk: showModalExportHTMLFile,
@@ -54734,539 +56794,6 @@ var QuestionCircleOutlined_QuestionCircleOutlined = function QuestionCircleOutli
 
 QuestionCircleOutlined_QuestionCircleOutlined.displayName = 'QuestionCircleOutlined';
 /* harmony default export */ const icons_QuestionCircleOutlined = (/*#__PURE__*/react.forwardRef(QuestionCircleOutlined_QuestionCircleOutlined));
-;// CONCATENATED MODULE: ../node_modules/rc-tooltip/es/placements.js
-var es_placements_autoAdjustOverflow = {
-  adjustX: 1,
-  adjustY: 1
-};
-var placements_targetOffset = [0, 0];
-var es_placements_placements = {
-  left: {
-    points: ['cr', 'cl'],
-    overflow: es_placements_autoAdjustOverflow,
-    offset: [-4, 0],
-    targetOffset: placements_targetOffset
-  },
-  right: {
-    points: ['cl', 'cr'],
-    overflow: es_placements_autoAdjustOverflow,
-    offset: [4, 0],
-    targetOffset: placements_targetOffset
-  },
-  top: {
-    points: ['bc', 'tc'],
-    overflow: es_placements_autoAdjustOverflow,
-    offset: [0, -4],
-    targetOffset: placements_targetOffset
-  },
-  bottom: {
-    points: ['tc', 'bc'],
-    overflow: es_placements_autoAdjustOverflow,
-    offset: [0, 4],
-    targetOffset: placements_targetOffset
-  },
-  topLeft: {
-    points: ['bl', 'tl'],
-    overflow: es_placements_autoAdjustOverflow,
-    offset: [0, -4],
-    targetOffset: placements_targetOffset
-  },
-  leftTop: {
-    points: ['tr', 'tl'],
-    overflow: es_placements_autoAdjustOverflow,
-    offset: [-4, 0],
-    targetOffset: placements_targetOffset
-  },
-  topRight: {
-    points: ['br', 'tr'],
-    overflow: es_placements_autoAdjustOverflow,
-    offset: [0, -4],
-    targetOffset: placements_targetOffset
-  },
-  rightTop: {
-    points: ['tl', 'tr'],
-    overflow: es_placements_autoAdjustOverflow,
-    offset: [4, 0],
-    targetOffset: placements_targetOffset
-  },
-  bottomRight: {
-    points: ['tr', 'br'],
-    overflow: es_placements_autoAdjustOverflow,
-    offset: [0, 4],
-    targetOffset: placements_targetOffset
-  },
-  rightBottom: {
-    points: ['bl', 'br'],
-    overflow: es_placements_autoAdjustOverflow,
-    offset: [4, 0],
-    targetOffset: placements_targetOffset
-  },
-  bottomLeft: {
-    points: ['tl', 'bl'],
-    overflow: es_placements_autoAdjustOverflow,
-    offset: [0, 4],
-    targetOffset: placements_targetOffset
-  },
-  leftBottom: {
-    points: ['br', 'bl'],
-    overflow: es_placements_autoAdjustOverflow,
-    offset: [-4, 0],
-    targetOffset: placements_targetOffset
-  }
-};
-/* harmony default export */ const rc_tooltip_es_placements = ((/* unused pure expression or super */ null && (es_placements_placements)));
-;// CONCATENATED MODULE: ../node_modules/rc-tooltip/es/Content.js
-
-
-var Content_Content = function Content(props) {
-  var overlay = props.overlay,
-      prefixCls = props.prefixCls,
-      id = props.id,
-      overlayInnerStyle = props.overlayInnerStyle;
-  return /*#__PURE__*/react.createElement("div", {
-    className: "".concat(prefixCls, "-inner"),
-    id: id,
-    role: "tooltip",
-    style: overlayInnerStyle
-  }, typeof overlay === 'function' ? overlay() : overlay);
-};
-
-/* harmony default export */ const es_Content = (Content_Content);
-;// CONCATENATED MODULE: ../node_modules/rc-tooltip/es/Tooltip.js
-
-
-
-
-
-
-
-
-
-
-var Tooltip = function Tooltip(props, ref) {
-  var overlayClassName = props.overlayClassName,
-      _props$trigger = props.trigger,
-      trigger = _props$trigger === void 0 ? ['hover'] : _props$trigger,
-      _props$mouseEnterDela = props.mouseEnterDelay,
-      mouseEnterDelay = _props$mouseEnterDela === void 0 ? 0 : _props$mouseEnterDela,
-      _props$mouseLeaveDela = props.mouseLeaveDelay,
-      mouseLeaveDelay = _props$mouseLeaveDela === void 0 ? 0.1 : _props$mouseLeaveDela,
-      overlayStyle = props.overlayStyle,
-      _props$prefixCls = props.prefixCls,
-      prefixCls = _props$prefixCls === void 0 ? 'rc-tooltip' : _props$prefixCls,
-      children = props.children,
-      onVisibleChange = props.onVisibleChange,
-      afterVisibleChange = props.afterVisibleChange,
-      transitionName = props.transitionName,
-      animation = props.animation,
-      motion = props.motion,
-      _props$placement = props.placement,
-      placement = _props$placement === void 0 ? 'right' : _props$placement,
-      _props$align = props.align,
-      align = _props$align === void 0 ? {} : _props$align,
-      _props$destroyTooltip = props.destroyTooltipOnHide,
-      destroyTooltipOnHide = _props$destroyTooltip === void 0 ? false : _props$destroyTooltip,
-      defaultVisible = props.defaultVisible,
-      getTooltipContainer = props.getTooltipContainer,
-      overlayInnerStyle = props.overlayInnerStyle,
-      restProps = objectWithoutProperties_objectWithoutProperties(props, ["overlayClassName", "trigger", "mouseEnterDelay", "mouseLeaveDelay", "overlayStyle", "prefixCls", "children", "onVisibleChange", "afterVisibleChange", "transitionName", "animation", "motion", "placement", "align", "destroyTooltipOnHide", "defaultVisible", "getTooltipContainer", "overlayInnerStyle"]);
-
-  var domRef = (0,react.useRef)(null);
-  (0,react.useImperativeHandle)(ref, function () {
-    return domRef.current;
-  });
-
-  var extraProps = _objectSpread2({}, restProps);
-
-  if ('visible' in props) {
-    extraProps.popupVisible = props.visible;
-  }
-
-  var getPopupElement = function getPopupElement() {
-    var _props$arrowContent = props.arrowContent,
-        arrowContent = _props$arrowContent === void 0 ? null : _props$arrowContent,
-        overlay = props.overlay,
-        id = props.id;
-    return [/*#__PURE__*/react.createElement("div", {
-      className: "".concat(prefixCls, "-arrow"),
-      key: "arrow"
-    }, arrowContent), /*#__PURE__*/react.createElement(es_Content, {
-      key: "content",
-      prefixCls: prefixCls,
-      id: id,
-      overlay: overlay,
-      overlayInnerStyle: overlayInnerStyle
-    })];
-  };
-
-  var destroyTooltip = false;
-  var autoDestroy = false;
-
-  if (typeof destroyTooltipOnHide === 'boolean') {
-    destroyTooltip = destroyTooltipOnHide;
-  } else if (destroyTooltipOnHide && typeof_typeof(destroyTooltipOnHide) === 'object') {
-    var keepParent = destroyTooltipOnHide.keepParent;
-    destroyTooltip = keepParent === true;
-    autoDestroy = keepParent === false;
-  }
-
-  return /*#__PURE__*/react.createElement(rc_trigger_es, extends_extends({
-    popupClassName: overlayClassName,
-    prefixCls: prefixCls,
-    popup: getPopupElement,
-    action: trigger,
-    builtinPlacements: es_placements_placements,
-    popupPlacement: placement,
-    ref: domRef,
-    popupAlign: align,
-    getPopupContainer: getTooltipContainer,
-    onPopupVisibleChange: onVisibleChange,
-    afterPopupVisibleChange: afterVisibleChange,
-    popupTransitionName: transitionName,
-    popupAnimation: animation,
-    popupMotion: motion,
-    defaultPopupVisible: defaultVisible,
-    destroyPopupOnHide: destroyTooltip,
-    autoDestroy: autoDestroy,
-    mouseLeaveDelay: mouseLeaveDelay,
-    popupStyle: overlayStyle,
-    mouseEnterDelay: mouseEnterDelay
-  }, extraProps), children);
-};
-
-/* harmony default export */ const es_Tooltip = (/*#__PURE__*/(0,react.forwardRef)(Tooltip));
-;// CONCATENATED MODULE: ../node_modules/rc-tooltip/es/index.js
-
-/* harmony default export */ const rc_tooltip_es = (es_Tooltip);
-;// CONCATENATED MODULE: ../node_modules/antd/es/tooltip/placements.js
-
-
-var autoAdjustOverflowEnabled = {
-  adjustX: 1,
-  adjustY: 1
-};
-var autoAdjustOverflowDisabled = {
-  adjustX: 0,
-  adjustY: 0
-};
-var tooltip_placements_targetOffset = [0, 0];
-function getOverflowOptions(autoAdjustOverflow) {
-  if (typeof autoAdjustOverflow === 'boolean') {
-    return autoAdjustOverflow ? autoAdjustOverflowEnabled : autoAdjustOverflowDisabled;
-  }
-
-  return extends_extends(extends_extends({}, autoAdjustOverflowDisabled), autoAdjustOverflow);
-}
-function getPlacements(config) {
-  var _config$arrowWidth = config.arrowWidth,
-      arrowWidth = _config$arrowWidth === void 0 ? 4 : _config$arrowWidth,
-      _config$horizontalArr = config.horizontalArrowShift,
-      horizontalArrowShift = _config$horizontalArr === void 0 ? 16 : _config$horizontalArr,
-      _config$verticalArrow = config.verticalArrowShift,
-      verticalArrowShift = _config$verticalArrow === void 0 ? 8 : _config$verticalArrow,
-      autoAdjustOverflow = config.autoAdjustOverflow;
-  var placementMap = {
-    left: {
-      points: ['cr', 'cl'],
-      offset: [-4, 0]
-    },
-    right: {
-      points: ['cl', 'cr'],
-      offset: [4, 0]
-    },
-    top: {
-      points: ['bc', 'tc'],
-      offset: [0, -4]
-    },
-    bottom: {
-      points: ['tc', 'bc'],
-      offset: [0, 4]
-    },
-    topLeft: {
-      points: ['bl', 'tc'],
-      offset: [-(horizontalArrowShift + arrowWidth), -4]
-    },
-    leftTop: {
-      points: ['tr', 'cl'],
-      offset: [-4, -(verticalArrowShift + arrowWidth)]
-    },
-    topRight: {
-      points: ['br', 'tc'],
-      offset: [horizontalArrowShift + arrowWidth, -4]
-    },
-    rightTop: {
-      points: ['tl', 'cr'],
-      offset: [4, -(verticalArrowShift + arrowWidth)]
-    },
-    bottomRight: {
-      points: ['tr', 'bc'],
-      offset: [horizontalArrowShift + arrowWidth, 4]
-    },
-    rightBottom: {
-      points: ['bl', 'cr'],
-      offset: [4, verticalArrowShift + arrowWidth]
-    },
-    bottomLeft: {
-      points: ['tl', 'bc'],
-      offset: [-(horizontalArrowShift + arrowWidth), 4]
-    },
-    leftBottom: {
-      points: ['br', 'cl'],
-      offset: [-4, verticalArrowShift + arrowWidth]
-    }
-  };
-  Object.keys(placementMap).forEach(function (key) {
-    placementMap[key] = config.arrowPointAtCenter ? extends_extends(extends_extends({}, placementMap[key]), {
-      overflow: getOverflowOptions(autoAdjustOverflow),
-      targetOffset: tooltip_placements_targetOffset
-    }) : extends_extends(extends_extends({}, es_placements_placements[key]), {
-      overflow: getOverflowOptions(autoAdjustOverflow)
-    });
-    placementMap[key].ignoreShake = true;
-  });
-  return placementMap;
-}
-;// CONCATENATED MODULE: ../node_modules/antd/es/_util/colors.js
-
-var PresetStatusColorTypes = tuple('success', 'processing', 'error', 'default', 'warning'); // eslint-disable-next-line import/prefer-default-export
-
-var PresetColorTypes = tuple('pink', 'red', 'yellow', 'orange', 'cyan', 'green', 'blue', 'purple', 'geekblue', 'magenta', 'volcano', 'gold', 'lime');
-;// CONCATENATED MODULE: ../node_modules/antd/es/tooltip/index.js
-
-
-
-
-var tooltip_rest = undefined && undefined.__rest || function (s, e) {
-  var t = {};
-
-  for (var p in s) {
-    if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0) t[p] = s[p];
-  }
-
-  if (s != null && typeof Object.getOwnPropertySymbols === "function") for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-    if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i])) t[p[i]] = s[p[i]];
-  }
-  return t;
-};
-
-
-
-
-
-
-
-
-
-
-
-var splitObject = function splitObject(obj, keys) {
-  var picked = {};
-
-  var omitted = extends_extends({}, obj);
-
-  keys.forEach(function (key) {
-    if (obj && key in obj) {
-      picked[key] = obj[key];
-      delete omitted[key];
-    }
-  });
-  return {
-    picked: picked,
-    omitted: omitted
-  };
-};
-
-var PresetColorRegex = new RegExp("^(".concat(PresetColorTypes.join('|'), ")(-inverse)?$")); // Fix Tooltip won't hide at disabled button
-// mouse events don't trigger at disabled button in Chrome
-// https://github.com/react-component/tooltip/issues/18
-
-function getDisabledCompatibleChildren(element, prefixCls) {
-  var elementType = element.type;
-
-  if ((elementType.__ANT_BUTTON === true || elementType.__ANT_SWITCH === true || elementType.__ANT_CHECKBOX === true || element.type === 'button') && element.props.disabled) {
-    // Pick some layout related style properties up to span
-    // Prevent layout bugs like https://github.com/ant-design/ant-design/issues/5254
-    var _splitObject = splitObject(element.props.style, ['position', 'left', 'right', 'top', 'bottom', 'float', 'display', 'zIndex']),
-        picked = _splitObject.picked,
-        omitted = _splitObject.omitted;
-
-    var spanStyle = extends_extends(extends_extends({
-      display: 'inline-block'
-    }, picked), {
-      cursor: 'not-allowed',
-      width: element.props.block ? '100%' : null
-    });
-
-    var buttonStyle = extends_extends(extends_extends({}, omitted), {
-      pointerEvents: 'none'
-    });
-
-    var child = cloneElement(element, {
-      style: buttonStyle,
-      className: null
-    });
-    return /*#__PURE__*/react.createElement("span", {
-      style: spanStyle,
-      className: classnames_default()(element.props.className, "".concat(prefixCls, "-disabled-compatible-wrapper"))
-    }, child);
-  }
-
-  return element;
-}
-
-var tooltip_Tooltip = /*#__PURE__*/react.forwardRef(function (props, ref) {
-  var _classNames2;
-
-  var _React$useContext = react.useContext(ConfigContext),
-      getContextPopupContainer = _React$useContext.getPopupContainer,
-      getPrefixCls = _React$useContext.getPrefixCls,
-      direction = _React$useContext.direction;
-
-  var _useMergedState = useControlledState(false, {
-    value: props.visible,
-    defaultValue: props.defaultVisible
-  }),
-      _useMergedState2 = _slicedToArray(_useMergedState, 2),
-      visible = _useMergedState2[0],
-      setVisible = _useMergedState2[1];
-
-  var isNoTitle = function isNoTitle() {
-    var title = props.title,
-        overlay = props.overlay;
-    return !title && !overlay && title !== 0; // overlay for old version compatibility
-  };
-
-  var onVisibleChange = function onVisibleChange(vis) {
-    var _a;
-
-    setVisible(isNoTitle() ? false : vis);
-
-    if (!isNoTitle()) {
-      (_a = props.onVisibleChange) === null || _a === void 0 ? void 0 : _a.call(props, vis);
-    }
-  };
-
-  var getTooltipPlacements = function getTooltipPlacements() {
-    var builtinPlacements = props.builtinPlacements,
-        arrowPointAtCenter = props.arrowPointAtCenter,
-        autoAdjustOverflow = props.autoAdjustOverflow;
-    return builtinPlacements || getPlacements({
-      arrowPointAtCenter: arrowPointAtCenter,
-      autoAdjustOverflow: autoAdjustOverflow
-    });
-  }; // 动态设置动画点
-
-
-  var onPopupAlign = function onPopupAlign(domNode, align) {
-    var placements = getTooltipPlacements(); // 当前返回的位置
-
-    var placement = Object.keys(placements).filter(function (key) {
-      return placements[key].points[0] === align.points[0] && placements[key].points[1] === align.points[1];
-    })[0];
-
-    if (!placement) {
-      return;
-    } // 根据当前坐标设置动画点
-
-
-    var rect = domNode.getBoundingClientRect();
-    var transformOrigin = {
-      top: '50%',
-      left: '50%'
-    };
-
-    if (placement.indexOf('top') >= 0 || placement.indexOf('Bottom') >= 0) {
-      transformOrigin.top = "".concat(rect.height - align.offset[1], "px");
-    } else if (placement.indexOf('Top') >= 0 || placement.indexOf('bottom') >= 0) {
-      transformOrigin.top = "".concat(-align.offset[1], "px");
-    }
-
-    if (placement.indexOf('left') >= 0 || placement.indexOf('Right') >= 0) {
-      transformOrigin.left = "".concat(rect.width - align.offset[0], "px");
-    } else if (placement.indexOf('right') >= 0 || placement.indexOf('Left') >= 0) {
-      transformOrigin.left = "".concat(-align.offset[0], "px");
-    }
-
-    domNode.style.transformOrigin = "".concat(transformOrigin.left, " ").concat(transformOrigin.top);
-  };
-
-  var getOverlay = function getOverlay() {
-    var title = props.title,
-        overlay = props.overlay;
-
-    if (title === 0) {
-      return title;
-    }
-
-    return overlay || title || '';
-  };
-
-  var getPopupContainer = props.getPopupContainer,
-      otherProps = tooltip_rest(props, ["getPopupContainer"]);
-
-  var customizePrefixCls = props.prefixCls,
-      openClassName = props.openClassName,
-      getTooltipContainer = props.getTooltipContainer,
-      overlayClassName = props.overlayClassName,
-      color = props.color,
-      overlayInnerStyle = props.overlayInnerStyle,
-      children = props.children;
-  var prefixCls = getPrefixCls('tooltip', customizePrefixCls);
-  var rootPrefixCls = getPrefixCls();
-  var tempVisible = visible; // Hide tooltip when there is no title
-
-  if (!('visible' in props) && isNoTitle()) {
-    tempVisible = false;
-  }
-
-  var child = getDisabledCompatibleChildren(isValidElement(children) ? children : /*#__PURE__*/react.createElement("span", null, children), prefixCls);
-  var childProps = child.props;
-  var childCls = classnames_default()(childProps.className, _defineProperty({}, openClassName || "".concat(prefixCls, "-open"), true));
-  var customOverlayClassName = classnames_default()(overlayClassName, (_classNames2 = {}, _defineProperty(_classNames2, "".concat(prefixCls, "-rtl"), direction === 'rtl'), _defineProperty(_classNames2, "".concat(prefixCls, "-").concat(color), color && PresetColorRegex.test(color)), _classNames2));
-  var formattedOverlayInnerStyle = overlayInnerStyle;
-  var arrowContentStyle;
-
-  if (color && !PresetColorRegex.test(color)) {
-    formattedOverlayInnerStyle = extends_extends(extends_extends({}, overlayInnerStyle), {
-      background: color
-    });
-    arrowContentStyle = {
-      background: color
-    };
-  }
-
-  return /*#__PURE__*/react.createElement(rc_tooltip_es, extends_extends({}, otherProps, {
-    prefixCls: prefixCls,
-    overlayClassName: customOverlayClassName,
-    getTooltipContainer: getPopupContainer || getTooltipContainer || getContextPopupContainer,
-    ref: ref,
-    builtinPlacements: getTooltipPlacements(),
-    overlay: getOverlay(),
-    visible: tempVisible,
-    onVisibleChange: onVisibleChange,
-    onPopupAlign: onPopupAlign,
-    overlayInnerStyle: formattedOverlayInnerStyle,
-    arrowContent: /*#__PURE__*/react.createElement("span", {
-      className: "".concat(prefixCls, "-arrow-content"),
-      style: arrowContentStyle
-    }),
-    motion: {
-      motionName: motion_getTransitionName(rootPrefixCls, 'zoom-big-fast', props.transitionName),
-      motionDeadline: 1000
-    }
-  }), tempVisible ? cloneElement(child, {
-    className: childCls
-  }) : child);
-});
-tooltip_Tooltip.displayName = 'Tooltip';
-tooltip_Tooltip.defaultProps = {
-  placement: 'top',
-  mouseEnterDelay: 0.1,
-  mouseLeaveDelay: 0.1,
-  arrowPointAtCenter: false,
-  autoAdjustOverflow: true
-};
-/* harmony default export */ const es_tooltip = (tooltip_Tooltip);
 ;// CONCATENATED MODULE: ../node_modules/antd/es/form/FormItemLabel.js
 
 
@@ -56120,39 +57647,6 @@ var divider_Divider = function Divider(props) {
 };
 
 /* harmony default export */ const divider = (divider_Divider);
-;// CONCATENATED MODULE: ../node_modules/rc-util/es/Dom/styleChecker.js
-
-
-var isStyleNameSupport = function isStyleNameSupport(styleName) {
-  if (canUseDom() && window.document.documentElement) {
-    var styleNameList = Array.isArray(styleName) ? styleName : [styleName];
-    var documentElement = window.document.documentElement;
-    return styleNameList.some(function (name) {
-      return name in documentElement.style;
-    });
-  }
-
-  return false;
-};
-
-var isStyleValueSupport = function isStyleValueSupport(styleName, value) {
-  if (!isStyleNameSupport(styleName)) {
-    return false;
-  }
-
-  var ele = document.createElement('div');
-  var origin = ele.style[styleName];
-  ele.style[styleName] = value;
-  return ele.style[styleName] !== origin;
-};
-
-function isStyleSupport(styleName, styleValue) {
-  if (!Array.isArray(styleName) && styleValue !== undefined) {
-    return isStyleValueSupport(styleName, styleValue);
-  }
-
-  return isStyleNameSupport(styleName);
-}
 ;// CONCATENATED MODULE: ../node_modules/rc-table/es/sugar/ColumnGroup.js
 /* istanbul ignore next */
 

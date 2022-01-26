@@ -2,6 +2,7 @@
  * Create a Menu
  */
  const { app, Menu, shell } = require('electron');
+ const { officialWebsite } = require('../package.json');
  const isMac = process.platform === 'darwin';
 
  const template = [
@@ -24,9 +25,9 @@
          role: 'help',
          submenu: [
            {
-             label: 'Visit Website',
+             label: 'Official Website',
              click() { 
-                 shell.openExternal('https://uiux.cc');
+                 shell.openExternal(officialWebsite);
              }
            },
         //    {

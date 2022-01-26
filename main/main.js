@@ -5,10 +5,12 @@
  */
 const path = require('path');
 const { app, BrowserWindow } = require('electron');
+const isDev = require('electron-is-dev');
 const crawl = require('./crawl');
 const buildHtml = require('./build-html');
 const exportHtml = require('./export-html');  
 const restoreDatabase = require('./restore-database');  
+const updateApp = require('./update-app');  
 const isMac = process.platform === 'darwin';
 
 let win = null;
@@ -29,8 +31,8 @@ db.save();
 
 
 // get app information
-const { version, description, applicationName } = require('../package.json');
-const appInfo = { "version": version, "description": description, "name": applicationName };
+const { version, description, applicationName, officialWebsite } = require('../package.json');
+const appInfo = { "version": version, "description": description, "name": applicationName, "website": officialWebsite };
 
 // Create the browser window.
 function createWindow() {
@@ -303,28 +305,31 @@ app.on('ready', () => {
 
 
 
-
-    /**
-     * //////////////////////////////////////////////////////
-     * Simulate CommandOrControl+M in electron app
-     * //////////////////////////////////////////////////////
-     */
+    // Simulate CommandOrControl+M in electron app
+    //------------------
     const { globalShortcut } = require('electron');
     globalShortcut.register('CommandOrControl+M', () => {
         console.log('CommandOrControl+M');
     });
 
-    /**
-     * //////////////////////////////////////////////////////
-     * Make a link from Electron open in browser
-     * //////////////////////////////////////////////////////
-     */
+    // Make a link from Electron open in browser
+    //------------------
     win.webContents.on('new-window', function (e, url) {
         e.preventDefault();
         require('electron').shell.openExternal(url);
     });
 
 
+    // Updating Applications
+    //------------------
+    //if (!isDev) {
+        win.webContents.once("did-frame-finish-load", (event) => {
+            updateApp(function(ver) {
+                win.webContents.send('NOTIFY_UPDATE', {"version": ver, "website": officialWebsite});
+            })();
+            
+        })
+   // }
  
 
 })
@@ -360,5 +365,4 @@ app.on('activate', () => {
 const { Menu } = require('electron');
 const menu = require('./application-menu');
 Menu.setApplicationMenu(menu);
-
 

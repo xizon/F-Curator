@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { Space, Input, Modal, Button, Select } from 'antd';
+import { Space, Input, Modal, Button, Select, Typography  } from 'antd';
 import { Link } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import AppInfo from '@/components/AppInfo';
@@ -13,6 +13,7 @@ import 'antd/dist/antd.css';
 
 const { Option } = Select;
 const { Search } = Input;
+const { Text } = Typography;
 
 // for electron
 const { ipcRenderer } = window.require('electron');
@@ -47,6 +48,7 @@ export default function Home() {
         ipcRenderer.removeAllListeners('APP_INFO');
         ipcRenderer.removeAllListeners('EXPORT_INFO');
         ipcRenderer.removeAllListeners('IMPORT_INFO');
+        ipcRenderer.removeAllListeners('NOTIFY_UPDATE');
 
         // Receiving on main process
         ipcRenderer.on('INITIALIZE_DATA', (event, curData) => {
@@ -93,7 +95,7 @@ export default function Home() {
         });
 
         ipcRenderer.on('APP_INFO', (event, curData) => {
-            setAppInfo({"version":curData.version, "description":curData.description, "name":curData.name});
+            setAppInfo({"version":curData.version, "description":curData.description, "name":curData.name, "website": curData.website});
         });
 
         ipcRenderer.on('EXPORT_INFO', (event, curData) => {
@@ -118,9 +120,11 @@ export default function Home() {
             });
         });
 
+        ipcRenderer.on('NOTIFY_UPDATE', (event, curData) => {
+            setUpdateInfo({"version":curData.version, "website": curData.website});
+            setVisibleUpdateApp(true);
+        });
 
-        
-        
 
     }
 
@@ -283,6 +287,13 @@ export default function Home() {
     }    
     
     
+    // Modal 5 (Update App)
+    //------------------------------------------
+    const [updateInfo, setUpdateInfo] = useState<any | null>(null);
+    const [visibleUpdateApp, setVisibleUpdateApp] = useState<boolean>(false);
+
+
+
     // Button action of Windows (DOM element associated with preload.js)
     //------------------------------------------
     function minimizeFn() { 
@@ -434,8 +445,25 @@ export default function Home() {
                         okButtonProps={{ shape: "round" }}
                     >
                         <p>{appInfo ? appInfo.description : null}</p>
+                        <p>Official Website: {appInfo ? <><a href={appInfo.website} target="_blank">Visit</a></> : null}</p>
                         <p>Current Version: {`${appInfo ? appInfo.version : null}`}</p>
                     </Modal>
+
+                    <Modal
+                        title="Update Available"
+                        centered
+                        closable={false}
+                        visible={visibleUpdateApp}
+                        okText="OK"
+                        cancelText="Cancel"
+                        onOk={() => setVisibleUpdateApp(false)}
+                        onCancel={() => setVisibleUpdateApp(false)}
+                        cancelButtonProps={{ shape: "round", style: { display: "none" } }}
+                        okButtonProps={{ shape: "round" }}
+                    >
+                        <p>{updateInfo ? <>A newer version ({updateInfo.version}) of this app is available for download. Please update it from the <a href={updateInfo.website} target="_blank">official website</a>.<br /><Text type="warning"><strong>Important:</strong> Please export the <code style={{color:"orange"}}>.zip</code> data package, and restore the data after installing the new version.</Text></> : null}</p>
+                    </Modal>
+
 
 
                     <Modal
