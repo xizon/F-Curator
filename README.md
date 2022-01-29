@@ -166,6 +166,11 @@ $ sudo npm rebuild node-sass
 ## Changelog
 
 
+#### = 1.3.2 (January 29, 2022) =
+
+* fix: Fixed the bug of Chinese search not working.
+
+
 #### = 1.3.1 (January 26, 2022) =
 
 * new: Support application version detection.

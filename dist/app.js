@@ -3,7 +3,7 @@
  * 	Boot Helpers
  *
  * 	@source: https://github.com/xizon/f-curator
- * 	@version: 1.2.0 (January 26, 2022)
+ * 	@version: 1.3.2 (January 29, 2022)
  * 	@author: UIUX Lab <uiuxlab@gmail.com>
  * 	@license: MIT
  *
@@ -55964,7 +55964,13 @@ function Home() {
   var _useState15 = (0,react.useState)(false),
       _useState16 = _slicedToArray(_useState15, 2),
       confirmLoading = _useState16[0],
-      setConfirmLoading = _useState16[1];
+      setConfirmLoading = _useState16[1]; // Change event fires extra times before IME composition ends
+
+
+  var _useState17 = (0,react.useState)(false),
+      _useState18 = _slicedToArray(_useState17, 2),
+      onComposition = _useState18[0],
+      setOnComposition = _useState18[1];
 
   function showModalAddnew() {
     setVisible(true); //clear input and select
@@ -55996,9 +56002,24 @@ function Home() {
     searchMatch(value);
   }
 
-  function handleInputSearch(e) {
-    searchMatch(e.target.value);
-    setInputSearch(e.target.value);
+  function handleInputSearchComposition(e) {
+    if (e.type === 'compositionend') {
+      setOnComposition(false); //fire change method to update for Chrome v53
+
+      handleInputSearchChange(e);
+    } else {
+      setOnComposition(true);
+    }
+  }
+
+  function handleInputSearchChange(e) {
+    var val = e.target.value;
+
+    if (!onComposition) {
+      searchMatch(val);
+    }
+
+    setInputSearch(val);
   }
 
   function searchMatch(str) {
@@ -56006,7 +56027,12 @@ function Home() {
       str = str.toLowerCase(); // match search characters
 
       var matchList = dataURLs.filter(function (item) {
-        return item.title.toLowerCase().includes(str) || item.link.toLowerCase().includes(str);
+        // Check if variable contains Chinese/Japanese characters
+        var hasCJ = item.title.match(/[\u3400-\u9FBF]/) !== null && item.title.match(/[\u3400-\u9FBF]/).length > 0 ? true : false;
+
+        var _title = hasCJ ? item.title : item.title.toLowerCase();
+
+        return _title.includes(str) || item.link.toLowerCase().includes(str);
       });
       setDataURLs(matchList);
     } else {
@@ -56022,15 +56048,15 @@ function Home() {
   //------------------------------------------
 
 
-  var _useState17 = (0,react.useState)(null),
-      _useState18 = _slicedToArray(_useState17, 2),
-      appInfo = _useState18[0],
-      setAppInfo = _useState18[1];
-
-  var _useState19 = (0,react.useState)(false),
+  var _useState19 = (0,react.useState)(null),
       _useState20 = _slicedToArray(_useState19, 2),
-      visibleAbout = _useState20[0],
-      setVisibleAbout = _useState20[1];
+      appInfo = _useState20[0],
+      setAppInfo = _useState20[1];
+
+  var _useState21 = (0,react.useState)(false),
+      _useState22 = _slicedToArray(_useState21, 2),
+      visibleAbout = _useState22[0],
+      setVisibleAbout = _useState22[1];
 
   function showModalAbout(e) {
     e.preventDefault();
@@ -56039,20 +56065,20 @@ function Home() {
   //------------------------------------------
 
 
-  var _useState21 = (0,react.useState)(''),
-      _useState22 = _slicedToArray(_useState21, 2),
-      exportHTMLInfo = _useState22[0],
-      setExportHTMLInfo = _useState22[1];
-
-  var _useState23 = (0,react.useState)(false),
+  var _useState23 = (0,react.useState)(''),
       _useState24 = _slicedToArray(_useState23, 2),
-      visibleExportHTMLFile = _useState24[0],
-      setVisibleExportHTMLFile = _useState24[1];
+      exportHTMLInfo = _useState24[0],
+      setExportHTMLInfo = _useState24[1];
 
   var _useState25 = (0,react.useState)(false),
       _useState26 = _slicedToArray(_useState25, 2),
-      loadingExportHTMLFile = _useState26[0],
-      setLoadingExportHTMLFile = _useState26[1];
+      visibleExportHTMLFile = _useState26[0],
+      setVisibleExportHTMLFile = _useState26[1];
+
+  var _useState27 = (0,react.useState)(false),
+      _useState28 = _slicedToArray(_useState27, 2),
+      loadingExportHTMLFile = _useState28[0],
+      setLoadingExportHTMLFile = _useState28[1];
 
   function handleOkExportHTMLFile() {
     setLoadingExportHTMLFile(true); // Communicate asynchronously from a renderer process to the main process.
@@ -56074,15 +56100,15 @@ function Home() {
   //------------------------------------------
 
 
-  var _useState27 = (0,react.useState)(''),
-      _useState28 = _slicedToArray(_useState27, 2),
-      importHTMLInfo = _useState28[0],
-      setImportHTMLInfo = _useState28[1];
-
-  var _useState29 = (0,react.useState)(false),
+  var _useState29 = (0,react.useState)(''),
       _useState30 = _slicedToArray(_useState29, 2),
-      visibleImportHTMLFile = _useState30[0],
-      setVisibleImportHTMLFile = _useState30[1];
+      importHTMLInfo = _useState30[0],
+      setImportHTMLInfo = _useState30[1];
+
+  var _useState31 = (0,react.useState)(false),
+      _useState32 = _slicedToArray(_useState31, 2),
+      visibleImportHTMLFile = _useState32[0],
+      setVisibleImportHTMLFile = _useState32[1];
 
   function handleOkImportHTMLFile() {
     // Communicate asynchronously from a renderer process to the main process.
@@ -56103,15 +56129,15 @@ function Home() {
   //------------------------------------------
 
 
-  var _useState31 = (0,react.useState)(null),
-      _useState32 = _slicedToArray(_useState31, 2),
-      updateInfo = _useState32[0],
-      setUpdateInfo = _useState32[1];
-
-  var _useState33 = (0,react.useState)(false),
+  var _useState33 = (0,react.useState)(null),
       _useState34 = _slicedToArray(_useState33, 2),
-      visibleUpdateApp = _useState34[0],
-      setVisibleUpdateApp = _useState34[1]; // Button action of Windows (DOM element associated with preload.js)
+      updateInfo = _useState34[0],
+      setUpdateInfo = _useState34[1];
+
+  var _useState35 = (0,react.useState)(false),
+      _useState36 = _slicedToArray(_useState35, 2),
+      visibleUpdateApp = _useState36[0],
+      setVisibleUpdateApp = _useState36[1]; // Button action of Windows (DOM element associated with preload.js)
   //------------------------------------------
 
 
@@ -56260,7 +56286,10 @@ function Home() {
       placeholder: "Site Name or URL",
       allowClear: true,
       onSearch: handleOkSearch,
-      onChange: handleInputSearch,
+      onChange: handleInputSearchChange,
+      onCompositionStart: handleInputSearchComposition,
+      onCompositionUpdate: handleInputSearchComposition,
+      onCompositionEnd: handleInputSearchComposition,
       style: {
         width: "325px"
       }

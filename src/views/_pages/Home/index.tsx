@@ -158,6 +158,9 @@ export default function Home() {
     const [visible, setVisible] = useState<boolean>(false);
     const [confirmLoading, setConfirmLoading] = useState<boolean>(false);
 
+    // Change event fires extra times before IME composition ends
+    const [onComposition, setOnComposition] = useState(false);
+
     function showModalAddnew() {
         setVisible(true);
 
@@ -191,9 +194,25 @@ export default function Home() {
         searchMatch(value);
     }    
     
-    function handleInputSearch(e) {
-        searchMatch(e.target.value);
-        setInputSearch(e.target.value);
+    function handleInputSearchComposition(e) {
+
+        if (e.type === 'compositionend') {
+            setOnComposition(false);
+
+            //fire change method to update
+            handleInputSearchChange(e);
+
+        } else {
+            setOnComposition(true);
+        }
+    }
+    function handleInputSearchChange(e) {
+        const val = e.target.value
+        if(!onComposition){
+            searchMatch(val);
+        }
+
+        setInputSearch(val);
     }
 
 
@@ -204,7 +223,12 @@ export default function Home() {
 
             // match search characters
             const matchList = dataURLs.filter( (item) => {
-                return item.title.toLowerCase().includes(str) || item.link.toLowerCase().includes(str);
+
+                // Check if variable contains Chinese/Japanese characters
+                const hasCJ = item.title.match(/[\u3400-\u9FBF]/) !== null && item.title.match(/[\u3400-\u9FBF]/).length > 0 ? true : false;
+                const _title = hasCJ ? item.title : item.title.toLowerCase();
+
+                return _title.includes(str) || item.link.toLowerCase().includes(str);
             });
 
             setDataURLs(matchList);
@@ -376,7 +400,19 @@ export default function Home() {
                 
                     <div className="content" style={{paddingTop: (!isMac ? "50px" : "20px")}}>
 
-                        <div className="app-search__wrapper" style={{marginBottom:"17px"}}><Search value={inputSearch} placeholder="Site Name or URL" allowClear onSearch={handleOkSearch} onChange={handleInputSearch} style={{ width:"325px" }} /></div>
+                        <div className="app-search__wrapper" style={{marginBottom:"17px"}}>
+                            <Search 
+                            value={inputSearch} 
+                            placeholder="Site Name or URL" 
+                            allowClear 
+                            onSearch={handleOkSearch}  
+                            onChange={handleInputSearchChange}
+                            onCompositionStart={handleInputSearchComposition}
+                            onCompositionUpdate={handleInputSearchComposition}
+                            onCompositionEnd={handleInputSearchComposition} 
+                            style={{ width:"325px" }} 
+                            />
+                        </div>
                         
                         {dataURLs && dataURLs.length > 0 ? <>
 
