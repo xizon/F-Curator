@@ -47,9 +47,10 @@
     position: absolute;
     right: 5px;
 	top: 4px;
-    transform: scale(0.8);
-	display: none;
+    transform: scale(0);
+	opacity: 0;
 	background: #fff;
+	transition: .1s ease-in-out;
 }
 
 .app-editbtn-project {
@@ -60,7 +61,9 @@
 	
     .app-deletebtn-project,
 	.app-editbtn-project {
-		display: block;
+		opacity: 1;
+		transform: scale(0.8);
+		transition-delay: 400ms;
 	}
 
 }

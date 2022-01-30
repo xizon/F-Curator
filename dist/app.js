@@ -3,7 +3,7 @@
  * 	Boot Helpers
  *
  * 	@source: https://github.com/xizon/f-curator
- * 	@version: 1.3.2 (January 29, 2022)
+ * 	@version: 1.3.3 (January 30, 2022)
  * 	@author: UIUX Lab <uiuxlab@gmail.com>
  * 	@license: MIT
  *
@@ -56004,7 +56004,7 @@ function Home() {
 
   function handleInputSearchComposition(e) {
     if (e.type === 'compositionend') {
-      setOnComposition(false); //fire change method to update for Chrome v53
+      setOnComposition(false); //fire change method to update
 
       handleInputSearchChange(e);
     } else {

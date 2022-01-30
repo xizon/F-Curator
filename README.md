@@ -166,8 +166,9 @@ $ sudo npm rebuild node-sass
 ## Changelog
 
 
-#### = 1.3.2 (January 29, 2022) =
+#### = 1.3.3 (January 30, 2022) =
 
+* tweak: Optimized editing experience for list.
 * fix: Fixed the bug of Chinese search not working.
 
 

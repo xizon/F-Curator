@@ -3,7 +3,7 @@
  * 	Boot Helpers
  *
  * 	@source: https://github.com/xizon/f-curator
- * 	@version: 1.3.2 (January 29, 2022)
+ * 	@version: 1.3.3 (January 30, 2022)
  * 	@author: UIUX Lab <uiuxlab@gmail.com>
  * 	@license: MIT
  *
@@ -31466,9 +31466,10 @@ div.ant-typography-edit-content.ant-typography-rtl {
   position: absolute;
   right: 5px;
   top: 4px;
-  transform: scale(0.8);
-  display: none;
+  transform: scale(0);
+  opacity: 0;
   background: #fff;
+  transition: .1s ease-in-out;
 }
 
 .app-editbtn-project {
@@ -31477,7 +31478,9 @@ div.ant-typography-edit-content.ant-typography-rtl {
 
 .ant-card:hover .app-deletebtn-project,
 .ant-card:hover .app-editbtn-project {
-  display: block;
+  opacity: 1;
+  transform: scale(0.8);
+  transition-delay: 400ms;
 }
 
 .ant-card .app-deletebtn-project:hover path {
