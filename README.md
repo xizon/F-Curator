@@ -13,8 +13,15 @@
 </p>
 
 
-
 F-Curator is an offline application that comes at you all day long and curates your own web favorites. Based on Electron and React technology.
+
+
+---
+
+- [English](README.md)
+- [中文](README_CN.md)
+
+---
 
 ## Packages
 
