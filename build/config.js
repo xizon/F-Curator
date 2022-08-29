@@ -161,9 +161,10 @@ const webpackConfig = {
 				]
 			},
 			{
-				test: /\.json$/,
-				use: 'json-loader'
-			},
+                test: /\.json$/,
+                exclude: path.resolve(__dirname, '../node_modules' ),
+                loader: "json-loader"       
+            },
 			
 
 
