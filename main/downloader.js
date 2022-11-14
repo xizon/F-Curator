@@ -18,6 +18,8 @@ const axios = require('axios');
 const path = require('path');
 const fs = require('fs');
 
+const { renameImage } = require('./rename.js');
+
 const newDir = path.resolve(__dirname, `../db/img`);
 if (!fs.existsSync(newDir)) {
     fs.mkdirSync(newDir);
@@ -55,11 +57,15 @@ function save(url, targetDir, callback, name = '') {
             //console.log('fileData: ', fileData); // <Buffer ff d8 ff e0 00 . 15556 more bytes>
             
             const extension = path.extname(url);
-            const randomStr = (Math.random() + 1).toString(36).substring(7);
             let fileName = (typeof(name) === 'undefined' || name === '' ) ? path.basename(url) : name;
 
-            fileName = fileName.replace(`${extension}`, `-${randomStr}${extension}`);
-            fs.writeFileSync(`${targetDir}/${fileName}`, fileData);
+            fileName = renameImage(url);
+            const targetPath = `${targetDir}/${fileName}`;
+
+            //
+            if (!fs.existsSync(targetPath)) {
+                fs.writeFileSync(targetPath, fileData);
+            }
 
             callback.call(null, fileName);
         }

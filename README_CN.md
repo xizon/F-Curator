@@ -57,6 +57,33 @@ F-Curator 是一个跨平台应用程序，支持Mac和Windows系统，用来管
 - 自动提取远程资源，例如图标
 
 
+## 目录结构
+
+
+```sh
+/
+├── README.md
+├── LICENSE
+├── tsconfig.json
+├── babel.config.js
+├── package-lock.json
+├── package.json
+├── package/      ·············· 软件包
+├── db/           ·············· 数据库
+├── main/         ·············· 主进程
+├── renderer/     ·············· 渲染进程
+├── dist/
+├── src/
+├── test/  
+├── scripts/  
+├── public/  
+│   └── index.html 
+├── build/  
+│   └── config.js
+└──
+```
+
+
 ## 感谢
 
 - [React](https://reactjs.org/)

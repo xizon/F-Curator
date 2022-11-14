@@ -22,7 +22,7 @@ function isValidHttpUrl(string) {
     return url.protocol === "http:" || url.protocol === "https:";
 }
 
-function crawl(category = '', title = '', vgmUrl, fn) {
+function crawl(category = '', title = '', vgmUrl, fn, timeoutSet = 5000) {
     
     vgmUrl = vgmUrl.replace(/\/\s*$/, '' );
 
@@ -34,7 +34,7 @@ function crawl(category = '', title = '', vgmUrl, fn) {
     let res = {};
     got(vgmUrl, {
         timeout: {
-            request: 5000
+            request: timeoutSet
         }
     }).then(response => {
         const dom = new JSDOM(response.body);

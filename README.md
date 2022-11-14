@@ -75,6 +75,7 @@ F-Curator is an offline application that comes at you all day long and curates y
 ├── dist/
 ├── src/
 ├── test/  
+├── scripts/  
 ├── public/  
 │   └── index.html 
 ├── build/  
@@ -171,6 +172,13 @@ $ sudo npm rebuild node-sass
 
 
 ## Changelog
+
+
+#### = 1.3.4 (November 13, 2022) =
+
+* tweak: Optimized the storage of remote image.
+* tweak:Optimized the main interface style.
+* new: Added ability to batch remote resources via Node script.
 
 
 #### = 1.3.3 (January 30, 2022) =

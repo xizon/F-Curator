@@ -24,6 +24,12 @@ function buildHtml(htmlFilePath, folderPath, folderName, logoPath, fn) {
                     const folderNameRegExp = new RegExp(`./${folderName}`, 'g' );
                     htmlContent = htmlContent.replace(/<link\s+rel\=\"stylesheet\".*?>/ig, `<style id="app.min.css">
                     ${cssContent}
+                    .app-search__wrapper {
+                        display: none;
+                    }
+                    .app-editbtn-project {
+                        visibility: hidden;
+                    }
                     .app-content__wrapper .content__sidebar {
                         width: 100px;
                       }
