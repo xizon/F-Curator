@@ -24,8 +24,9 @@ function buildHtml(htmlFilePath, folderPath, folderName, logoPath, fn) {
                     const folderNameRegExp = new RegExp(`./${folderName}`, 'g' );
                     htmlContent = htmlContent.replace(/<link\s+rel\=\"stylesheet\".*?>/ig, `<style id="app.min.css">
                     ${cssContent}
-                    .app-search__wrapper {
-                        display: none;
+                    .app-topbar,
+                    .app-group-sidemenu {
+                        display: none !important;
                     }
                     .app-editbtn-project {
                         visibility: hidden;
@@ -49,6 +50,7 @@ function buildHtml(htmlFilePath, folderPath, folderName, logoPath, fn) {
                       }
                       .app-content__wrapper .content__sidebar .board .brand img {
                         width: 70px;
+                        margin-left: 10px;
                       }
                       .ant-modal-root {
                         display: none;

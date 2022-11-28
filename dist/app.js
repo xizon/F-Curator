@@ -3,7 +3,7 @@
  * 	Boot Helpers
  *
  * 	@source: https://github.com/xizon/f-curator
- * 	@version: 1.3.4 (November 14, 2022)
+ * 	@version: 1.3.5 (November 28, 2022)
  * 	@author: UIUX Lab <uiuxlab@gmail.com>
  * 	@license: MIT
  *
@@ -55564,7 +55564,8 @@ function Project(props) {
   var data = props.data,
       classifiedMapData = props.classifiedMapData,
       catName = props.catName,
-      callback = props.callback;
+      callback = props.callback,
+      isSearch = props.isSearch;
 
   var _useState = (0,react.useState)([]),
       _useState2 = _slicedToArray(_useState, 2),
@@ -55684,7 +55685,8 @@ function Project(props) {
       link: item.link,
       icon: item.icon,
       "data-id": index,
-      draggable: true,
+      draggable: isSearch ? false : true // Prevent drag sorting 
+      ,
       evDragEnd: function evDragEnd(e) {
         return dragEnd(e);
       },
@@ -55697,15 +55699,13 @@ function Project(props) {
 ;// CONCATENATED MODULE: ../src/components/Group/Item.tsx
 
 function Group_Item_Item(props) {
-  var title = props.title,
+  var id = props.id,
+      title = props.title,
       content = props.content;
   return /*#__PURE__*/react.createElement(react.Fragment, null, /*#__PURE__*/react.createElement("div", {
-    className: "app-group"
-  }, /*#__PURE__*/react.createElement("div", {
-    className: "app-group__title"
-  }, title || null), /*#__PURE__*/react.createElement("div", {
-    className: "app-group__content"
-  }, content || null)));
+    className: "app-group",
+    id: "app-group-".concat(id)
+  }, /*#__PURE__*/react.createElement("dt", null, title || null), /*#__PURE__*/react.createElement("dd", null, content || null)));
 }
 ;// CONCATENATED MODULE: ../src/components/Group/index.tsx
 /* 
@@ -55720,7 +55720,8 @@ function Group_Item_Item(props) {
 function Group_Group(props) {
   var data = props.data,
       cat = props.cat,
-      callback = props.callback; // Merge items for each category into an array
+      callback = props.callback,
+      isSearch = props.isSearch; // Merge items for each category into an array
 
   var classifiedListMap = new Map();
   cat.map(function (catName, index) {
@@ -55731,14 +55732,46 @@ function Group_Group(props) {
     });
     classifiedListMap.set(catName, list);
   });
-  return /*#__PURE__*/react.createElement(react.Fragment, null, cat && cat.length > 0 ? cat.map(function (catName, index) {
+
+  function handleClick(e) {
+    var _document$querySelect;
+
+    e.preventDefault();
+    var targetEl = e.currentTarget.dataset.id;
+    (_document$querySelect = document.querySelector('.app-content__wrapper .content-area')) === null || _document$querySelect === void 0 ? void 0 : _document$querySelect.scrollTo({
+      top: document.querySelector("#".concat(targetEl)).offsetTop,
+      behavior: "smooth"
+    });
+  }
+
+  return /*#__PURE__*/react.createElement(react.Fragment, null, /*#__PURE__*/react.createElement("div", {
+    className: "app-group-sidemenu"
+  }, /*#__PURE__*/react.createElement("ul", null, cat && cat.length > 0 ? cat.map(function (catName, index) {
+    var currentList = classifiedListMap.get(catName);
+
+    if (currentList.length > 0) {
+      return /*#__PURE__*/react.createElement("li", {
+        key: index
+      }, /*#__PURE__*/react.createElement("a", {
+        href: "#",
+        "data-id": "app-group-".concat(index),
+        onClick: function onClick(e) {
+          return handleClick(e);
+        }
+      }, catName));
+    }
+  }) : '')), /*#__PURE__*/react.createElement("dl", {
+    className: "app-stickgroup"
+  }, cat && cat.length > 0 ? cat.map(function (catName, index) {
     var currentList = classifiedListMap.get(catName);
 
     if (currentList.length > 0) {
       return /*#__PURE__*/react.createElement(Group_Item_Item, {
         key: index,
         title: catName,
+        id: index,
         content: /*#__PURE__*/react.createElement(react.Fragment, null, /*#__PURE__*/react.createElement(Project, {
+          isSearch: isSearch,
           data: currentList,
           catName: catName,
           classifiedMapData: classifiedListMap,
@@ -55746,7 +55779,7 @@ function Group_Group(props) {
         }))
       });
     }
-  }) : '');
+  }) : ''));
 }
 ;// CONCATENATED MODULE: ../src/components/Welcome/index.tsx
 
@@ -55817,35 +55850,40 @@ function Home() {
   var refInputUrl = (0,react.useRef)(null);
   var refInputTitle = (0,react.useRef)(null);
 
-  var _useState = (0,react.useState)([]),
+  var _useState = (0,react.useState)(false),
       _useState2 = _slicedToArray(_useState, 2),
-      dataURLs = _useState2[0],
-      setDataURLs = _useState2[1];
+      isSearch = _useState2[0],
+      setIsSearch = _useState2[1];
 
   var _useState3 = (0,react.useState)([]),
       _useState4 = _slicedToArray(_useState3, 2),
-      dataCategories = _useState4[0],
-      setDataCategories = _useState4[1];
+      dataURLs = _useState4[0],
+      setDataURLs = _useState4[1];
 
-  var _useState5 = (0,react.useState)(),
+  var _useState5 = (0,react.useState)([]),
       _useState6 = _slicedToArray(_useState5, 2),
-      category = _useState6[0],
-      setCategory = _useState6[1];
+      dataCategories = _useState6[0],
+      setDataCategories = _useState6[1];
 
-  var _useState7 = (0,react.useState)(''),
+  var _useState7 = (0,react.useState)(),
       _useState8 = _slicedToArray(_useState7, 2),
-      inputTitle = _useState8[0],
-      setInputTitle = _useState8[1];
+      category = _useState8[0],
+      setCategory = _useState8[1];
 
   var _useState9 = (0,react.useState)(''),
       _useState10 = _slicedToArray(_useState9, 2),
-      inputUrl = _useState10[0],
-      setInputUrl = _useState10[1];
+      inputTitle = _useState10[0],
+      setInputTitle = _useState10[1];
 
   var _useState11 = (0,react.useState)(''),
       _useState12 = _slicedToArray(_useState11, 2),
-      inputSearch = _useState12[0],
-      setInputSearch = _useState12[1]; //------------------------------------------
+      inputUrl = _useState12[0],
+      setInputUrl = _useState12[1];
+
+  var _useState13 = (0,react.useState)(''),
+      _useState14 = _slicedToArray(_useState13, 2),
+      inputSearch = _useState14[0],
+      setInputSearch = _useState14[1]; //------------------------------------------
 
 
   function updateData() {
@@ -55956,21 +55994,21 @@ function Home() {
   //------------------------------------------
 
 
-  var _useState13 = (0,react.useState)(false),
-      _useState14 = _slicedToArray(_useState13, 2),
-      visible = _useState14[0],
-      setVisible = _useState14[1];
-
   var _useState15 = (0,react.useState)(false),
       _useState16 = _slicedToArray(_useState15, 2),
-      confirmLoading = _useState16[0],
-      setConfirmLoading = _useState16[1]; // Change event fires extra times before IME composition ends
-
+      visible = _useState16[0],
+      setVisible = _useState16[1];
 
   var _useState17 = (0,react.useState)(false),
       _useState18 = _slicedToArray(_useState17, 2),
-      onComposition = _useState18[0],
-      setOnComposition = _useState18[1];
+      confirmLoading = _useState18[0],
+      setConfirmLoading = _useState18[1]; // Change event fires extra times before IME composition ends
+
+
+  var _useState19 = (0,react.useState)(false),
+      _useState20 = _slicedToArray(_useState19, 2),
+      onComposition = _useState20[0],
+      setOnComposition = _useState20[1];
 
   function showModalAddnew() {
     setVisible(true); //clear input and select
@@ -56035,8 +56073,12 @@ function Home() {
         return _title.includes(str) || item.link.toLowerCase().includes(str);
       });
       setDataURLs(matchList);
+      setIsSearch(true);
     } else {
       setDataURLs(currentAllURLs);
+      setIsSearch(false); // Communicate asynchronously from a renderer process to the main process.
+
+      Home_ipcRenderer.send('DATA_UPDATED_URLS', false);
     }
   }
 
@@ -56048,15 +56090,15 @@ function Home() {
   //------------------------------------------
 
 
-  var _useState19 = (0,react.useState)(null),
-      _useState20 = _slicedToArray(_useState19, 2),
-      appInfo = _useState20[0],
-      setAppInfo = _useState20[1];
-
-  var _useState21 = (0,react.useState)(false),
+  var _useState21 = (0,react.useState)(null),
       _useState22 = _slicedToArray(_useState21, 2),
-      visibleAbout = _useState22[0],
-      setVisibleAbout = _useState22[1];
+      appInfo = _useState22[0],
+      setAppInfo = _useState22[1];
+
+  var _useState23 = (0,react.useState)(false),
+      _useState24 = _slicedToArray(_useState23, 2),
+      visibleAbout = _useState24[0],
+      setVisibleAbout = _useState24[1];
 
   function showModalAbout(e) {
     e.preventDefault();
@@ -56065,20 +56107,20 @@ function Home() {
   //------------------------------------------
 
 
-  var _useState23 = (0,react.useState)(''),
-      _useState24 = _slicedToArray(_useState23, 2),
-      exportHTMLInfo = _useState24[0],
-      setExportHTMLInfo = _useState24[1];
-
-  var _useState25 = (0,react.useState)(false),
+  var _useState25 = (0,react.useState)(''),
       _useState26 = _slicedToArray(_useState25, 2),
-      visibleExportHTMLFile = _useState26[0],
-      setVisibleExportHTMLFile = _useState26[1];
+      exportHTMLInfo = _useState26[0],
+      setExportHTMLInfo = _useState26[1];
 
   var _useState27 = (0,react.useState)(false),
       _useState28 = _slicedToArray(_useState27, 2),
-      loadingExportHTMLFile = _useState28[0],
-      setLoadingExportHTMLFile = _useState28[1];
+      visibleExportHTMLFile = _useState28[0],
+      setVisibleExportHTMLFile = _useState28[1];
+
+  var _useState29 = (0,react.useState)(false),
+      _useState30 = _slicedToArray(_useState29, 2),
+      loadingExportHTMLFile = _useState30[0],
+      setLoadingExportHTMLFile = _useState30[1];
 
   function handleOkExportHTMLFile() {
     setLoadingExportHTMLFile(true); // Communicate asynchronously from a renderer process to the main process.
@@ -56100,15 +56142,15 @@ function Home() {
   //------------------------------------------
 
 
-  var _useState29 = (0,react.useState)(''),
-      _useState30 = _slicedToArray(_useState29, 2),
-      importHTMLInfo = _useState30[0],
-      setImportHTMLInfo = _useState30[1];
-
-  var _useState31 = (0,react.useState)(false),
+  var _useState31 = (0,react.useState)(''),
       _useState32 = _slicedToArray(_useState31, 2),
-      visibleImportHTMLFile = _useState32[0],
-      setVisibleImportHTMLFile = _useState32[1];
+      importHTMLInfo = _useState32[0],
+      setImportHTMLInfo = _useState32[1];
+
+  var _useState33 = (0,react.useState)(false),
+      _useState34 = _slicedToArray(_useState33, 2),
+      visibleImportHTMLFile = _useState34[0],
+      setVisibleImportHTMLFile = _useState34[1];
 
   function handleOkImportHTMLFile() {
     // Communicate asynchronously from a renderer process to the main process.
@@ -56129,15 +56171,15 @@ function Home() {
   //------------------------------------------
 
 
-  var _useState33 = (0,react.useState)(null),
-      _useState34 = _slicedToArray(_useState33, 2),
-      updateInfo = _useState34[0],
-      setUpdateInfo = _useState34[1];
-
-  var _useState35 = (0,react.useState)(false),
+  var _useState35 = (0,react.useState)(null),
       _useState36 = _slicedToArray(_useState35, 2),
-      visibleUpdateApp = _useState36[0],
-      setVisibleUpdateApp = _useState36[1]; // Button action of Windows (DOM element associated with preload.js)
+      updateInfo = _useState36[0],
+      setUpdateInfo = _useState36[1];
+
+  var _useState37 = (0,react.useState)(false),
+      _useState38 = _slicedToArray(_useState37, 2),
+      visibleUpdateApp = _useState38[0],
+      setVisibleUpdateApp = _useState38[1]; // Button action of Windows (DOM element associated with preload.js)
   //------------------------------------------
 
 
@@ -56255,7 +56297,7 @@ function Home() {
     }, /*#__PURE__*/react.createElement("path", {
       fill: "#d5d5d5",
       d: "M216 0h80c13.3 0 24 10.7 24 24v168h87.7c17.8 0 26.7 21.5 14.1 34.1L269.7 378.3c-7.5 7.5-19.8 7.5-27.3 0L90.1 226.1c-12.6-12.6-3.7-34.1 14.1-34.1H192V24c0-13.3 10.7-24 24-24zm296 376v112c0 13.3-10.7 24-24 24H24c-13.3 0-24-10.7-24-24V376c0-13.3 10.7-24 24-24h146.7l49 49c20.1 20.1 52.5 20.1 72.6 0l49-49H488c13.3 0 24 10.7 24 24zm-124 88c0-11-9-20-20-20s-20 9-20 20 9 20 20 20 20-9 20-20zm64 0c0-11-9-20-20-20s-20 9-20 20 9 20 20 20 20-9 20-20z"
-    })), " Export HTML"), /*#__PURE__*/react.createElement("a", {
+    })), " Export HTML & DB"), /*#__PURE__*/react.createElement("a", {
       href: "#",
       onClick: showModalImportHTMLFile
     }, /*#__PURE__*/react.createElement("svg", {
@@ -56269,6 +56311,7 @@ function Home() {
       d: "M512 48v288c0 26.5-21.5 48-48 48h-48V176c0-44.1-35.9-80-80-80H128V48c0-26.5 21.5-48 48-48h288c26.5 0 48 21.5 48 48zM384 176v288c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V176c0-26.5 21.5-48 48-48h288c26.5 0 48 21.5 48 48zm-68 28c0-6.6-5.4-12-12-12H76c-6.6 0-12 5.4-12 12v52h252v-52z"
     })), " Import Database"), /*#__PURE__*/react.createElement("a", {
       href: "#",
+      className: "app-name",
       onClick: showModalAbout
     }, "About ", appInfo ? appInfo.name : null)),
     contentArea: /*#__PURE__*/react.createElement(react.Fragment, null, /*#__PURE__*/react.createElement("div", {
@@ -56277,10 +56320,11 @@ function Home() {
         paddingTop: !isMac ? "50px" : "20px"
       }
     }, /*#__PURE__*/react.createElement("div", {
-      className: "app-search__wrapper",
-      style: {
-        marginBottom: "17px"
-      }
+      className: "app-topbar"
+    }, /*#__PURE__*/react.createElement("div", {
+      className: "left"
+    }, /*#__PURE__*/react.createElement("div", {
+      className: "app-search__wrapper"
     }, /*#__PURE__*/react.createElement(Home_Search, {
       value: inputSearch,
       placeholder: "Site Name or URL",
@@ -56293,7 +56337,10 @@ function Home() {
       style: {
         width: "325px"
       }
-    })), dataURLs && dataURLs.length > 0 ? /*#__PURE__*/react.createElement(react.Fragment, null, /*#__PURE__*/react.createElement(Group_Group, {
+    }))), /*#__PURE__*/react.createElement("div", {
+      className: "right"
+    }, "Total sites: ", /*#__PURE__*/react.createElement("strong", null, currentAllURLs.length))), dataURLs && dataURLs.length > 0 ? /*#__PURE__*/react.createElement(react.Fragment, null, /*#__PURE__*/react.createElement(Group_Group, {
+      isSearch: isSearch,
       data: dataURLs,
       cat: dataCategories,
       callback: function callback(res) {
@@ -56422,7 +56469,7 @@ function Home() {
         color: "orange"
       }
     }, ".zip"), " data package, and restore the data after installing the new version.")) : null)), /*#__PURE__*/react.createElement(modal, {
-      title: "Export HTML",
+      title: "Export HTML & DB",
       visible: visibleExportHTMLFile,
       onOk: showModalExportHTMLFile,
       onCancel: handleCancelExportHTMLFile,
@@ -56461,7 +56508,7 @@ function Home() {
       style: {
         color: "green"
       }
-    }, exportHTMLInfo), " exported successfully, please check your computer desktop.") : 'Export an HTML file package that you can use directly in any operating system\'s browser.')), /*#__PURE__*/react.createElement(modal, {
+    }, exportHTMLInfo), " exported successfully, please check your computer desktop.") : 'Export an HTML file package and a Database that you can use directly in any operating system\'s browser.')), /*#__PURE__*/react.createElement(modal, {
       title: "Import Database",
       visible: visibleImportHTMLFile,
       onOk: showModalImportHTMLFile,
@@ -70370,7 +70417,7 @@ function usePageViews() {
 
     var $style = document.createElement("style");
     document.head.appendChild($style);
-    $style.innerHTML = "\n    html,body {\n        height: 100%;\n    }\n    \n    body {\n        font-family: 'Helvetica Neue', Helvetica, 'Microsoft YaHei', STXihei, 'PingFang SC','Hiragino Sans GB', Arial, sans-serif;\n    }\n\n    .app-content__wrapper .content__sidebar .panel-dragarea {\n      -webkit-app-region: drag;\n    }\n    \n    #app, #main {\n        height: 100%;\n    }\n\n    /* Ant Design Styles*/\n    .ant-card,\n        .ant-modal-wrap,\n        .ant-table {\n        -webkit-app-region: no-drag;\n    }\n    \n    .ant-table-tbody>tr>td, \n        .ant-table-thead>tr>th, \n        .ant-table tfoot>tr>td, \n        .ant-table tfoot>tr>th {\n        padding: 8px;\n    }\n\n    .ant-btn-primary {\n      background-color: #4c7e1c;\n      border-color: #4c7e1c;\n      box-shadow: 0 2px 0 rgba(76, 126, 28, 0.5);\n      text-shadow: none;\n      transition: .1s ease-in-out;\n    }\n\n    .ant-btn:active,\n    .ant-btn:focus,\n    .ant-btn:hover {\n      color: #67a32e;\n      border-color: #4c7e1c;\n    }\n\n\n    .ant-btn-primary:active,\n    .ant-btn-primary:focus,\n    .ant-btn-primary:hover {\n      background: #67a32e;\n      border-color: #4c7e1c;\n      color: #fff;\n    }\n\n    .ant-modal-header,\n    .ant-modal-content {\n      border-radius: 12px;\n    }\n\n    .ant-select:not(.ant-select-disabled):hover .ant-select-selector,\n    .ant-input:hover {\n      border-color: #67a32e;\n    }\n\n    .ant-select.ant-select-focused .ant-select-selector,\n    .ant-select.ant-select-open .ant-select-selector {\n      border-color: #67a32e !important;\n    }\n\n    .ant-select .ant-select-selector {\n      box-shadow: none !important;\n    }\n  \n    .ant-input-focused, \n    .ant-input:focus {\n      border-color: #67a32e;\n      box-shadow: 0 0 0 2px rgb(17 124 4 / 20%);\n    }\n    .ant-select-item-option-selected:not(.ant-select-item-option-disabled) {\n      background-color: rgb(248, 248, 248);\n    }\n\n    .app-search__wrapper .ant-input-search .ant-input-group .ant-input-affix-wrapper:not(:last-child) {\n      border-bottom-left-radius: 6px;\n      border-top-left-radius: 6px;\n    }\n\n    .app-search__wrapper .ant-input-search>.ant-input-group>.ant-input-group-addon:last-child .ant-input-search-button {\n      border-radius: 0 6px 6px 0;\n    }  \n\n\n    /* Add buttons to app of Windows  */\n    nav#title-bar {\n        display: block;\n        width: 100%;\n        height: 30px;\n        background-color: #070906;\n        -webkit-app-region: drag;\n        -webkit-user-select: none;\n        position: fixed;\n        z-index: 1;\n    }\n    \n    nav#title-bar #titleshown {\n        width: 30%;\n        height: 100%;\n        line-height: 30px;\n        color: #f7f7f7;\n        float: left;\n        padding: 0 0 0 1em;\n    }\n    \n    nav#title-bar #buttons {\n        float: right;\n        width: 150px;\n        height: 100%;\n        line-height: 30px;\n        background-color: #222222;\n        -webkit-app-region: no-drag;\n    }\n    \n    nav#title-bar #buttons #minimize,\n    nav#title-bar #buttons #maximize,\n    nav#title-bar #buttons #quit {\n        float: left;\n        height: 100%;\n        width: 33%;\n        text-align: center;\n        color: #f7f7f7;\n        cursor: default;\n    }\n    \n    nav#title-bar #buttons #minimize:hover {\n        background-color: #070906aa;\n    }\n    nav#title-bar #buttons #maximize:hover {\n        background-color: #070906aa;\n    }\n    nav#title-bar #buttons #quit:hover {\n        background-color: #ff0000dd;\n    }\n\n    ";
+    $style.innerHTML = "\n\n    /* General */\n    /* ----------------  */\n    html,body {\n        height: 100%;\n    }\n    \n    body {\n        font-family: 'Helvetica Neue', Helvetica, 'Microsoft YaHei', STXihei, 'PingFang SC','Hiragino Sans GB', Arial, sans-serif;\n    }\n\n    .app-content__wrapper .content__sidebar .panel-dragarea {\n      -webkit-app-region: drag;\n    }\n    \n    #app, #main {\n        height: 100%;\n    }\n\n    /* Ant Design Styles*/\n    /* ----------------  */\n    .ant-card,\n        .ant-modal-wrap,\n        .ant-table {\n        -webkit-app-region: no-drag;\n    }\n    \n    .ant-table-tbody>tr>td, \n        .ant-table-thead>tr>th, \n        .ant-table tfoot>tr>td, \n        .ant-table tfoot>tr>th {\n        padding: 8px;\n    }\n\n    .ant-btn-primary {\n      background-color: #4c7e1c;\n      border-color: #4c7e1c;\n      box-shadow: 0 2px 0 rgba(76, 126, 28, 0.5);\n      text-shadow: none;\n      transition: .1s ease-in-out;\n    }\n\n    .ant-btn:active,\n    .ant-btn:focus,\n    .ant-btn:hover {\n      color: #67a32e;\n      border-color: #4c7e1c;\n    }\n\n\n    .ant-btn-primary:active,\n    .ant-btn-primary:focus,\n    .ant-btn-primary:hover {\n      background: #67a32e;\n      border-color: #4c7e1c;\n      color: #fff;\n    }\n\n    .ant-modal-header,\n    .ant-modal-content {\n      border-radius: 12px;\n    }\n\n    .ant-select:not(.ant-select-disabled):hover .ant-select-selector,\n    .ant-input:hover {\n      border-color: #67a32e;\n    }\n\n    .ant-select.ant-select-focused .ant-select-selector,\n    .ant-select.ant-select-open .ant-select-selector {\n      border-color: #67a32e !important;\n    }\n\n    .ant-select .ant-select-selector {\n      box-shadow: none !important;\n    }\n  \n    .ant-input-focused, \n    .ant-input:focus {\n      border-color: #67a32e;\n      box-shadow: 0 0 0 2px rgb(17 124 4 / 20%);\n    }\n    .ant-select-item-option-selected:not(.ant-select-item-option-disabled) {\n      background-color: rgb(248, 248, 248);\n    }\n\n\n    /* Top bar  */\n    /* ----------------  */\n    .app-topbar {\n        margin-bottom: 17px;\n        display: flex;\n        line-height: 2;\n    }\n\n    .app-topbar > div.left {\n        flex-basis: 349px;\n    }\n\n    .app-search__wrapper .ant-input-search .ant-input-group .ant-input-affix-wrapper:not(:last-child) {\n      border-bottom-left-radius: 6px;\n      border-top-left-radius: 6px;\n    }\n\n    .app-search__wrapper .ant-input-search>.ant-input-group>.ant-input-group-addon:last-child .ant-input-search-button {\n      border-radius: 0 6px 6px 0;\n    }  \n\n\n    /* Add buttons to app of Windows  */\n    /* ----------------  */\n    nav#title-bar {\n        display: block;\n        width: 100%;\n        height: 30px;\n        background-color: #070906;\n        -webkit-app-region: drag;\n        -webkit-user-select: none;\n        position: fixed;\n        z-index: 1;\n    }\n    \n    nav#title-bar #titleshown {\n        width: 30%;\n        height: 100%;\n        line-height: 30px;\n        color: #f7f7f7;\n        float: left;\n        padding: 0 0 0 1em;\n    }\n    \n    nav#title-bar #buttons {\n        float: right;\n        width: 150px;\n        height: 100%;\n        line-height: 30px;\n        background-color: #222222;\n        -webkit-app-region: no-drag;\n    }\n    \n    nav#title-bar #buttons #minimize,\n    nav#title-bar #buttons #maximize,\n    nav#title-bar #buttons #quit {\n        float: left;\n        height: 100%;\n        width: 33%;\n        text-align: center;\n        color: #f7f7f7;\n        cursor: default;\n    }\n    \n    nav#title-bar #buttons #minimize:hover {\n        background-color: #070906aa;\n    }\n    nav#title-bar #buttons #maximize:hover {\n        background-color: #070906aa;\n    }\n    nav#title-bar #buttons #quit:hover {\n        background-color: #ff0000dd;\n    }\n\n\n    \n    ";
   }, [theLocation]);
 }
 

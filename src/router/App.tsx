@@ -21,6 +21,9 @@ function usePageViews() {
     const $style = document.createElement("style");
     document.head.appendChild($style);
     $style.innerHTML = `
+
+    /* General */
+    /* ----------------  */
     html,body {
         height: 100%;
     }
@@ -38,6 +41,7 @@ function usePageViews() {
     }
 
     /* Ant Design Styles*/
+    /* ----------------  */
     .ant-card,
         .ant-modal-wrap,
         .ant-table {
@@ -103,6 +107,19 @@ function usePageViews() {
       background-color: rgb(248, 248, 248);
     }
 
+
+    /* Top bar  */
+    /* ----------------  */
+    .app-topbar {
+        margin-bottom: 17px;
+        display: flex;
+        line-height: 2;
+    }
+
+    .app-topbar > div.left {
+        flex-basis: 349px;
+    }
+
     .app-search__wrapper .ant-input-search .ant-input-group .ant-input-affix-wrapper:not(:last-child) {
       border-bottom-left-radius: 6px;
       border-top-left-radius: 6px;
@@ -114,6 +131,7 @@ function usePageViews() {
 
 
     /* Add buttons to app of Windows  */
+    /* ----------------  */
     nav#title-bar {
         display: block;
         width: 100%;
@@ -164,6 +182,8 @@ function usePageViews() {
         background-color: #ff0000dd;
     }
 
+
+    
     `;
 
 

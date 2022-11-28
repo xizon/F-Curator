@@ -83,6 +83,11 @@ F-Curator 是一个跨平台应用程序，支持Mac和Windows系统，用来管
 └──
 ```
 
+## 更细日志
+
+[releases](CHANGELOG.md)
+
+
 
 ## 感谢
 

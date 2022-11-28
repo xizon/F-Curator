@@ -20,6 +20,8 @@ type GroupProps = {
      cat?: any[any];
      /** The method to call when a page is clicked. Exposes the current data as an argument. */
      callback?: GroupFnType | any;
+     /** Determine whether it is the result of the search filter */
+     isSearch?: boolean;
 };
 
 
@@ -30,7 +32,8 @@ export default function Group(props: GroupProps ) {
     const {
         data,
         cat,
-        callback
+        callback,
+        isSearch
     } = props;
 
 
@@ -50,30 +53,64 @@ export default function Group(props: GroupProps ) {
     });
 
 
+    function handleClick(e) {
+        e.preventDefault();
+
+        const targetEl = e.currentTarget.dataset.id;
+
+        document.querySelector( '.app-content__wrapper .content-area' )?.scrollTo({
+            top: (document.querySelector( `#${targetEl}` ) as HTMLElement).offsetTop,
+            behavior: "smooth"
+        });  
+
+    }
+
+
+
     return (
         <>
 
-            {cat && cat.length > 0 ? cat.map((catName, index) => {
 
-                const currentList = classifiedListMap.get(catName);
+            <div className="app-group-sidemenu">
+                <ul>
+                    {cat && cat.length > 0 ? cat.map((catName, index) => {
 
-                if ( currentList.length > 0 ) {
-                    return <Item
-                        key={index}
-                        title={catName}
-                        content={<>
-                            <Project 
-                                data={currentList} 
-                                catName={catName} 
-                                classifiedMapData={classifiedListMap} 
-                                callback={callback} 
-                            />
-                        </>}
-                    />;
-                }
+                        const currentList = classifiedListMap.get(catName);
+
+                        if ( currentList.length > 0 ) {
+                            return <li key={index}><a href="#" data-id={`app-group-${index}`} onClick={(e) => handleClick(e) }>{catName}</a></li>;
+                        }
+                    }) : ''}
+                </ul>
+            </div>
 
 
-            }) : ''}
+            <dl className="app-stickgroup">
+                {cat && cat.length > 0 ? cat.map((catName, index) => {
+
+                    const currentList = classifiedListMap.get(catName);
+
+                    if ( currentList.length > 0 ) {
+                        return <Item
+                            key={index}
+                            title={catName}
+                            id={index}
+                            content={<>
+                                <Project 
+                                    isSearch={isSearch}
+                                    data={currentList} 
+                                    catName={catName} 
+                                    classifiedMapData={classifiedListMap} 
+                                    callback={callback} 
+                                />
+                            </>}
+                        />;
+                    }
+
+
+                }) : ''}
+            </dl>
+
 
         </>
     )

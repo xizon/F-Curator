@@ -3,7 +3,7 @@
  * 	Boot Helpers
  *
  * 	@source: https://github.com/xizon/f-curator
- * 	@version: 1.3.4 (November 14, 2022)
+ * 	@version: 1.3.5 (November 28, 2022)
  * 	@author: UIUX Lab <uiuxlab@gmail.com>
  * 	@license: MIT
  *
@@ -60,7 +60,7 @@
 .app-content__wrapper .content__sidebar .board {
   position: fixed;
   bottom: 30px;
-  padding: 30px 20px 30px 100px;
+  padding: 29px 0 30px 85px;
   border-radius: 25px;
   background-color: #2b530f;
   background-image: -moz-linear-gradient(90deg, #2b530f 0%, #599021 100%);
@@ -121,6 +121,7 @@
     width: calc(100% - 98px);
   }
   .app-content__wrapper .content__sidebar .board {
+    padding: 30px 20px 30px 100px;
     width: 189px;
     padding-bottom: 10px;
     transform: translateX(-46px);
@@ -131,7 +132,7 @@
   .app-content__wrapper .content__sidebar .board .secondary-btn a {
     font-size: 0;
   }
-  .app-content__wrapper .content__sidebar .board .secondary-btn a:last-child {
+  .app-content__wrapper .content__sidebar .board .secondary-btn a.app-name {
     display: none;
   }
   .app-content__wrapper .content__sidebar .board .brand img {
@@ -31496,7 +31497,7 @@ div.ant-typography-edit-content.ant-typography-rtl {
   fill: #333;
 }
 
-.app-group {
+dl.app-stickgroup > .app-group {
   border: 1px solid #e9e9e9;
   border-radius: 7px;
   background-color: white;
@@ -31504,18 +31505,44 @@ div.ant-typography-edit-content.ant-typography-rtl {
   margin-bottom: 17px;
 }
 
-.app-group .app-group__title {
+dl.app-stickgroup > .app-group dt {
+  position: -webkit-sticky;
+  position: sticky;
+  z-index: 50;
+  top: 0;
+  /* -----  */
   font-size: 14px;
   font-weight: bold;
   color: #c4c4c4;
-  background: #f9f9f9;
-  border: 1px solid #e9e9e9;
+  background: #282828;
+  border-bottom: 1px solid #e9e9e9;
   border-radius: 7px 7px 0 0;
   padding: 10px 20px;
 }
 
-.app-group .app-group__content {
+dl.app-stickgroup > .app-group dd {
   padding: 10px;
+}
+
+dl.app-stickgroup > .app-group dd + dd {
+  border-top: 1px solid #CCC;
+}
+
+.app-group-sidemenu {
+  position: relative;
+  margin-top: -10px;
+}
+
+.app-group-sidemenu ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.app-group-sidemenu ul li {
+  display: inline-block;
+  padding: 10px;
+  font-size: 12px;
 }
 
 .app-welcome {

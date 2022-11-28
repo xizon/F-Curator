@@ -97,7 +97,7 @@
 	.content__sidebar .board {
 	  position: fixed;
 	  bottom: 30px;
-	  padding: 30px 20px 30px 100px;
+      padding: 29px 0 30px 85px;
 	  border-radius: 25px;
 	  background-color: rgb(43, 83, 15);
 	  background-image: -moz-linear-gradient(90deg, rgb(43, 83, 15) 0%, rgb(89, 144, 33) 100%);
@@ -162,10 +162,12 @@
 	  }
   
 	  .content__sidebar .board {
+        padding: 30px 20px 30px 100px;
+
 		.secondary-btn a {
 		  font-size: 0;
   
-		  &:last-child {
+		  &.app-name {
 			display: none;
 		  }
 		}

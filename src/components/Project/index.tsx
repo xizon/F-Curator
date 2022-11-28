@@ -24,6 +24,8 @@ type ProjectProps = {
     catName?: string;
     /** The method to call when a page is clicked. Exposes the current data as an argument. */
     callback?: ProjectFnType | any;
+     /** Determine whether it is the result of the search filter */
+     isSearch?: boolean;
 };
 
 
@@ -35,7 +37,8 @@ export default function Project(props: ProjectProps ) {
         data,
         classifiedMapData,
         catName,
-        callback
+        callback,
+        isSearch
     } = props;
 
 
@@ -186,7 +189,7 @@ export default function Project(props: ProjectProps ) {
                             link={item.link}
                             icon={item.icon}
                             data-id={index}
-                            draggable={true}
+                            draggable={isSearch ? false : true}  // Prevent drag sorting 
                             evDragEnd={(e) => dragEnd(e)}
                             evDragStart={(e) => dragStart(e)}
                         />;

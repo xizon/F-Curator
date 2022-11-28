@@ -32,6 +32,8 @@ export default function Home() {
     const refInputUrl = useRef<any>(null);
     const refInputTitle = useRef<any>(null);
 
+    
+    const [isSearch, setIsSearch] = useState<boolean>(false);
     const [dataURLs, setDataURLs] = useState<any[]>([]);
     const [dataCategories, setDataCategories] = useState<any[]>([]);
     const [category, setCategory] = useState<string>();
@@ -232,8 +234,14 @@ export default function Home() {
             });
 
             setDataURLs(matchList);
+            setIsSearch(true);
         } else {
             setDataURLs(currentAllURLs);
+            setIsSearch(false);
+
+            
+            // Communicate asynchronously from a renderer process to the main process.
+            ipcRenderer.send('DATA_UPDATED_URLS', false);            
         }
 
         
@@ -386,13 +394,13 @@ export default function Home() {
                     <Link to="/category"><svg aria-hidden="true" height="12" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path fill="#d5d5d5" d="M12.83 352h262.34A12.82 12.82 0 0 0 288 339.17v-38.34A12.82 12.82 0 0 0 275.17 288H12.83A12.82 12.82 0 0 0 0 300.83v38.34A12.82 12.82 0 0 0 12.83 352zm0-256h262.34A12.82 12.82 0 0 0 288 83.17V44.83A12.82 12.82 0 0 0 275.17 32H12.83A12.82 12.82 0 0 0 0 44.83v38.34A12.82 12.82 0 0 0 12.83 96zM432 160H16a16 16 0 0 0-16 16v32a16 16 0 0 0 16 16h416a16 16 0 0 0 16-16v-32a16 16 0 0 0-16-16zm0 256H16a16 16 0 0 0-16 16v32a16 16 0 0 0 16 16h416a16 16 0 0 0 16-16v-32a16 16 0 0 0-16-16z"></path></svg> Category Edit</Link>
 
                     <a href="#" onClick={showModalExportHTMLFile}>
-                        <svg aria-hidden="true" height="12" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="#d5d5d5" d="M216 0h80c13.3 0 24 10.7 24 24v168h87.7c17.8 0 26.7 21.5 14.1 34.1L269.7 378.3c-7.5 7.5-19.8 7.5-27.3 0L90.1 226.1c-12.6-12.6-3.7-34.1 14.1-34.1H192V24c0-13.3 10.7-24 24-24zm296 376v112c0 13.3-10.7 24-24 24H24c-13.3 0-24-10.7-24-24V376c0-13.3 10.7-24 24-24h146.7l49 49c20.1 20.1 52.5 20.1 72.6 0l49-49H488c13.3 0 24 10.7 24 24zm-124 88c0-11-9-20-20-20s-20 9-20 20 9 20 20 20 20-9 20-20zm64 0c0-11-9-20-20-20s-20 9-20 20 9 20 20 20 20-9 20-20z"></path></svg> Export HTML</a>
+                        <svg aria-hidden="true" height="12" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="#d5d5d5" d="M216 0h80c13.3 0 24 10.7 24 24v168h87.7c17.8 0 26.7 21.5 14.1 34.1L269.7 378.3c-7.5 7.5-19.8 7.5-27.3 0L90.1 226.1c-12.6-12.6-3.7-34.1 14.1-34.1H192V24c0-13.3 10.7-24 24-24zm296 376v112c0 13.3-10.7 24-24 24H24c-13.3 0-24-10.7-24-24V376c0-13.3 10.7-24 24-24h146.7l49 49c20.1 20.1 52.5 20.1 72.6 0l49-49H488c13.3 0 24 10.7 24 24zm-124 88c0-11-9-20-20-20s-20 9-20 20 9 20 20 20 20-9 20-20zm64 0c0-11-9-20-20-20s-20 9-20 20 9 20 20 20 20-9 20-20z"></path></svg> Export HTML & DB</a>
 
                     <a href="#" onClick={showModalImportHTMLFile}>
                         <svg aria-hidden="true" height="12" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="#d5d5d5" d="M512 48v288c0 26.5-21.5 48-48 48h-48V176c0-44.1-35.9-80-80-80H128V48c0-26.5 21.5-48 48-48h288c26.5 0 48 21.5 48 48zM384 176v288c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V176c0-26.5 21.5-48 48-48h288c26.5 0 48 21.5 48 48zm-68 28c0-6.6-5.4-12-12-12H76c-6.6 0-12 5.4-12 12v52h252v-52z"></path></svg> Import Database</a>
 
 
-                    <a href="#" onClick={showModalAbout}>About {appInfo ? appInfo.name : null}</a>
+                    <a href="#" className="app-name" onClick={showModalAbout}>About {appInfo ? appInfo.name : null}</a>
                     
 
                 </>}
@@ -400,23 +408,34 @@ export default function Home() {
                 
                     <div className="content" style={{paddingTop: (!isMac ? "50px" : "20px")}}>
 
-                        <div className="app-search__wrapper" style={{marginBottom:"17px"}}>
-                            <Search 
-                            value={inputSearch} 
-                            placeholder="Site Name or URL" 
-                            allowClear 
-                            onSearch={handleOkSearch}  
-                            onChange={handleInputSearchChange}
-                            onCompositionStart={handleInputSearchComposition}
-                            onCompositionUpdate={handleInputSearchComposition}
-                            onCompositionEnd={handleInputSearchComposition} 
-                            style={{ width:"325px" }} 
-                            />
+ 
+                        <div className="app-topbar">
+                            <div className="left">
+                                <div className="app-search__wrapper">
+                                    <Search 
+                                    value={inputSearch} 
+                                    placeholder="Site Name or URL" 
+                                    allowClear 
+                                    onSearch={handleOkSearch}  
+                                    onChange={handleInputSearchChange}
+                                    onCompositionStart={handleInputSearchComposition}
+                                    onCompositionUpdate={handleInputSearchComposition}
+                                    onCompositionEnd={handleInputSearchComposition} 
+                                    style={{ width:"325px" }} 
+                                    />
+                                </div>                                
+                            </div>
+                            <div className="right">
+                                Total sites: <strong>{currentAllURLs.length}</strong>
+
+                            </div>
                         </div>
-                        
+
+
+                    
                         {dataURLs && dataURLs.length > 0 ? <>
 
-                            <Group data={dataURLs} cat={dataCategories} callback={(res) => {
+                            <Group isSearch={isSearch} data={dataURLs} cat={dataCategories} callback={(res) => {
                                 console.log('--> update database: ', res);
 
                                 res.map((item) => {
@@ -503,7 +522,7 @@ export default function Home() {
 
 
                     <Modal
-                        title="Export HTML"
+                        title="Export HTML & DB"
                         visible={visibleExportHTMLFile}
                         onOk={showModalExportHTMLFile}
                         onCancel={handleCancelExportHTMLFile}
@@ -518,7 +537,7 @@ export default function Home() {
                             </Button>,
                         ]}
                     >
-                        <p>{exportHTMLInfo && exportHTMLInfo !== '' ? <><svg aria-hidden="true" style={{verticalAlign:"middle"}} height="16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="green" d="M504 256c0 136.967-111.033 248-248 248S8 392.967 8 256 119.033 8 256 8s248 111.033 248 248zM227.314 387.314l184-184c6.248-6.248 6.248-16.379 0-22.627l-22.627-22.627c-6.248-6.249-16.379-6.249-22.628 0L216 308.118l-70.059-70.059c-6.248-6.248-16.379-6.248-22.628 0l-22.627 22.627c-6.248 6.248-6.248 16.379 0 22.627l104 104c6.249 6.249 16.379 6.249 22.628.001z"></path></svg> Package <strong style={{ color: "green" }}>{exportHTMLInfo}</strong> exported successfully, please check your computer desktop.</> : 'Export an HTML file package that you can use directly in any operating system\'s browser.'}</p>
+                        <p>{exportHTMLInfo && exportHTMLInfo !== '' ? <><svg aria-hidden="true" style={{verticalAlign:"middle"}} height="16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="green" d="M504 256c0 136.967-111.033 248-248 248S8 392.967 8 256 119.033 8 256 8s248 111.033 248 248zM227.314 387.314l184-184c6.248-6.248 6.248-16.379 0-22.627l-22.627-22.627c-6.248-6.249-16.379-6.249-22.628 0L216 308.118l-70.059-70.059c-6.248-6.248-16.379-6.248-22.628 0l-22.627 22.627c-6.248 6.248-6.248 16.379 0 22.627l104 104c6.249 6.249 16.379 6.249 22.628.001z"></path></svg> Package <strong style={{ color: "green" }}>{exportHTMLInfo}</strong> exported successfully, please check your computer desktop.</> : 'Export an HTML file package and a Database that you can use directly in any operating system\'s browser.'}</p>
                     </Modal>
 
 
