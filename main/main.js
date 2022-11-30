@@ -118,6 +118,9 @@ app.on('ready', () => {
     ipcMain.on('DATA_UPDATED_URLS', (event, data) => {
         console.log('Current URLs Data: ', data);
 
+
+        if ( typeof data.category === typeof undefined ) data.category = db.get("classList").state.classList[0];
+
         if (data) {
             crawl(data.category, data.title, data.url, function (response) {
 

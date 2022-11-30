@@ -1,12 +1,12 @@
 import React from 'react';
 
-type ItemProps = {
+type GroupItemProps = {
     id?: string | number;
     title?: React.ReactNode;
     content?: React.ReactNode;
 };
 
-export default function Item(props: ItemProps) {
+export default function GroupItem(props: GroupItemProps) {
 
     const {
         id,

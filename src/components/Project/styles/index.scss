@@ -94,4 +94,44 @@
 }
 
 
+/* Preview title and link */
+.app-preview-link {
+    word-wrap: break-word;
+    position: absolute;
+    white-space: normal;
+    z-index: 52;
+    top: 2.7em;
+    left: .5em;
+    background: #fff4f4;
+    border: 1px solid #ddd;
+    width: 100%;
+    padding: 5px;
+    border-radius: 4px;
+    box-shadow: 0px -2px 35px 0px rgba(0,0,0,0.20);
+    font-weight: bold;
+    color: #161616;
+    display: none;
+    font-size: 12px;
 
+    em {
+        display: block;
+        margin-top: 3px;
+        font-weight: normal;
+        color: #afafaf;
+    }
+
+    &.is-dragging {
+        display: none !important;
+    }
+}
+
+
+.app-project .ant-col {
+    &:hover {
+        .app-preview-link {
+            display: block;
+        }
+    }
+
+
+}

@@ -28,9 +28,6 @@ type ProjectProps = {
      isSearch?: boolean;
 };
 
-
-
-
 export default function Project(props: ProjectProps ) {
 
     const {
@@ -88,12 +85,22 @@ export default function Project(props: ProjectProps ) {
         draggedObj = e.currentTarget;
         e.dataTransfer.effectAllowed = 'move';
         e.dataTransfer.setData('text/html', draggedObj);
+
+        [].slice.call( draggedObj.closest( '.app-group' ).querySelectorAll( '.app-preview-link' ) ).forEach( (el: any) => {
+            el.classList.add( 'is-dragging' );
+        });
+     
+
     }, [dragOver]);
 
     const dragEnd = useCallback((e: any) => {
 
         draggedObj.style.display = 'block';
         draggedObj.parentNode.removeChild(placeholder);
+
+        [].slice.call( draggedObj.closest( '.app-group' ).querySelectorAll( '.app-preview-link' ) ).forEach( (el: any) => {
+            el.classList.remove( 'is-dragging' );
+        });
 
         // update state
         let curData: any[] = [];
@@ -156,6 +163,7 @@ export default function Project(props: ProjectProps ) {
 
         setRendererData(newData);
 
+
         // return to parent Component
         // Send all data to main process via ipcRenderer
         callback.call(null, allData);        
@@ -167,7 +175,7 @@ export default function Project(props: ProjectProps ) {
 
     useEffect(() => {
 
-        console.log('--> Project props.data: ',  data);
+        console.log('--> <Project> props.data: ',  data);
         setRendererData(data);
         
     }, [data]);  // A total of 2 runs before and after rendering

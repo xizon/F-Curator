@@ -3,7 +3,7 @@
  * 	Boot Helpers
  *
  * 	@source: https://github.com/xizon/f-curator
- * 	@version: 1.3.5 (November 28, 2022)
+ * 	@version: 1.3.6 (November 30, 2022)
  * 	@author: UIUX Lab <uiuxlab@gmail.com>
  * 	@license: MIT
  *
@@ -156,7 +156,7 @@
 }
 
 .app-content__wrapper .content-area::-webkit-scrollbar {
-  width: 3px;
+  width: 8px;
 }
 
 .app-content__wrapper .content-area::-webkit-scrollbar-thumb {
@@ -31495,6 +31495,41 @@ div.ant-typography-edit-content.ant-typography-rtl {
 
 .ant-card .app-editbtn-project:hover path {
   fill: #333;
+}
+
+/* Preview title and link */
+.app-preview-link {
+  word-wrap: break-word;
+  position: absolute;
+  white-space: normal;
+  z-index: 52;
+  top: 2.7em;
+  left: .5em;
+  background: #fff4f4;
+  border: 1px solid #ddd;
+  width: 100%;
+  padding: 5px;
+  border-radius: 4px;
+  box-shadow: 0px -2px 35px 0px rgba(0, 0, 0, 0.2);
+  font-weight: bold;
+  color: #161616;
+  display: none;
+  font-size: 12px;
+}
+
+.app-preview-link em {
+  display: block;
+  margin-top: 3px;
+  font-weight: normal;
+  color: #afafaf;
+}
+
+.app-preview-link.is-dragging {
+  display: none !important;
+}
+
+.app-project .ant-col:hover .app-preview-link {
+  display: block;
 }
 
 dl.app-stickgroup > .app-group {

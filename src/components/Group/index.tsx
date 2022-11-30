@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import Project from '@/components/Project';
-import Item from './Item';
+import GroupItem from './GroupItem';
 
 import './styles/index.scss';
 
@@ -91,7 +91,7 @@ export default function Group(props: GroupProps ) {
                     const currentList = classifiedListMap.get(catName);
 
                     if ( currentList.length > 0 ) {
-                        return <Item
+                        return <GroupItem
                             key={index}
                             title={catName}
                             id={index}

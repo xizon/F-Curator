@@ -3,7 +3,7 @@
  * 	Boot Helpers
  *
  * 	@source: https://github.com/xizon/f-curator
- * 	@version: 1.3.5 (November 28, 2022)
+ * 	@version: 1.3.6 (November 30, 2022)
  * 	@author: UIUX Lab <uiuxlab@gmail.com>
  * 	@license: MIT
  *
@@ -55297,6 +55297,7 @@ function Project_Item_Item(props) {
   var deleteConfirm = (0,react.useCallback)(function (paramLink) {
     return function (e) {
       e.preventDefault();
+      console.log('--> deleteConfirm data: ', data);
       modal.confirm({
         title: '',
         icon: /*#__PURE__*/react.createElement(react.Fragment, null, /*#__PURE__*/react.createElement("svg", {
@@ -55334,7 +55335,8 @@ function Project_Item_Item(props) {
         }
       });
     };
-  }, []); // Form (Edit)
+  }, [data]); // Get the latest data to avoid sorting not updated in real time when deleted item
+  // Form (Edit)
   //------------------------------------------
 
   var refInputUrl = (0,react.useRef)(null);
@@ -55428,8 +55430,7 @@ function Project_Item_Item(props) {
   (0,react.useEffect)(function () {
     // Update categories
     setDataCategories(Array.from(classifiedMapData.keys()));
-  }, []); // Empty array ensures that effect is only run on mount and unmount
-
+  }, []);
   return /*#__PURE__*/react.createElement(react.Fragment, null, /*#__PURE__*/react.createElement(modal, {
     title: "Edit",
     visible: visible,
@@ -55545,7 +55546,9 @@ function Project_Item_Item(props) {
   }, /*#__PURE__*/react.createElement("path", {
     fill: "#cbcbcb",
     d: "M402.6 83.2l90.2 90.2c3.8 3.8 3.8 10 0 13.8L274.4 405.6l-92.8 10.3c-12.4 1.4-22.9-9.1-21.5-21.5l10.3-92.8L388.8 83.2c3.8-3.8 10-3.8 13.8 0zm162-22.9l-48.8-48.8c-15.2-15.2-39.9-15.2-55.2 0l-35.4 35.4c-3.8 3.8-3.8 10 0 13.8l90.2 90.2c3.8 3.8 10 3.8 13.8 0l35.4-35.4c15.2-15.3 15.2-40 0-55.2zM384 346.2V448H64V128h229.8c3.2 0 6.2-1.3 8.5-3.5l40-40c7.6-7.6 2.2-20.5-8.5-20.5H48C21.5 64 0 85.5 0 112v352c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V306.2c0-10.7-12.9-16-20.5-8.5l-40 40c-2.2 2.3-3.5 5.3-3.5 8.5z"
-  }))))));
+  })))), /*#__PURE__*/react.createElement("span", {
+    className: "app-preview-link"
+  }, title || '', /*#__PURE__*/react.createElement("em", null, link))));
 }
 ;// CONCATENATED MODULE: ../src/components/Project/index.tsx
 
@@ -55608,10 +55611,16 @@ function Project(props) {
     draggedObj = e.currentTarget;
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/html', draggedObj);
+    [].slice.call(draggedObj.closest('.app-group').querySelectorAll('.app-preview-link')).forEach(function (el) {
+      el.classList.add('is-dragging');
+    });
   }, [dragOver]);
   var dragEnd = (0,react.useCallback)(function (e) {
     draggedObj.style.display = 'block';
-    draggedObj.parentNode.removeChild(placeholder); // update state
+    draggedObj.parentNode.removeChild(placeholder);
+    [].slice.call(draggedObj.closest('.app-group').querySelectorAll('.app-preview-link')).forEach(function (el) {
+      el.classList.remove('is-dragging');
+    }); // update state
 
     var curData = [];
     curData = JSON.parse(JSON.stringify(rendererData));
@@ -55664,7 +55673,7 @@ function Project(props) {
     callback.call(null, allData);
   }, [rendererData]);
   (0,react.useEffect)(function () {
-    console.log('--> Project props.data: ', data);
+    console.log('--> <Project> props.data: ', data);
     setRendererData(data);
   }, [data]); // A total of 2 runs before and after rendering
 
@@ -55696,9 +55705,9 @@ function Project(props) {
     });
   }) : '')));
 }
-;// CONCATENATED MODULE: ../src/components/Group/Item.tsx
+;// CONCATENATED MODULE: ../src/components/Group/GroupItem.tsx
 
-function Group_Item_Item(props) {
+function GroupItem(props) {
   var id = props.id,
       title = props.title,
       content = props.content;
@@ -55766,7 +55775,7 @@ function Group_Group(props) {
     var currentList = classifiedListMap.get(catName);
 
     if (currentList.length > 0) {
-      return /*#__PURE__*/react.createElement(Group_Item_Item, {
+      return /*#__PURE__*/react.createElement(GroupItem, {
         key: index,
         title: catName,
         id: index,
@@ -56344,7 +56353,7 @@ function Home() {
       data: dataURLs,
       cat: dataCategories,
       callback: function callback(res) {
-        console.log('--> update database: ', res);
+        //console.log('--> update database: ', res);
         res.map(function (item) {
           delete item.id;
         }); // Communicate asynchronously from a renderer process to the main process.

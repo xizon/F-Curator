@@ -1,5 +1,15 @@
 # Changelog
 
+
+
+#### = 1.3.6 (November 30, 2022) =
+
+* fix: Fixed a bug where no data was added and not displayed.
+* fix: Fixed sorting issues after deleting items.
+* tweak: Enhanced experience before clicking a link.
+* tweak: Form performance optimization.
+
+
 #### = 1.3.5 (November 28, 2022) =
 
 * new: Enhanced User Experience.

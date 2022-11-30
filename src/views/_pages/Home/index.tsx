@@ -436,7 +436,7 @@ export default function Home() {
                         {dataURLs && dataURLs.length > 0 ? <>
 
                             <Group isSearch={isSearch} data={dataURLs} cat={dataCategories} callback={(res) => {
-                                console.log('--> update database: ', res);
+                                //console.log('--> update database: ', res);
 
                                 res.map((item) => {
                                     delete item.id;
