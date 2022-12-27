@@ -1,6 +1,10 @@
 # Changelog
 
 
+#### = 1.3.7 (December 26, 2022) =
+
+* fix: Fixed data bug saving caused by some operations after search filtering.
+
 
 #### = 1.3.6 (November 30, 2022) =
 
