@@ -68,6 +68,7 @@ Whether you find yourself in the need to create a database of necessary links fo
 ├── LICENSE
 ├── tsconfig.json
 ├── babel.config.js
+├── forge.config.js
 ├── package-lock.json
 ├── package.json
 ├── package/      ·············· Available packages
@@ -182,6 +183,7 @@ $ sudo npm rebuild node-sass
 
 - [React](https://reactjs.org/)
 - [Electron](https://www.electronjs.org/)
+- [Electron Forge](https://www.electronforge.io/)
 - [Ant Design](https://github.com/ant-design/ant-design/)
 - [stormdb](https://github.com/TomPrograms/stormdb)
 - [lodash](https://github.com/lodash/lodash)
@@ -190,8 +192,8 @@ $ sudo npm rebuild node-sass
 
 ## Supported development environment
 
-- Electron 16 +
-- React 17 +
+- Electron 16 + / Electron 31 +
+- React 18 +
 - TypeScript 4.x.x + 
 - Babel 7.x.x + 
 - Webpack 5.x.x

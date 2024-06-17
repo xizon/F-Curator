@@ -1,5 +1,10 @@
 # Changelog
 
+#### = 1.3.7 (June 15, 2024) =
+
+* tweak: Upgraded electron version from 16 to 31.0.1.
+* new: Using Electron Forge to optimize bundled files.
+
 
 #### = 1.3.7 (December 26, 2022) =
 

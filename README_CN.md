@@ -69,6 +69,7 @@ F-Curator 是一个跨平台应用程序，支持Mac和Windows系统，用来管
 ├── LICENSE
 ├── tsconfig.json
 ├── babel.config.js
+├── forge.config.js
 ├── package-lock.json
 ├── package.json
 ├── package/      ·············· 软件包
@@ -96,6 +97,7 @@ F-Curator 是一个跨平台应用程序，支持Mac和Windows系统，用来管
 
 - [React](https://reactjs.org/)
 - [Electron](https://www.electronjs.org/)
+- [Electron Forge](https://www.electronforge.io/)
 - [Ant Design](https://github.com/ant-design/ant-design/)
 - [stormdb](https://github.com/TomPrograms/stormdb)
 - [lodash](https://github.com/lodash/lodash)
@@ -104,8 +106,8 @@ F-Curator 是一个跨平台应用程序，支持Mac和Windows系统，用来管
 
 ## 环境支持
 
-- Electron 16 +
-- React 17 +
+- Electron 16 + / Electron 31 +
+- React 18 +
 - TypeScript 4.x.x + 
 - Babel 7.x.x + 
 - Webpack 5.x.x
